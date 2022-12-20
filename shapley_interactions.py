@@ -329,8 +329,8 @@ if __name__ == "__main__":
     # game = Game(n)
     game = NN(n)
 
-    min_order = 2
-    shapley_interaction_order = 2
+    min_order = 4
+    shapley_interaction_order = 4
     shapley_extractor_sii = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="SII")
     shapley_extractor_sti = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="STI")
     shapley_extractor_sfi = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="SFI")
