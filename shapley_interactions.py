@@ -251,8 +251,7 @@ class Shapley_Interactions:
 
             p = np.zeros(n + 1)
             for i, k in enumerate(self.incomplete_subsets):
-                p[k] = subset_weight_vector[i] / binom(self.n, k)
-            # self.counts = Counter(subset_sizes_samples)
+                p[k] = new_budget*subset_weight_vector[i] / binom(self.n, k)
             for k in subset_sizes_samples:
                 # add counter here with proper weighting
                 # ---> so that no subset is evaluated twice
@@ -261,11 +260,8 @@ class Shapley_Interactions:
                 if pairing:
                     T_c = self.N - T
                     rslt_sample = self.update_results(rslt_sample, self.evaluate_subset(game, T_c, p[k]))
-        R = self.constant_R(self.incomplete_subsets, q)
-        rslt_sample = self.scale_results(rslt_sample, 1 / (new_budget))
         const_complete = self.update_results(rslt_constant, rslt_complete)
         final = self.update_results(const_complete, rslt_sample)
-        # print("results ready")
         self.last_const_complete = const_complete
         return final
 
@@ -278,6 +274,7 @@ class Shapley_Interactions:
                 for L in self.powerset(S):
                     l = len(L)
                     results[S] += game(subset + L) * (-1) ** (self.s - l)
+                    self.counter += 1
         if self.type == "STI":
             for S in self.powerset(self.N, self.s, self.s):
                 idx = 0
@@ -290,14 +287,16 @@ class Shapley_Interactions:
                 for L in self.powerset(S):
                     l = len(L)
                     results[S] += game(subset + L) * (-1) ** (self.s - l)
+                    self.counter += 1
         return results
 
     def permutation_approximation(self, game, budget):
         results = np.zeros(np.repeat(self.n, self.s))
-        iteration_cost = (2 ** self.s - 1) * (self.n - self.s + 1)
         val_empty = game({})
         val_full = game(self.N)
+        iteration_cost = 0
         n_permutations = 0
+        self.counter = 0
         while budget >= iteration_cost:
             start_counter = self.counter
             vals = np.zeros(self.n + 1)
@@ -307,8 +306,8 @@ class Shapley_Interactions:
             np.random.shuffle(pi)
             results += self.estimate_from_permutation(game, pi)
             n_permutations += 1
+            iteration_cost = self.counter-start_counter
             budget -= iteration_cost
-        # print(n_permutations)
         return results / n_permutations
 
     def compute_efficiency(self, game):
@@ -322,7 +321,7 @@ class Shapley_Interactions:
 
 
 if __name__ == "__main__":
-    n = 10
+    n = 15
     N = set(range(n))
 
     # game = Game(n)
@@ -347,7 +346,7 @@ if __name__ == "__main__":
     shapx_perm = {}
     shapx_sampling = {}
     approximation_errors = {}
-    sampling_kernel_list = ["ksh", "faith", "unif-size", "unif-set"]
+    sampling_kernel_list = ["unif-size"]
     pairwise_list = [True, False]
 
     total_subsets = 2 ** n
