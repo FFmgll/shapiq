@@ -228,7 +228,8 @@ class Shapley_Interactions:
         rslt_sample = self.init_results()
         rslt_constant = self.constant_c(game)
         const_complete = self.update_results(rslt_constant, rslt_complete)
-        self.last_const_complete = const_complete
+        self.last_const_complete = copy.copy(const_complete)
+        final = copy.copy(const_complete)
 
         for k in self.complete_subsets:
             rslt_complete = self.update_results(rslt_complete, self.compute_interactions_complete_k(game, k))
@@ -262,7 +263,7 @@ class Shapley_Interactions:
                     if pairing:
                         T_c = self.N - T
                         rslt_sample = self.update_results(rslt_sample, self.evaluate_subset(game, T_c, p[k]))
-                final = self.update_results(const_complete, rslt_sample)
+                final = self.update_results(final, rslt_sample)
         return final
 
     def estimate_from_permutation(self, game, pi):
