@@ -116,14 +116,10 @@ class Shapley_Interactions:
     def evaluate_subset(self, game, T, p):
         tmp = self.init_results()
         game_eval = game(T)
-        # game_eval_c = game(self.N-T)
         t = len(T)
-        # t_c = self.n-t
         for S in self.powerset(self.N, self.min_order, self.s):
             size_intersection = len(set(S).intersection(T))
-            # print(S,size_intersection)
             tmp[len(S)][S] += game_eval * self.weights[t, size_intersection] / p
-            # results[len(S)][S] += game_eval_c*self.weights[t_c,self.s-size_intersection]/self.q[t_c]
         return tmp
 
     def init_sampling_weights(self, sampling_kernel):
@@ -231,6 +227,8 @@ class Shapley_Interactions:
         rslt_complete = self.init_results()
         rslt_sample = self.init_results()
         rslt_constant = self.constant_c(game)
+        const_complete = self.update_results(rslt_constant, rslt_complete)
+        self.last_const_complete = const_complete
 
         for k in self.complete_subsets:
             rslt_complete = self.update_results(rslt_complete, self.compute_interactions_complete_k(game, k))
@@ -251,18 +249,20 @@ class Shapley_Interactions:
 
             p = np.zeros(n + 1)
             for i, k in enumerate(self.incomplete_subsets):
-                p[k] = new_budget*subset_weight_vector[i] / binom(self.n, k)
-            for k in subset_sizes_samples:
+                rslt_sample = self.init_results()
+                n_samples = int(budget*subset_weight_vector[i])
+                #p[k] = new_budget*subset_weight_vector[i] / binom(self.n, k)
+                p[k] = n_samples/ (binom(self.n, k))
+                for j in range(n_samples):
+            #for k in subset_sizes_samples:
                 # add counter here with proper weighting
                 # ---> so that no subset is evaluated twice
-                T = set(np.random.choice(self.n, k, replace=False))
-                rslt_sample = self.update_results(rslt_sample, self.evaluate_subset(game, T, p[k]))
-                if pairing:
-                    T_c = self.N - T
-                    rslt_sample = self.update_results(rslt_sample, self.evaluate_subset(game, T_c, p[k]))
-        const_complete = self.update_results(rslt_constant, rslt_complete)
-        final = self.update_results(const_complete, rslt_sample)
-        self.last_const_complete = const_complete
+                    T = set(np.random.choice(self.n, k, replace=False))
+                    rslt_sample = self.update_results(rslt_sample, self.evaluate_subset(game, T, p[k]))
+                    if pairing:
+                        T_c = self.N - T
+                        rslt_sample = self.update_results(rslt_sample, self.evaluate_subset(game, T_c, p[k]))
+                final = self.update_results(const_complete, rslt_sample)
         return final
 
     def estimate_from_permutation(self, game, pi):
