@@ -252,7 +252,7 @@ class Shapley_Interactions:
             p = np.zeros(n + 1)
             for i, k in enumerate(self.incomplete_subsets):
                 rslt_sample = self.init_results()
-                n_samples = int(budget*subset_weight_vector[i])
+                n_samples = int(new_budget*subset_weight_vector[i])
                 #p[k] = new_budget*subset_weight_vector[i] / binom(self.n, k)
                 p[k] = n_samples/ (binom(self.n, k))
                 for j in range(n_samples):
@@ -326,11 +326,11 @@ if __name__ == "__main__":
     n = 15
     N = set(range(n))
 
-    # game = Game(n)
+    #game = Game(n)
     game = NN(n)
 
-    min_order = 4
-    shapley_interaction_order = 4
+    min_order = 2
+    shapley_interaction_order = 2
     shapley_extractor_sii = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="SII")
     shapley_extractor_sti = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="STI")
     shapley_extractor_sfi = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="SFI")
