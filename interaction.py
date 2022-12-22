@@ -326,25 +326,25 @@ if __name__ == "__main__":
 
             # Permutation Approximations
             if shapx.type in ("STI", "SII"):
-                run_id = '_'.join((run_id, 'permutation'))
-                shapx_perm[run_id] = shapx.permutation_approximation(game_fun, budget)
-                approximation_errors[run_id] = get_approximation_error(
-                    approx=shapx_perm[run_id], exact=exact_values)
+                perm_run_id = '_'.join((run_id, 'permutation'))
+                shapx_perm[perm_run_id] = shapx.permutation_approximation(game_fun, budget)
+                approximation_errors[perm_run_id] = get_approximation_error(
+                    approx=shapx_perm[perm_run_id], exact=exact_values)
 
             # Sampling Approximations
             for sampling_kernel in sampling_kernels:
-                run_id = '_'.join((run_id, sampling_kernel))
+                run_id = '_'.join((run_id, 'approximation', sampling_kernel))
                 for pairwise in pairwise_list:
                     pairwise_id = 'pairwise' if pairwise else 'not-paired'
-                    run_id = '_'.join((run_id, pairwise_id))
+                    approx_run_id = '_'.join((run_id, pairwise_id))
 
                     approximated_interactions = shapx.compute_interactions_from_budget(
                         game_fun, budget,  pairing=pairwise, sampling_kernel=sampling_kernel)
-                    shapx_sampling[run_id] = approximated_interactions
+                    shapx_sampling[approx_run_id] = approximated_interactions
 
-                    approximation_errors[run_id] = get_approximation_error(
+                    approximation_errors[approx_run_id] = get_approximation_error(
                         approx=approximated_interactions[shapley_interaction_order], exact=exact_values)
-                    approximation_errors['_'.join((run_id, 'full'))] = get_approximation_error(
+                    approximation_errors['_'.join((approx_run_id, 'full'))] = get_approximation_error(
                         approx=shapx.last_const_complete[shapley_interaction_order], exact=exact_values)
 
                     pbar.update(1)
