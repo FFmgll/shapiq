@@ -1,57 +1,11 @@
-import scipy
 import numpy as np
 import itertools
 import random
-from collections import Counter
 import copy
 from scipy.special import binom
+from tqdm import tqdm
 
-from scipy import special
-
-from utils.permutations import get_n_feature_masks, get_all_feature_masks
-
-import math
-
-
-def sigmoid(x):
-    return 1 / (1 + math.exp(-x))
-
-
-class NN:
-    def __init__(self, n):
-        self.weights_1 = np.random.normal(loc=0, scale=10, size=((100, n)))
-        self.bias_1 = np.random.normal(loc=0, scale=1, size=(100))
-        self.weights_2 = np.random.normal(loc=0, scale=0.5, size=((10, 100)))
-        self.bias_2 = np.random.normal(loc=0, scale=1)
-        self.weights_3 = np.random.normal(loc=0, scale=0.05, size=((1, 10)))
-        self.bias_3 = np.random.normal(loc=0, scale=0.05)
-        self.n = n
-        self.intx2 = 0
-        self.intx3 = 0
-
-    def call(self, x):
-        return sigmoid(np.dot(self.weights_3, np.maximum(0, np.dot(self.weights_2, np.maximum(0, np.dot(self.weights_1, x) + self.bias_1)) + self.bias_2)))
-
-    def set_call(self, S):
-        x = np.zeros(self.n)
-        x[list(S)] = 1
-        return self.call(x) - self.call(np.zeros(self.n))
-
-
-class Game:
-    def __init__(self, n):
-        self.weights = np.random.rand(n)
-        self.n = n
-        self.intx2 = 0
-        self.intx3 = 0
-
-    def call(self, x):
-        return np.dot(x, self.weights) + x[1] * x[2] * self.intx2 + self.intx3 * x[1] * x[2] * x[3]
-
-    def set_call(self, S):
-        x = np.zeros(self.n)
-        x[list(S)] = 1
-        return self.call(x)
+from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SynthLinearFunction
 
 
 class Shapley_Interactions:
@@ -320,55 +274,80 @@ class Shapley_Interactions:
         return rslt / self.s
 
 
+def get_approximation_error(approx, exact):
+    return np.sum((approx - exact) ** 2)
+
+
 if __name__ == "__main__":
-    n = 10
+    # Game Function ----------------------------------------------------------------------------------------------------
+    # game = NLPGame(input_text="I like the movie not so much anymore")
+    game = SyntheticNeuralNetwork(n=10)
+    n = game.n
     N = set(range(n))
+    total_subsets = 2 ** n
 
-    game = Game(n)
-    #game = NN(n)
-
+    # Parameters -------------------------------------------------------------------------------------------------------
     min_order = 2
     shapley_interaction_order = 2
-    shapley_extractor_sii = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="SII")
-    shapley_extractor_sti = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="STI")
-    shapley_extractor_sfi = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="SFI")
 
-    game_fun = game.set_call
-
-    shapx_exact = {}
-    shapx_list = [shapley_extractor_sii, shapley_extractor_sti, shapley_extractor_sfi]
-
-    # Compute exact interactions
-    for shapx in shapx_list:
-        shapx_exact[shapx.type] = shapx.compute_interactions_complete(game_fun)
-    print("Exact computations finished")
+    max_budget = min(total_subsets, 2 ** 15)
+    budgets = [0.25, 0.5, 1.0] #[0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0]
+    budgets = [int(budget * max_budget) for budget in budgets]
 
     shapx_perm = {}
     shapx_sampling = {}
     approximation_errors = {}
-    sampling_kernel_list = ["unif-size"]
+    sampling_kernels = ["unif-size"]
     pairwise_list = [True, False]
 
-    total_subsets = 2 ** n
-    budget_list = [int(total_subsets * 1.5)]
-    # Compute Approximations
+    shapley_extractor_sii = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="SII")
+    shapley_extractor_sti = Shapley_Interactions(N, shapley_interaction_order, min_order=min_order, type="STI")
+
+    game_fun = game.set_call
+
+    shapx_exact = {}
+    shapx_list = [shapley_extractor_sii, shapley_extractor_sti]
+
+    # Compute exact interactions ---------------------------------------------------------------------------------------
+    print("Starting exact computations")
+    for shapx in shapx_list:
+        shapx_exact[shapx.type] = shapx.compute_interactions_complete(game_fun)
+    print("Exact computations finished")
+
+    # Approximate ------------------------------------------------------------------------------------------------------
     for shapx in shapx_list:
         print("Starting Sampling for ", shapx.type)
-        # Permutation Approximations
-        for budget in budget_list:
+        pbar = tqdm(total=len(budgets) * len(pairwise_list) * len(sampling_kernels))
+        exact_values = shapx_exact[shapx.type][shapley_interaction_order]
+
+        for budget in budgets:
+            relative_budget = round(budget / total_subsets, 2)
+            run_id = '_'.join((shapx.type, str(budget), str(relative_budget)))
+
+            # Permutation Approximations
             if shapx.type in ("STI", "SII"):
-                id = shapx.type + "_" + str(budget)
-                shapx_perm[id] = shapx.permutation_approximation(game_fun, budget)
-                approximation_errors[id + "_perm"] = np.sum(
-                    (shapx_perm[id] - shapx_exact[shapx.type][shapley_interaction_order]) ** 2)
+                run_id = '_'.join((run_id, 'permutation'))
+                shapx_perm[run_id] = shapx.permutation_approximation(game_fun, budget)
+                approximation_errors[run_id] = get_approximation_error(
+                    approx=shapx_perm[run_id], exact=exact_values)
+
             # Sampling Approximations
-            for sampling_kernel in sampling_kernel_list:
+            for sampling_kernel in sampling_kernels:
+                run_id = '_'.join((run_id, sampling_kernel))
                 for pairwise in pairwise_list:
-                    id = shapx.type + "_sampling_" + sampling_kernel + "_" + str(pairwise) + "_" + str(budget)
-                    shapx_sampling[id] = shapx.compute_interactions_from_budget(game_fun, budget, pairing=pairwise,
-                                                                                sampling_kernel=sampling_kernel)
-                    approximation_errors[id] = np.sum((shapx_sampling[id][shapley_interaction_order] -
-                                                       shapx_exact[shapx.type][shapley_interaction_order]) ** 2)
-                    approximation_errors[id + "_full"] = np.sum((shapx.last_const_complete[shapley_interaction_order] -
-                                                                 shapx_exact[shapx.type][shapley_interaction_order]) ** 2)
+                    pairwise_id = 'pairwise' if pairwise else 'not-paired'
+                    run_id = '_'.join((run_id, pairwise_id))
+
+                    approximated_interactions = shapx.compute_interactions_from_budget(
+                        game_fun, budget,  pairing=pairwise, sampling_kernel=sampling_kernel)
+                    shapx_sampling[run_id] = approximated_interactions
+
+                    approximation_errors[run_id] = get_approximation_error(
+                        approx=approximated_interactions[shapley_interaction_order], exact=exact_values)
+                    approximation_errors['_'.join((run_id, 'full'))] = get_approximation_error(
+                        approx=shapx.last_const_complete[shapley_interaction_order], exact=exact_values)
+
+                    pbar.update(1)
+        pbar.close()
+        del pbar
         print("End ", shapx.type)
