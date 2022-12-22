@@ -3,7 +3,7 @@ import copy
 from transformers import pipeline
 import random
 import math
-
+import typing
 
 # TODO add exact_values computation on the games side if they allow it
 
@@ -57,7 +57,11 @@ class SynthLinearFunction:
     """
     # TODO implement it correctly
 
-    def __init__(self, n: int = 50, n_important_features: int = 10, interaction_order: int = 3):
+    def __init__(
+            self,
+            n: int = 50,
+            n_important_features: int = 10,
+            n_interactions_per_order: typing.Dict[int, int] = None):
         assert n_important_features <= n, f"Total number of features must be greater than number of important features."
         self.n = n
         self.weights = np.zeros(self.n)
@@ -65,11 +69,18 @@ class SynthLinearFunction:
         print(important_weights)
         self.weights[important_weights] = np.random.rand(n_important_features)
         self.n = n
-        self.intx2 = 0
-        self.intx3 = 0  # TODO add interaction weights
+        self.interaction_weights = {}
+        if n_interactions_per_order is not None:
+            for interaction_order, n_interactions in n_interactions_per_order.items():
+                maximum_interactions = math.comb(n_important_features, interaction_order)
+                assert n_interactions <= maximum_interactions, \
+                    f"The number of possible interactions of order {interaction_order} is {maximum_interactions}. " \
+                    f"The number of interactions on this order is {n_interactions}. " \
+                    f"The value must be lower or equal than {maximum_interactions}."
+                self.interaction_weights[interaction_order] = np.random.rand(n_important_features) # tODO make right
 
     def call(self, x):
-        return np.dot(x, self.weights) + x[1] * x[2] * self.intx2 + self.intx3 * x[1] * x[2] * x[3]
+        return np.dot(x, self.weights)
 
     def set_call(self, S):
         x = np.zeros(self.n)
@@ -112,7 +123,7 @@ class SyntheticNeuralNetwork:
     def call(self, x):
         x = np.maximum(0, np.dot(self.weights_1, x) + self.bias_1)
         x = np.maximum(0, np.dot(self.weights_2, x) + self.bias_2)
-        x = np.maximum(0, np.dot(self.weights_3, x) + self.bias_3)
+        x = np.dot(self.weights_3, x) + self.bias_3
         y = _sigmoid(x)
         return y
 
@@ -123,4 +134,4 @@ class SyntheticNeuralNetwork:
 
 
 if __name__ == "__main__":
-    game = SynthLinearFunction(n=10, n_important_features=3)
+    game = SynthLinearFunction(n=10, n_important_features=5, n_interactions_per_order={2: 4, 3: 2})
