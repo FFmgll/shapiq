@@ -179,13 +179,13 @@ class Shapley_Interactions:
         rslt_complete = self.init_results()
         rslt_sample = self.init_results()
         rslt_constant = self.constant_c(game)
-        const_complete = self.update_results(rslt_constant, rslt_complete)
         self.last_const_complete = self.init_results()
-        self.last_const_complete = copy.deepcopy(const_complete)
-        final = copy.deepcopy(const_complete)
 
         for k in self.complete_subsets:
             rslt_complete = self.update_results(rslt_complete, self.compute_interactions_complete_k(game, k))
+        const_complete = self.update_results(rslt_constant, rslt_complete)
+        self.last_const_complete = copy.deepcopy(const_complete)
+        final = copy.deepcopy(const_complete)
 
         # print(self.incomplete_subsets,p)
         subset_weight_vector = np.asarray(
