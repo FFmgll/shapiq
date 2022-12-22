@@ -281,17 +281,17 @@ def get_approximation_error(approx, exact):
 if __name__ == "__main__":
     # Game Function ----------------------------------------------------------------------------------------------------
     # game = NLPGame(input_text="I like the movie not so much anymore")
-    game = SyntheticNeuralNetwork(n=10)
+    game = SynthLinearFunction(n=12, n_interactions_per_order={2: 2}, n_non_important_features=6)
     n = game.n
     N = set(range(n))
     total_subsets = 2 ** n
 
     # Parameters -------------------------------------------------------------------------------------------------------
-    min_order = 2
+    min_order = 1
     shapley_interaction_order = 2
 
     max_budget = min(total_subsets, 2 ** 15)
-    budgets = [0.25, 0.5, 1.0] #[0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0]
+    budgets = [0.25, 0.5, 1.0, 1.5] #[0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1.0]
     budgets = [int(budget * max_budget) for budget in budgets]
 
     shapx_perm = {}

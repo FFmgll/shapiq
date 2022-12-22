@@ -48,7 +48,7 @@ class NLPGame:
         return self.call(x_text)[0]
 
 
-class SynthLinearFunction:
+class SparseLinearModel:
     """Synthetic Linear Function where you know the Shapley values and interaction terms beforehand.
     To be used to create high dimensional data with ground truths.
 
@@ -59,28 +59,48 @@ class SynthLinearFunction:
 
     def __init__(
             self,
-            n: int = 50,
-            n_important_features: int = 10,
+            n: int = 10,
+            n_non_important_features: int = 0,
             n_interactions_per_order: typing.Dict[int, int] = None):
-        assert n_important_features <= n, f"Total number of features must be greater than number of important features."
+        assert n_non_important_features <= n, f"Total number of non-important features {n_non_important_features} " \
+                                              f"must be smaller than number features {n}."
         self.n = n
-        self.weights = np.zeros(self.n)
-        important_weights = np.random.choice(list(range(0, self.n)), size=n_important_features, replace=False)
-        print(important_weights)
-        self.weights[important_weights] = np.random.rand(n_important_features)
-        self.n = n
+        n_important = n - n_non_important_features
+        weights_important = np.random.rand(n_important)
+        N_important = np.asarray(list(range(0, n_important)))
         self.interaction_weights = {}
         if n_interactions_per_order is not None:
             for interaction_order, n_interactions in n_interactions_per_order.items():
-                maximum_interactions = math.comb(n_important_features, interaction_order)
-                assert n_interactions <= maximum_interactions, \
-                    f"The number of possible interactions of order {interaction_order} is {maximum_interactions}. " \
-                    f"The number of interactions on this order is {n_interactions}. " \
-                    f"The value must be lower or equal than {maximum_interactions}."
-                self.interaction_weights[interaction_order] = np.random.rand(n_important_features) # tODO make right
+                interacting_features = set()
+                while len(interacting_features) < n_interactions:  # might stall at certain parameters
+                    interaction_sample = tuple(sorted(np.random.choice(N_important, size=interaction_order, replace=False)))
+                    interacting_features.add(interaction_sample)
+                interaction_weights = list(np.random.rand(len(interacting_features)))
+                for interaction_feature_pair, interaction_weight in zip(interacting_features, interaction_weights):
+                    self.interaction_weights[interaction_feature_pair] = interaction_weight
+        self.N = np.asarray(list(range(0, self.n)))
+        self.weights = np.concatenate((weights_important, np.zeros(n_non_important_features)))
+        self._highest_interaction_order = max(n_interactions_per_order.keys())
+
+    @property
+    def exact_values(self) -> dict:
+        interaction_scores = {1: np.asarray(self.weights)}
+        for interaction_order in range(2, self._highest_interaction_order + 1):
+            interaction_shape = tuple([self.n for _ in range(interaction_order)])
+            weights_interaction = np.zeros(shape=interaction_shape)
+            for features, interaction_weight in self.interaction_weights.items():
+                if len(features) != interaction_order:
+                    continue
+                weights_interaction[features] = interaction_weight
+            interaction_scores[interaction_order] = weights_interaction
+        return interaction_scores
 
     def call(self, x):
-        return np.dot(x, self.weights)
+        no_interaction = np.dot(x, self.weights)
+        interaction_part = sum([
+            np.prod(x[[*features]]) * interaction_weight
+            for features, interaction_weight in self.interaction_weights.items()])
+        return no_interaction + interaction_part
 
     def set_call(self, S):
         x = np.zeros(self.n)
@@ -134,4 +154,6 @@ class SyntheticNeuralNetwork:
 
 
 if __name__ == "__main__":
-    game = SynthLinearFunction(n=10, n_important_features=5, n_interactions_per_order={2: 4, 3: 2})
+    game = SynthLinearFunction(n=10, n_non_important_features=5, n_interactions_per_order={2: 4, 3: 2})
+    game.set_call({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
+    v = game.exact_values
