@@ -5,8 +5,6 @@ import random
 import math
 import typing
 
-# TODO add exact_values computation on the games side if they allow it
-
 
 def _sigmoid(x):
     return 1 / (1 + math.exp(-x))
@@ -55,7 +53,6 @@ class SparseLinearModel:
     Players: the input features (zero or one)
     Output: regression score -Inf, Inf
     """
-    # TODO implement it correctly
 
     def __init__(
             self,
@@ -72,6 +69,11 @@ class SparseLinearModel:
         if n_interactions_per_order is not None:
             for interaction_order, n_interactions in n_interactions_per_order.items():
                 interacting_features = set()
+                if math.comb(n_important, interaction_order) < n_interactions:
+                    raise ValueError(f"The number of interaction per order {interaction_order} is {n_interactions} "
+                                     f"exceeding the total number of combinations "
+                                     f"({math.comb(n_important, interaction_order)}). Use a value smaller or equal to "
+                                     f"{math.comb(n_important, interaction_order)}.")
                 while len(interacting_features) < n_interactions:  # might stall at certain parameters
                     interaction_sample = tuple(sorted(np.random.choice(N_important, size=interaction_order, replace=False)))
                     interacting_features.add(interaction_sample)
@@ -82,8 +84,10 @@ class SparseLinearModel:
         self.weights = np.concatenate((weights_important, np.zeros(n_non_important_features)))
         self._highest_interaction_order = max(n_interactions_per_order.keys())
 
+        self.interaction_matrices = copy.deepcopy(self.exact_values)
+
     @property
-    def exact_values(self) -> dict:
+    def exact_values(self) -> dict:  # TODO add exact_values computation for the SII, STI and SFI
         interaction_scores = {1: np.asarray(self.weights)}
         for interaction_order in range(2, self._highest_interaction_order + 1):
             interaction_shape = tuple([self.n for _ in range(interaction_order)])
@@ -112,8 +116,8 @@ class SimpleGame:
     def __init__(self, n):
         self.weights = np.random.rand(n)
         self.n = n
-        self.intx2 = 0
-        self.intx3 = 0  # TODO delete later
+        self.intx2 = random.random()
+        self.intx3 = 0
 
     def call(self, x):
         return np.dot(x, self.weights) + x[1] * x[2] * self.intx2 + self.intx3 * x[1] * x[2] * x[3]
@@ -151,9 +155,3 @@ class SyntheticNeuralNetwork:
         x = np.zeros(self.n)
         x[list(S)] = 1
         return self.call(x) - self.call(np.zeros(self.n))
-
-
-if __name__ == "__main__":
-    game = SynthLinearFunction(n=10, n_non_important_features=5, n_interactions_per_order={2: 4, 3: 2})
-    game.set_call({0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
-    v = game.exact_values
