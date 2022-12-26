@@ -142,6 +142,7 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
 
         # Sample the remaining budget and update the approximations
         if len(incomplete_subsets) > 0:
+            #subset_weight_vector[incomplete_subsets] contains probabilities for subset sizes in incomplete_subsets
             subset_weight_vector = q/np.sum(q[incomplete_subsets])
             subset_sizes_samples = random.choices(incomplete_subsets, k=budget, weights=subset_weight_vector[incomplete_subsets])
             p = np.zeros(self.n+1)
