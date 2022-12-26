@@ -4,7 +4,7 @@ import numpy as np
 import itertools
 import copy
 from scipy.special import binom
-
+import random
 
 class BaseShapleyInteractions:
 
@@ -131,28 +131,33 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
         result_complete = copy.deepcopy(constant_complete)
 
         # Update weights for samplings for the remaining subsets
-        subset_weight_vector = np.asarray(
-            [q[subset_size] for subset_size in incomplete_subsets])
+        #subset_weight_vector = np.asarray(
+        #    [q[subset_size] for subset_size in incomplete_subsets])
 
         # Split the budget in case of pairing
         if pairing:
-            budget = 2 * int(budget / 2)
+            total_budget = 2 * int(budget / 2)
+        else:
+            total_budget = budget
 
         # Sample the remaining budget and update the approximations
-        if len(subset_weight_vector) > 0:
-            subset_weight_vector /= np.sum(subset_weight_vector)
-            p = np.zeros(self.n + 1)
-            for i, k in enumerate(incomplete_subsets):
+        if len(incomplete_subsets) > 0:
+            subset_weight_vector = q/np.sum(q[incomplete_subsets])
+            subset_sizes_samples = random.choices(incomplete_subsets, k=budget, weights=subset_weight_vector[incomplete_subsets])
+            p = np.zeros(self.n+1)
+            for k in incomplete_subsets:
+                p[k] = total_budget/binom(self.n,k)
+            for k in subset_sizes_samples:
                 result_sample = self.init_results()
-                n_samples = int(budget * subset_weight_vector[i])
-                p[k] = n_samples / (binom(self.n, k))
-                for j in range(n_samples):  # TODO add counter here with proper weighting
-                    T = set(np.random.choice(self.n, k, replace=False))
-                    result_sample = self.update_results(result_sample, self._evaluate_subset(game, T, p[k]))
-                    if pairing:
-                        T_c = self.N - T
-                        result_sample = self.update_results(result_sample, self._evaluate_subset(game, T_c, p[k]))
-                result_complete = self.update_results(result_complete, result_sample)
+                #n_samples = int(budget * subset_weight_vector[i])
+                #p[k] = subset_weight_vector / (binom(self.n, k))
+                #for j in range(n_samples):  # TODO add counter here with proper weighting
+                T = set(np.random.choice(self.n, k, replace=False))
+                result_sample = self.update_results(result_sample, self._evaluate_subset(game, T, p[k]))
+                if pairing:
+                    T_c = self.N - T
+                    result_sample = self.update_results(result_sample, self._evaluate_subset(game, T_c, p[k]))
+            result_complete = self.update_results(result_complete, result_sample)
         results_out = self._smooth_with_epsilon(result_complete)
         return copy.deepcopy(results_out)
 
