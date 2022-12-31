@@ -145,19 +145,20 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
             #subset_weight_vector[incomplete_subsets] contains probabilities for subset sizes in incomplete_subsets
             subset_weight_vector = q/np.sum(q[incomplete_subsets])
             subset_sizes_samples = random.choices(incomplete_subsets, k=budget, weights=subset_weight_vector[incomplete_subsets])
-            p = np.zeros(self.n+1)
+            r = np.zeros(self.n+1)
             for k in incomplete_subsets:
-                p[k] = total_budget/binom(self.n,k)
+                r[k] = total_budget/binom(self.n,k)
             for k in subset_sizes_samples:
                 result_sample = self.init_results()
                 #n_samples = int(budget * subset_weight_vector[i])
                 #p[k] = subset_weight_vector / (binom(self.n, k))
                 #for j in range(n_samples):  # TODO add counter here with proper weighting
                 T = set(np.random.choice(self.n, k, replace=False))
-                result_sample = self.update_results(result_sample, self._evaluate_subset(game, T, p[k]))
+                result_sample = self.update_results(result_sample, self._evaluate_subset(game, T, r[k]))
                 if pairing:
                     T_c = self.N - T
-                    result_sample = self.update_results(result_sample, self._evaluate_subset(game, T_c, p[k]))
+                    k_c = len(T_c)
+                    result_sample = self.update_results(result_sample, self._evaluate_subset(game, T_c, r[k_c]))
             result_complete = self.update_results(result_complete, result_sample)
         results_out = self._smooth_with_epsilon(result_complete)
         return copy.deepcopy(results_out)
@@ -183,13 +184,13 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                 result += factor * sign * ((-1) ** self.s * game(S) + game(set(self.N) - set(S)))
         return result / self.s
 
-    def _evaluate_subset(self, game, T, p):
+    def _evaluate_subset(self, game, T, r):
         tmp = self.init_results()
         game_eval = game(T)
         t = len(T)
         for S in self.powerset(self.N, self.min_order, self.s):
             size_intersection = len(set(S).intersection(T))
-            tmp[len(S)][S] += game_eval * self.weights[t, size_intersection] / p
+            tmp[len(S)][S] += game_eval * self.weights[t, size_intersection] / r
         return tmp
 
     def _constant_c(self, game):
