@@ -17,8 +17,8 @@ if __name__ == "__main__":
     total_subsets = 2 ** n
 
     # Parameters -------------------------------------------------------------------------------------------------------
-    min_order = 5
-    shapley_interaction_order = 5
+    min_order = 2
+    shapley_interaction_order = 2
 
     max_budget = min(total_subsets, 2 ** 13)
     budgets = [0.25, 0.5, 0.75, 1.0, 1.25]
