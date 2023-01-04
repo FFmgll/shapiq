@@ -101,7 +101,7 @@ def compare_unbiasedksh_and_shapx(
     # Original Unbiased Kernel SHAP
     u_ksh_covert, _, _, _ = CovertRegression(
         game=GameWrapper(game),
-        batch_size=100,
+        batch_size=1,
         detect_convergence=False,
         n_samples=u_ksh_sample_size,
         paired_sampling=pairing
@@ -111,9 +111,9 @@ def compare_unbiasedksh_and_shapx(
     values_ksh = [round(value, 5) for value in values_ksh]
     u_ksh_covert = [round(value, 5) for value in u_ksh_covert]
 
-    print(f"Shapx:          {values_shapx}\n"
-          f"unbiased-ksh:   {values_ksh}\n"
-          f"covert-u-ksh:   {u_ksh_covert}")
+    print(f"shapx-defined-samples: {values_shapx} (n: {budget})\n"
+          f"u-ksh-defined-samples: {values_ksh} (n: {budget})\n"
+          f"u-ksh-sampling:        {u_ksh_covert} (n: {u_ksh_sample_size})")
 
     return values_ksh, values_shapx
 
@@ -123,5 +123,5 @@ if __name__ == "__main__":
     game = SparseLinearModel(n=10, n_interactions_per_order=None, n_non_important_features=3)
     game_fun = game.set_call
     values_ksh, values_shapx = compare_unbiasedksh_and_shapx(
-        game=game, budget=500, pairing=True, u_ksh_sample_size=5_000)
+        game=game, budget=500, pairing=True, u_ksh_sample_size=500)
     game_values = game.interaction_matrices[1]
