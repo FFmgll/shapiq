@@ -9,7 +9,7 @@ from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel
 from shapx.interaction import ShapleyInteractionsEstimator
 from shapx.permutation import PermutationSampling
 
-game = SparseLinearModel(n=10, n_interactions_per_order={2: 4}, n_non_important_features=0)
+game = SparseLinearModel(n=10, n_interactions_per_order={3: 1}, n_non_important_features=0)
 
 n = game.n
 N = set(range(n))
@@ -36,13 +36,11 @@ shapx_list = [shapley_extractor_sii, shapley_extractor_sti, shapley_extractor_sf
 # Compute exact interactions ---------------------------------------------------------------------------------------
 print("Starting exact computations")
 for shapx in shapx_list:
-    if False:  # hasattr(game, "exact_values"):  # TODO when it's implemented correctly run this here
-        shapx_exact[shapx.interaction_type] = copy.deepcopy(game.exact_values)
-    else:
-        shapx_exact[shapx.interaction_type] = shapx.compute_interactions_complete(game_fun)
+    shapx_exact[shapx.interaction_type+"_computed"] = copy.deepcopy(game.exact_values(gamma_matrix=shapx.weights,s=shapley_interaction_order))
+    shapx_exact[shapx.interaction_type+"_bruteforce"] = shapx.compute_interactions_complete(game_fun)
 print("Exact computations finished")
 
-
+"""
 s= shapley_interaction_order
 shapx = shapx_list[0]
 test = shapx.compute_interactions_complete(game_fun)
@@ -51,7 +49,6 @@ game.coefficient_weighting(shapx.weights,shapley_interaction_order,2,2)
 
 
 
-"""
 import itertools
 def powerset(iterable, min_size=-1, max_size=None):
     if max_size is None and min_size > -1:
