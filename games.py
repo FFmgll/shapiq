@@ -82,7 +82,10 @@ class SparseLinearModel:
                     self.interaction_weights[interaction_feature_pair] = interaction_weight
         self.N = np.asarray(list(range(0, self.n)))
         self.weights = np.concatenate((weights_important, np.zeros(n_non_important_features)))
-        self._highest_interaction_order = max(n_interactions_per_order.keys())
+        try:
+            self._highest_interaction_order = max(n_interactions_per_order.keys())
+        except AttributeError:
+            self._highest_interaction_order = 0
 
         self.interaction_matrices = copy.deepcopy(self.exact_values)
 

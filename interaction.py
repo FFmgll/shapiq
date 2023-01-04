@@ -1,13 +1,24 @@
 import copy
+
 from tqdm import tqdm
+import numpy as np
 
 from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel
-from shapx import ShapleyInteractionsEstimator, get_approximation_error, PermutationSampling
+
+from shapx.interaction import ShapleyInteractionsEstimator
+from shapx.permutation import PermutationSampling
+
+
+def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 0.00001) -> float:
+    error = np.sum((approx - exact) ** 2)
+    error = 0. if error < eps else error  # For pretty printing ...
+    return error
+
 
 if __name__ == "__main__":
     # Game Function ----------------------------------------------------------------------------------------------------
-    game = NLPGame(input_text="I like the movie no more")
-    #game = SparseLinearModel(n=12, n_interactions_per_order={4: 24}, n_non_important_features=0)
+    #game = NLPGame(input_text="I like the movie no more")
+    game = SparseLinearModel(n=10, n_interactions_per_order=None, n_non_important_features=3)
     #game = SyntheticNeuralNetwork(n=12)
     #game = SimpleGame(n=10)
 
@@ -17,11 +28,11 @@ if __name__ == "__main__":
     total_subsets = 2 ** n
 
     # Parameters -------------------------------------------------------------------------------------------------------
-    min_order = 2
-    shapley_interaction_order = 2
+    min_order = 1
+    shapley_interaction_order = 1
 
     max_budget = min(total_subsets, 2 ** 13)
-    budgets = [0.25, 0.5, 0.75, 1.0, 1.25]
+    budgets = [0.75, 1.0]
     budgets = [int(budget * max_budget) for budget in budgets]
     all_budgets = sum(budgets)
 
