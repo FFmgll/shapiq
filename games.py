@@ -6,9 +6,10 @@ import math
 import typing
 from scipy.special import binom
 
-
-#TODO: import from somewhere, help please
+# TODO: import from somewhere, help please
 import itertools
+
+
 def powerset(iterable, min_size=-1, max_size=None):
     if max_size is None and min_size > -1:
         max_size = min_size
@@ -44,7 +45,9 @@ class NLPGame:
 
     def call(self, x):
         outputs = self.classifier(x)
-        outputs = [output['score'] * 1 if output[self._label_key] == 'POSITIVE' else output['score'] * -1 for output in outputs]
+        outputs = [
+            output['score'] * 1 if output[self._label_key] == 'POSITIVE' else output['score'] * -1
+            for output in outputs]
         return outputs
 
     def set_call_iterable(self, S):
@@ -78,17 +81,17 @@ class SparseLinearModel:
                                               f"must be smaller than number features {n}."
         self.n = n
         n_important = n - n_non_important_features
-        weights_important = np.random.rand(n_important)
         N_important = np.asarray(list(range(0, n_important)))
         self.interaction_weights = {}
         if n_interactions_per_order is not None:
             for interaction_order, n_interactions in n_interactions_per_order.items():
                 interacting_features = set()
                 if math.comb(n_important, interaction_order) < n_interactions:
-                    raise ValueError(f"The number of interaction per order {interaction_order} is {n_interactions} "
-                                     f"exceeding the total number of combinations "
-                                     f"({math.comb(n_important, interaction_order)}). Use a value smaller or equal to "
-                                     f"{math.comb(n_important, interaction_order)}.")
+                    raise ValueError(
+                        f"The number of interaction per order {interaction_order} is {n_interactions} "
+                        f"exceeding the total number of combinations "
+                        f"({math.comb(n_important, interaction_order)}). Use a value smaller or equal to "
+                        f"{math.comb(n_important, interaction_order)}.")
                 while len(interacting_features) < n_interactions:  # might stall at certain parameters
                     interaction_sample = tuple(sorted(np.random.choice(N_important, size=interaction_order, replace=False)))
                     interacting_features.add(interaction_sample)
@@ -96,53 +99,34 @@ class SparseLinearModel:
                 for interaction_feature_pair, interaction_weight in zip(interacting_features, interaction_weights):
                     self.interaction_weights[interaction_feature_pair] = interaction_weight
         self.N = np.asarray(list(range(0, self.n)))
-        #self.weights = np.concatenate((weights_important, np.zeros(n_non_important_features)))
         try:
             self._highest_interaction_order = max(n_interactions_per_order.keys())
         except AttributeError:
             self._highest_interaction_order = 0
 
-        #self.interaction_matrices = copy.deepcopy(self.exact_values)
-
-    #@property
-    def exact_values(self,gamma_matrix,s) -> dict:  # TODO add exact_values computation for the SII, STI and SFI
+    def exact_values(self, gamma_matrix, s):  # TODO add exact_values computation for the SII, STI and SFI
         results = np.zeros(np.repeat(self.n, s))
-        for subset,weight in self.interaction_weights.items():
+        for subset, weight in self.interaction_weights.items():
             q = len(subset)
-            for S in powerset(self.N,s,s):
+            for S in powerset(self.N, s, s):
                 r = len(set(subset).intersection(S))
-                results[S] += self.coefficient_weighting(gamma_matrix,s,q,r)
+                results[S] += self.coefficient_weighting(gamma_matrix, s, q, r)
         return results
 
-
-        """
-        interaction_scores = {1: np.asarray(self.weights)}
-        for interaction_order in range(2, self._highest_interaction_order + 1):
-            interaction_shape = tuple([self.n for _ in range(interaction_order)])
-            weights_interaction = np.zeros(shape=interaction_shape)
-            for features, interaction_weight in self.interaction_weights.items():
-                if len(features) != interaction_order:
-                    continue
-                weights_interaction[features] = interaction_weight
-            interaction_scores[interaction_order] = weights_interaction
-        return interaction_scores
-        """
-
-    def coefficient_weighting(self,gamma_matrix,s,q,s_cap_q):
+    def coefficient_weighting(self, gamma_matrix, s, q, s_cap_q):
         rslt = 0
-        for t in range(q,self.n+1):
+        for t in range(q, self.n + 1):
             add = min(t - q, s - s_cap_q)
-            for l in range(add+1):
-                rslt += binom(self.n-q-(s-s_cap_q),t-q-l)*binom(s-s_cap_q,l)*gamma_matrix[t,l+s_cap_q]
+            for l in range(add + 1):
+                rslt += binom(self.n - q - (s - s_cap_q), t - q - l) * binom(s - s_cap_q, l) * \
+                        gamma_matrix[t, l + s_cap_q]
         return rslt
 
     def call(self, x):
-        #no_interaction = np.dot(x, self.weights)
-        interaction_part = sum([
+        output = sum([
             np.prod(x[[*features]]) * interaction_weight
             for features, interaction_weight in self.interaction_weights.items()])
-        #return no_interaction + interaction_part
-        return interaction_part
+        return output
 
     def set_call(self, S):
         x = np.zeros(self.n)
@@ -173,6 +157,7 @@ class SyntheticNeuralNetwork:
     Players: the input features (zero or one)
     Output: classification score between 0 and 1
     """
+
     def __init__(self, n):
         self.n = n
         self.weights_1 = np.random.normal(loc=0, scale=10, size=(100, self.n))
