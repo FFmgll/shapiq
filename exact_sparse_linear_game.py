@@ -12,7 +12,7 @@ from shapx.permutation import PermutationSampling
 
 if __name__ == "__main__":
 
-    game = SparseLinearModel(n=10, n_interactions_per_order={1: 2})
+    game = SparseLinearModel(n=10, n_interactions_per_order={1: 2,2:5,3:8})
 
     n = game.n
     N = set(range(n))

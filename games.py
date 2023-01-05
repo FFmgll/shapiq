@@ -110,7 +110,7 @@ class SparseLinearModel:
             q = len(subset)
             for S in powerset(self.N, s, s):
                 r = len(set(subset).intersection(S))
-                results[S] += self.coefficient_weighting(gamma_matrix, s, q, r)
+                results[S] += weight*self.coefficient_weighting(gamma_matrix, s, q, r)
         return results
 
     def coefficient_weighting(self, gamma_matrix, s, q, s_cap_q):
