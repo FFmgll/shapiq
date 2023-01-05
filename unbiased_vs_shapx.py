@@ -120,8 +120,7 @@ def compare_unbiasedksh_and_shapx(
 
 if __name__ == "__main__":
     from games import SparseLinearModel
-    game = SparseLinearModel(n=10, n_interactions_per_order=None, n_non_important_features=3)
+    game = SparseLinearModel(n=10, n_interactions_per_order={1:7}, n_non_important_features=3)
     game_fun = game.set_call
     values_ksh, values_shapx = compare_unbiasedksh_and_shapx(
         game=game, budget=500, pairing=True, u_ksh_sample_size=500)
-    game_values = game.interaction_matrices[1]

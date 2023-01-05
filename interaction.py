@@ -2,6 +2,7 @@ import copy
 
 from tqdm import tqdm
 import numpy as np
+import pandas as pd
 
 from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel
 
@@ -16,101 +17,131 @@ def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 
 
 
 if __name__ == "__main__":
-    # Game Function ----------------------------------------------------------------------------------------------------
-    #game = NLPGame(input_text="I like the movie no more")
-    game = SparseLinearModel(n=10, n_interactions_per_order=None, n_non_important_features=3)
-    #game = SyntheticNeuralNetwork(n=12)
-    #game = SimpleGame(n=10)
 
-    # Game Parameters --------------------------------------------------------------------------------------------------
-    n = game.n
-    N = set(range(n))
-    total_subsets = 2 ** n
+    ITERATIONS = 5
 
-    # Parameters -------------------------------------------------------------------------------------------------------
-    min_order = 1
-    shapley_interaction_order = 1
+    approx_errors_list = []
 
-    max_budget = min(total_subsets, 2 ** 13)
-    budgets = [0.75, 1.0]
-    budgets = [int(budget * max_budget) for budget in budgets]
-    all_budgets = sum(budgets)
+    for iteration in range(1, ITERATIONS + 1):
+        print(f"Starting Iteration {iteration}")
 
-    shapx_sampling = {}
-    approximation_errors = {}
-    sampling_kernels = ["unif-size"]#,"unif-set","ksh","faith"]
-    pairwise_list = [True, False]
+        # Game Function ----------------------------------------------------------------------------------------------------
+        #game = NLPGame(input_text="I like the movie no more")
+        game = SparseLinearModel(n=10, n_interactions_per_order={1: 6, 2: 6, 3:6, 4:6, 5:6}, n_non_important_features=0)
+        #game = SyntheticNeuralNetwork(n=12)
+        #game = SimpleGame(n=10)
 
-    # All interactions
-    shapley_extractor_sii = ShapleyInteractionsEstimator(
-        N, shapley_interaction_order, min_order=min_order, interaction_type="SII")
-    shapley_extractor_sti = ShapleyInteractionsEstimator(
-        N, shapley_interaction_order, min_order=min_order, interaction_type="STI")
-    shapley_extractor_sfi = ShapleyInteractionsEstimator(
-        N, shapley_interaction_order, min_order=min_order, interaction_type="SFI")
+        # Game Parameters --------------------------------------------------------------------------------------------------
+        n = game.n
+        N = set(range(n))
+        total_subsets = 2 ** n
 
-    # Permutation Estimator
-    shapley_extractor_sii_permutation = PermutationSampling(
-        N, shapley_interaction_order, min_order=min_order, interaction_type="SII")
-    shapley_extractor_sti_permutation = PermutationSampling(
-        N, shapley_interaction_order, min_order=min_order, interaction_type="STI")
+        # Parameters -------------------------------------------------------------------------------------------------------
+        min_order = 2
+        shapley_interaction_order = 2
 
-    game_fun = game.set_call
+        max_budget = min(total_subsets, 2 ** 13)
+        budgets = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        budgets = [int(budget * max_budget) for budget in budgets]
+        all_budgets = sum(budgets)
 
-    shapx_exact = {}
-    shapx_list = [shapley_extractor_sii, shapley_extractor_sti, shapley_extractor_sfi]
-    permutation_samplers = {"SII": shapley_extractor_sii_permutation, "STI": shapley_extractor_sti_permutation}
+        shapx_sampling = {}
+        approximation_errors = {}
+        sampling_kernels = ["faith"]#,"unif-set","ksh","faith"]
+        pairwise_list = [True, False]
 
-    # Compute exact interactions ---------------------------------------------------------------------------------------
-    print("Starting exact computations")
-    for shapx in shapx_list:
-        if False:  # hasattr(game, "exact_values"):  # TODO when it's implemented correctly run this here
-            shapx_exact[shapx.interaction_type] = copy.deepcopy(game.exact_values)
-        else:
-            shapx_exact[shapx.interaction_type] = shapx.compute_interactions_complete(game_fun)
-    print("Exact computations finished")
+        # All interactions
+        shapley_extractor_sii = ShapleyInteractionsEstimator(
+            N, shapley_interaction_order, min_order=min_order, interaction_type="SII")
+        shapley_extractor_sti = ShapleyInteractionsEstimator(
+            N, shapley_interaction_order, min_order=min_order, interaction_type="STI")
+        shapley_extractor_sfi = ShapleyInteractionsEstimator(
+            N, shapley_interaction_order, min_order=min_order, interaction_type="SFI")
 
-    # Approximate ------------------------------------------------------------------------------------------------------
-    for shapx in shapx_list:
-        interaction_type = shapx.interaction_type
-        if interaction_type in ("STI", "SII"):
-            pbar_budget = all_budgets * len(pairwise_list) * len(sampling_kernels) + all_budgets
-        else:
-            pbar_budget = all_budgets * len(pairwise_list) * len(sampling_kernels)
-        pbar = tqdm(total=pbar_budget, desc=interaction_type)
-        exact_values = shapx_exact[interaction_type][shapley_interaction_order]
-        for budget in budgets:
-            relative_budget = round(budget / total_subsets, 2)
-            run_id = '_'.join((interaction_type, str(budget), str(relative_budget)))
+        # Permutation Estimator
+        shapley_extractor_sii_permutation = PermutationSampling(
+            N, shapley_interaction_order, min_order=min_order, interaction_type="SII")
+        shapley_extractor_sti_permutation = PermutationSampling(
+            N, shapley_interaction_order, min_order=min_order, interaction_type="STI")
 
-            # Permutation Approximations
+        game_fun = game.set_call
+
+        shapx_exact = {}
+        shapx_list = [shapley_extractor_sii, shapley_extractor_sti, shapley_extractor_sfi]
+        permutation_samplers = {"SII": shapley_extractor_sii_permutation, "STI": shapley_extractor_sti_permutation}
+
+        # Compute exact interactions ---------------------------------------------------------------------------------------
+        print("Starting exact computations")
+        for shapx in shapx_list:
+            if False:  # hasattr(game, "exact_values"):  # TODO when it's implemented correctly run this here
+                shapx_exact[shapx.interaction_type] = copy.deepcopy(game.exact_values)
+            else:
+                shapx_exact[shapx.interaction_type] = shapx.compute_interactions_complete(game_fun)
+        print("Exact computations finished")
+
+        # Approximate ------------------------------------------------------------------------------------------------------
+        for shapx in shapx_list:
+            interaction_type = shapx.interaction_type
             if interaction_type in ("STI", "SII"):
-                perm_run_id = '_'.join((run_id, 'permutation'))
-                perm_sampler = permutation_samplers[interaction_type]
+                pbar_budget = all_budgets * len(pairwise_list) * len(sampling_kernels) + all_budgets
+            else:
+                pbar_budget = all_budgets * len(pairwise_list) * len(sampling_kernels)
+            pbar = tqdm(total=pbar_budget, desc=interaction_type)
+            exact_values = shapx_exact[interaction_type][shapley_interaction_order]
+            for budget in budgets:
+                relative_budget = round(budget / total_subsets, 2)
+                run_id = '_'.join((interaction_type, str(budget), str(relative_budget)))
 
-                approximated_interactions = copy.deepcopy(perm_sampler.permutation_approximation(game_fun, budget))
-                shapx_sampling[perm_run_id] = approximated_interactions
-                approximation_errors[perm_run_id] = get_approximation_error(
-                    approx=shapx_sampling[perm_run_id], exact=exact_values)
-                pbar.update(budget)
+                # Permutation Approximations
+                if interaction_type in ("STI", "SII"):
+                    perm_run_id = '_'.join((run_id, 'permutation'))
+                    perm_sampler = permutation_samplers[interaction_type]
 
-            # Sampling Approximations
-            for sampling_kernel in sampling_kernels:
-                run_id = '_'.join((run_id, 'approximation', sampling_kernel))
-                for pairwise in pairwise_list:
-                    pairwise_id = 'pairwise' if pairwise else 'not-paired'
-                    approx_run_id = '_'.join((run_id, pairwise_id))
-
-                    approximated_interactions = copy.deepcopy(shapx.compute_interactions_from_budget(
-                        game_fun, budget,  pairing=pairwise, sampling_kernel=sampling_kernel))
-                    shapx_sampling[approx_run_id] = approximated_interactions
-                    approximation_errors[approx_run_id] = get_approximation_error(
-                        approx=approximated_interactions[shapley_interaction_order], exact=exact_values)
-
-                    approximated_interactions = copy.deepcopy(shapx.last_const_complete[shapley_interaction_order])
-                    shapx_sampling['_'.join((approx_run_id, 'full'))] = approximated_interactions
-                    approximation_errors['_'.join((approx_run_id, 'full'))] = get_approximation_error(
-                        approx=shapx.last_const_complete[shapley_interaction_order], exact=exact_values)
-
+                    approximated_interactions = copy.deepcopy(perm_sampler.permutation_approximation(game_fun, budget))
+                    shapx_sampling[perm_run_id] = approximated_interactions
+                    approximation_errors[perm_run_id] = get_approximation_error(
+                        approx=shapx_sampling[perm_run_id], exact=exact_values)
                     pbar.update(budget)
-        pbar.close()
+
+                # Sampling Approximations
+                for sampling_kernel in sampling_kernels:
+                    run_id = '_'.join((run_id, 'approximation', sampling_kernel))
+                    for pairwise in pairwise_list:
+                        pairwise_id = 'pairwise' if pairwise else 'not-paired'
+                        approx_run_id = '_'.join((run_id, pairwise_id))
+
+                        approximated_interactions = copy.deepcopy(shapx.compute_interactions_from_budget(
+                            game_fun, budget,  pairing=pairwise, sampling_kernel=sampling_kernel))
+                        shapx_sampling['_'.join((approx_run_id, 'not full'))] = approximated_interactions
+                        approximation_errors['_'.join((approx_run_id, 'not full'))] = get_approximation_error(
+                            approx=approximated_interactions[shapley_interaction_order], exact=exact_values)
+
+                        approximated_interactions = copy.deepcopy(shapx.last_const_complete[shapley_interaction_order])
+                        shapx_sampling['_'.join((approx_run_id, 'full'))] = approximated_interactions
+                        approximation_errors['_'.join((approx_run_id, 'full'))] = get_approximation_error(
+                            approx=shapx.last_const_complete[shapley_interaction_order], exact=exact_values)
+
+                        pbar.update(budget)
+            pbar.close()
+
+        for approximator_id, approximation_error in approximation_errors.items():
+            run_dict = {}
+            id_parts = approximator_id.split('_')
+            try:
+                run_dict['iteration'] = iteration
+                run_dict['approx_value'] = approximation_error
+                run_dict['interaction_index'] = id_parts[0]
+                run_dict['n_absolute'] = id_parts[1]
+                run_dict['n_relative'] = id_parts[2]
+                run_dict['approx_type'] = id_parts[3]
+                run_dict['sampling_kernel'] = id_parts[4]
+                run_dict['pairing'] = id_parts[5]
+                run_dict['full'] = id_parts[6]
+            except IndexError:
+                pass
+            approx_errors_list.append(run_dict)
+
+    approx_errors_df = pd.DataFrame(approx_errors_list)
+    approx_errors_df.to_csv("third_run.csv", index=False)
+
+

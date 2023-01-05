@@ -6,20 +6,7 @@ import math
 import typing
 from scipy.special import binom
 
-# TODO: import from somewhere, help please
-import itertools
-
-
-def powerset(iterable, min_size=-1, max_size=None):
-    if max_size is None and min_size > -1:
-        max_size = min_size
-    s = list(iterable)
-    if max_size is None:
-        max_size = len(s)
-    else:
-        max_size = min(max_size, len(s))
-    return itertools.chain.from_iterable(
-        itertools.combinations(s, r) for r in range(max(min_size, 0), max_size + 1))
+from shapx.base import powerset
 
 
 def _sigmoid(x):
@@ -110,7 +97,7 @@ class SparseLinearModel:
             q = len(subset)
             for S in powerset(self.N, s, s):
                 r = len(set(subset).intersection(S))
-                results[S] += weight*self.coefficient_weighting(gamma_matrix, s, q, r)
+                results[S] += weight * self.coefficient_weighting(gamma_matrix, s, q, r)
         return results
 
     def coefficient_weighting(self, gamma_matrix, s, q, s_cap_q):
