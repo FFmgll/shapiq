@@ -19,8 +19,8 @@ class BaseShapleyInteractions:
     def constant_R(self, incomplete_subsets, q):
         R = 0
         for t in incomplete_subsets:
-            R += q[t] / binom(self.n, t)
-        return R / len(incomplete_subsets)
+            R += q[t] * binom(self.n, t)
+        return R
 
     def init_results(self):
         results = {}
@@ -36,10 +36,38 @@ class BaseShapleyInteractions:
         return rslt
 
     @staticmethod
+    def update_mean(current_mean, update, n_samples):
+        rslt = {}
+        for l in current_mean:
+            rslt[l] = (current_mean[l]*(n_samples-1) + update[l])/n_samples
+        return rslt
+
+    @staticmethod
+    def update_mean_variance(current_mean, current_s2, n_samples, update):
+        rslt = {}
+        for l in current_s2:
+            n_samples += 1
+            delta = update[l] - current_mean[l]
+            current_mean[l] += delta / n_samples
+            delta2 = update[l] - current_mean[l]
+            current_s2[l] += delta*delta2
+        return current_mean,current_s2,n_samples
+
+
+
+
+    @staticmethod
     def scale_results(current, factor):
         rslt = {}
         for l in current:
             rslt[l] = current[l] * factor
+        return rslt
+
+    @staticmethod
+    def apply_sqrt(current):
+        rslt = {}
+        for l in current:
+            rslt[l] = np.sqrt(current[l])
         return rslt
 
     @staticmethod
