@@ -7,7 +7,57 @@ import typing
 from scipy.special import binom
 
 from shapx.base import powerset
+from collections import Counter
 
+def customSparseLinearModel(n,weighting_scheme,n_interactions,max_interaction_size=-1):
+    if max_interaction_size == -1:
+        max_interaction_size = n
+    n_interactions_per_order = {}
+    interaction_ratios = np.zeros(n+1)
+    weighting_ratios = np.zeros(n+1)
+
+    allowed_interaction_sizes = np.arange(1,max_interaction_size+1)
+
+    for k in allowed_interaction_sizes:
+        if weighting_scheme=="uniform":
+            weighting_ratios += 1
+        if weighting_scheme=="center":
+            weighting_ratios += binom(n,k)
+        if weighting_scheme=="tail":
+            weighting_ratios += 1/binom(n,k)
+    weighting_ratios /= np.sum(weighting_ratios)
+
+
+    interaction_sizes = random.choices(allowed_interaction_sizes, k=n_interactions,
+                                          weights=weighting_ratios[allowed_interaction_sizes])
+
+    n_interactions_per_order = Counter(interaction_sizes)
+    game = SparseLinearModel(n=n,n_interactions_per_order=n_interactions_per_order)
+    return game
+
+
+def customSparseLinearModel_old(n,weighting_scheme,sparsity,max_interaction=-1):
+    if max_interaction == -1:
+        max_interaction = n
+    n_interactions_per_order = {}
+    interaction_ratios = np.zeros(n+1)
+    normalizing_factor = 0
+
+    for k in range(1,max_interaction):
+        if weighting_scheme=="uniform":
+            interaction_ratios[k] = sparsity
+            normalizing_factor += 1
+        if weighting_scheme=="center":
+            normalizing_factor += binom(n,k)
+            interaction_ratios[k] = binom(n,k)*sparsity
+        if weighting_scheme=="tail":
+            normalizing_factor += 1/binom(n,k)
+            interaction_ratios[k] = sparsity/binom(n,k)
+    interaction_ratios /= normalizing_factor
+    for k in range(1,n):
+        n_interactions_per_order[k] = int(binom(n,k)*interaction_ratios[k])
+    game = SparseLinearModel(n=n,n_interactions_per_order=n_interactions_per_order)
+    return game
 
 def _sigmoid(x):
     return 1 / (1 + math.exp(-x))
@@ -27,7 +77,7 @@ class NLPGame:
         self.input_sentence = self.tokenizer.decode(self.tokenized_input)
         self.n = len(self.tokenized_input)
         self._label_key = label_key
-
+        self.game_name = "language_model"
         self.original_output = self.call(self.input_sentence)
 
     def call(self, x):
@@ -66,6 +116,7 @@ class SparseLinearModel:
             n_interactions_per_order: typing.Dict[int, int] = None):
         assert n_non_important_features <= n, f"Total number of non-important features {n_non_important_features} " \
                                               f"must be smaller than number features {n}."
+        self.game_name = "sparse_linear_model"
         self.n = n
         n_important = n - n_non_important_features
         N_important = np.asarray(list(range(0, n_important)))
@@ -91,13 +142,15 @@ class SparseLinearModel:
         except AttributeError:
             self._highest_interaction_order = 0
 
-    def exact_values(self, gamma_matrix, s):  # TODO add exact_values computation for the SII, STI and SFI
-        results = np.zeros(np.repeat(self.n, s))
-        for subset, weight in self.interaction_weights.items():
-            q = len(subset)
-            for S in powerset(self.N, s, s):
-                r = len(set(subset).intersection(S))
-                results[S] += weight * self.coefficient_weighting(gamma_matrix, s, q, r)
+    def exact_values(self, gamma_matrix, min_order, max_order):  # TODO add exact_values computation for the SII, STI and SFI
+        results = {}
+        for s in range(min_order,max_order+1):
+            results[s] = np.zeros(np.repeat(self.n, s))
+            for subset, weight in self.interaction_weights.items():
+                q = len(subset)
+                for S in powerset(self.N, s, s):
+                    r = len(set(subset).intersection(S))
+                    results[s][S] += weight * self.coefficient_weighting(gamma_matrix, s, q, r)
         return results
 
     def coefficient_weighting(self, gamma_matrix, s, q, s_cap_q):
@@ -147,6 +200,7 @@ class SyntheticNeuralNetwork:
 
     def __init__(self, n):
         self.n = n
+        self.game_name = "synth_neural_network"
         self.weights_1 = np.random.normal(loc=0, scale=10, size=(100, self.n))
         self.bias_1 = np.random.normal(loc=0, scale=1, size=100)
         self.weights_2 = np.random.normal(loc=0, scale=0.5, size=(10, 100))
