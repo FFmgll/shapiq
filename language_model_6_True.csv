@@ -1,0 +1,289 @@
+shapley_interaction_order,iteration,approx_value,interaction_index,n_absolute,n_relative,approx_type,sampling_kernel,pairing,full
+2,1,0.1602799398065978,SII,16,0.25,permutation,,,
+2,1,2.893192786930149,SII,16,0.25,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,16,0.25,approximation,unif-size,not-paired,full
+2,1,1.8196898259105312,SII,16,0.25,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,16,0.25,approximation,unif-set,not-paired,full
+2,1,2.800109690058805,SII,16,0.25,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,16,0.25,approximation,ksh,not-paired,full
+2,1,1.6383439922174494,SII,16,0.25,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,16,0.25,approximation,faith,not-paired,full
+2,1,0.1602799398065978,SII,19,0.3,permutation,,,
+2,1,1.3054896575523676,SII,19,0.3,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,19,0.3,approximation,unif-size,not-paired,full
+2,1,1.0977804285491026,SII,19,0.3,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,19,0.3,approximation,unif-set,not-paired,full
+2,1,1.2168975029160218,SII,19,0.3,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,19,0.3,approximation,ksh,not-paired,full
+2,1,1.2077970267592415,SII,19,0.3,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,19,0.3,approximation,faith,not-paired,full
+2,1,0.23699851881634454,SII,22,0.34,permutation,,,
+2,1,0.8350750769123853,SII,22,0.34,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,22,0.34,approximation,unif-size,not-paired,full
+2,1,0.5575162014314107,SII,22,0.34,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,22,0.34,approximation,unif-set,not-paired,full
+2,1,0.2707595253032347,SII,22,0.34,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,22,0.34,approximation,ksh,not-paired,full
+2,1,0.5303618569438637,SII,22,0.34,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,22,0.34,approximation,faith,not-paired,full
+2,1,0.15331223002365485,SII,25,0.39,permutation,,,
+2,1,0.5381858455208456,SII,25,0.39,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,25,0.39,approximation,unif-size,not-paired,full
+2,1,0.4193193692424698,SII,25,0.39,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,25,0.39,approximation,unif-set,not-paired,full
+2,1,0.5599957043178703,SII,25,0.39,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,25,0.39,approximation,ksh,not-paired,full
+2,1,0.8785172059976463,SII,25,0.39,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,25,0.39,approximation,faith,not-paired,full
+2,1,0.2219204025317958,SII,28,0.44,permutation,,,
+2,1,0.5401958758499582,SII,28,0.44,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,28,0.44,approximation,unif-size,not-paired,full
+2,1,0.436965544925002,SII,28,0.44,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,28,0.44,approximation,unif-set,not-paired,full
+2,1,0.6439028431773791,SII,28,0.44,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,28,0.44,approximation,ksh,not-paired,full
+2,1,0.6093253378108716,SII,28,0.44,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,28,0.44,approximation,faith,not-paired,full
+2,1,0.13536783898378524,SII,32,0.5,permutation,,,
+2,1,0.10826866239847482,SII,32,0.5,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,32,0.5,approximation,unif-size,not-paired,full
+2,1,0.15044082462920763,SII,32,0.5,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,32,0.5,approximation,unif-set,not-paired,full
+2,1,0.25093321569509985,SII,32,0.5,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,32,0.5,approximation,ksh,not-paired,full
+2,1,0.3556510034046681,SII,32,0.5,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,32,0.5,approximation,faith,not-paired,full
+2,1,0.16678784597611415,SII,35,0.55,permutation,,,
+2,1,0.15335413866139652,SII,35,0.55,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,35,0.55,approximation,unif-size,not-paired,full
+2,1,0.10101370198640273,SII,35,0.55,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,35,0.55,approximation,unif-set,not-paired,full
+2,1,0.17168152889486568,SII,35,0.55,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,35,0.55,approximation,ksh,not-paired,full
+2,1,0.2778428386982404,SII,35,0.55,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,35,0.55,approximation,faith,not-paired,full
+2,1,0.17012469204768887,SII,38,0.59,permutation,,,
+2,1,0.26673538168539945,SII,38,0.59,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,38,0.59,approximation,unif-size,not-paired,full
+2,1,0.39330624030195044,SII,38,0.59,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,38,0.59,approximation,unif-set,not-paired,full
+2,1,0.2143457344598772,SII,38,0.59,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,38,0.59,approximation,ksh,not-paired,full
+2,1,0.07268427236724986,SII,38,0.59,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,38,0.59,approximation,faith,not-paired,full
+2,1,0.4093036053668187,SII,41,0.64,permutation,,,
+2,1,0.4736577267438854,SII,41,0.64,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,41,0.64,approximation,unif-size,not-paired,full
+2,1,0.25853539122232694,SII,41,0.64,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,41,0.64,approximation,unif-set,not-paired,full
+2,1,0.19724399738883805,SII,41,0.64,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,41,0.64,approximation,ksh,not-paired,full
+2,1,0.2582055073779628,SII,41,0.64,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,41,0.64,approximation,faith,not-paired,full
+2,1,0.12258851691695995,SII,44,0.69,permutation,,,
+2,1,0.20240369082733867,SII,44,0.69,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,44,0.69,approximation,unif-size,not-paired,full
+2,1,0.1536844795401344,SII,44,0.69,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,44,0.69,approximation,unif-set,not-paired,full
+2,1,0.15839534123513294,SII,44,0.69,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,44,0.69,approximation,ksh,not-paired,full
+2,1,0.14884215264276715,SII,44,0.69,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,44,0.69,approximation,faith,not-paired,full
+2,1,0.1488769153761688,SII,48,0.75,permutation,,,
+2,1,0.18841454010240896,SII,48,0.75,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,48,0.75,approximation,unif-size,not-paired,full
+2,1,0.1477558232666823,SII,48,0.75,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,48,0.75,approximation,unif-set,not-paired,full
+2,1,0.1281886698246124,SII,48,0.75,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,48,0.75,approximation,ksh,not-paired,full
+2,1,0.107377400680581,SII,48,0.75,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,48,0.75,approximation,faith,not-paired,full
+2,1,0.17047110026134824,SII,51,0.8,permutation,,,
+2,1,0.08875181292229058,SII,51,0.8,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,51,0.8,approximation,unif-size,not-paired,full
+2,1,0.214085431240436,SII,51,0.8,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,51,0.8,approximation,unif-set,not-paired,full
+2,1,0.14840450060466592,SII,51,0.8,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,51,0.8,approximation,ksh,not-paired,full
+2,1,0.1944778759578443,SII,51,0.8,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,51,0.8,approximation,faith,not-paired,full
+2,1,0.09978678830460043,SII,54,0.84,permutation,,,
+2,1,0.16175963912952554,SII,54,0.84,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,54,0.84,approximation,unif-size,not-paired,full
+2,1,0.032636238085400095,SII,54,0.84,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,54,0.84,approximation,unif-set,not-paired,full
+2,1,0.09276004773611025,SII,54,0.84,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,54,0.84,approximation,ksh,not-paired,full
+2,1,0.1498799881091858,SII,54,0.84,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,54,0.84,approximation,faith,not-paired,full
+2,1,0.12652587832302234,SII,57,0.89,permutation,,,
+2,1,0.07361367255112113,SII,57,0.89,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,57,0.89,approximation,unif-size,not-paired,full
+2,1,0.15515914640670533,SII,57,0.89,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,57,0.89,approximation,unif-set,not-paired,full
+2,1,0.1121492231897148,SII,57,0.89,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,57,0.89,approximation,ksh,not-paired,full
+2,1,0.09079121053209495,SII,57,0.89,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,57,0.89,approximation,faith,not-paired,full
+2,1,0.146940233632801,SII,60,0.94,permutation,,,
+2,1,0.12553366948039824,SII,60,0.94,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,60,0.94,approximation,unif-size,not-paired,full
+2,1,0.14799760128880118,SII,60,0.94,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,60,0.94,approximation,unif-set,not-paired,full
+2,1,0.13896727497293943,SII,60,0.94,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,60,0.94,approximation,ksh,not-paired,full
+2,1,0.10040445127261854,SII,60,0.94,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,60,0.94,approximation,faith,not-paired,full
+2,1,0.18766979562595162,SII,64,1.0,permutation,,,
+2,1,0.11664389306728569,SII,64,1.0,approximation,unif-size,not-paired,not full
+2,1,0.05579511603837976,SII,64,1.0,approximation,unif-size,not-paired,full
+2,1,0.13654373430096184,SII,64,1.0,approximation,unif-set,not-paired,not full
+2,1,0.05579511603837976,SII,64,1.0,approximation,unif-set,not-paired,full
+2,1,0.11181897497272818,SII,64,1.0,approximation,ksh,not-paired,not full
+2,1,0.05579511603837976,SII,64,1.0,approximation,ksh,not-paired,full
+2,1,0.04258526227415524,SII,64,1.0,approximation,faith,not-paired,not full
+2,1,0.05579511603837976,SII,64,1.0,approximation,faith,not-paired,full
+2,1,,STI,16,0.25,permutation,,,
+2,1,2.518127645867208,STI,16,0.25,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,16,0.25,approximation,unif-size,not-paired,full
+2,1,0.8170000283081464,STI,16,0.25,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,16,0.25,approximation,unif-set,not-paired,full
+2,1,1.2299589762626415,STI,16,0.25,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,16,0.25,approximation,ksh,not-paired,full
+2,1,4.8964670745309355,STI,16,0.25,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,16,0.25,approximation,faith,not-paired,full
+2,1,,STI,19,0.3,permutation,,,
+2,1,0.4517375455044575,STI,19,0.3,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,19,0.3,approximation,unif-size,not-paired,full
+2,1,0.538584143641929,STI,19,0.3,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,19,0.3,approximation,unif-set,not-paired,full
+2,1,0.9502801309243919,STI,19,0.3,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,19,0.3,approximation,ksh,not-paired,full
+2,1,0.9629180348840637,STI,19,0.3,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,19,0.3,approximation,faith,not-paired,full
+2,1,,STI,22,0.34,permutation,,,
+2,1,1.2774714958997222,STI,22,0.34,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,22,0.34,approximation,unif-size,not-paired,full
+2,1,0.8932811413120937,STI,22,0.34,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,22,0.34,approximation,unif-set,not-paired,full
+2,1,0.987674018741036,STI,22,0.34,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,22,0.34,approximation,ksh,not-paired,full
+2,1,0.22521731213118854,STI,22,0.34,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,22,0.34,approximation,faith,not-paired,full
+2,1,,STI,25,0.39,permutation,,,
+2,1,0.21982156549161455,STI,25,0.39,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,25,0.39,approximation,unif-size,not-paired,full
+2,1,0.4971971567972137,STI,25,0.39,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,25,0.39,approximation,unif-set,not-paired,full
+2,1,0.4994117917100078,STI,25,0.39,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,25,0.39,approximation,ksh,not-paired,full
+2,1,0.41537505214306475,STI,25,0.39,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,25,0.39,approximation,faith,not-paired,full
+2,1,,STI,28,0.44,permutation,,,
+2,1,0.21972036926716842,STI,28,0.44,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,28,0.44,approximation,unif-size,not-paired,full
+2,1,0.4266160845682977,STI,28,0.44,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,28,0.44,approximation,unif-set,not-paired,full
+2,1,0.9901267937460542,STI,28,0.44,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,28,0.44,approximation,ksh,not-paired,full
+2,1,0.2548095870155373,STI,28,0.44,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,28,0.44,approximation,faith,not-paired,full
+2,1,,STI,32,0.5,permutation,,,
+2,1,0.2406172897803625,STI,32,0.5,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,32,0.5,approximation,unif-size,not-paired,full
+2,1,0.3067483635668688,STI,32,0.5,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,32,0.5,approximation,unif-set,not-paired,full
+2,1,0.10312153876043255,STI,32,0.5,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,32,0.5,approximation,ksh,not-paired,full
+2,1,0.3023818641842586,STI,32,0.5,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,32,0.5,approximation,faith,not-paired,full
+2,1,,STI,35,0.55,permutation,,,
+2,1,0.5850289239894272,STI,35,0.55,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,35,0.55,approximation,unif-size,not-paired,full
+2,1,0.2490796348872613,STI,35,0.55,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,35,0.55,approximation,unif-set,not-paired,full
+2,1,0.4851038197123654,STI,35,0.55,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,35,0.55,approximation,ksh,not-paired,full
+2,1,0.23972672698167535,STI,35,0.55,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,35,0.55,approximation,faith,not-paired,full
+2,1,,STI,38,0.59,permutation,,,
+2,1,0.14973665320027993,STI,38,0.59,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,38,0.59,approximation,unif-size,not-paired,full
+2,1,0.20498940723537462,STI,38,0.59,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,38,0.59,approximation,unif-set,not-paired,full
+2,1,0.09490944704308957,STI,38,0.59,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,38,0.59,approximation,ksh,not-paired,full
+2,1,0.2968459949957418,STI,38,0.59,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,38,0.59,approximation,faith,not-paired,full
+2,1,,STI,41,0.64,permutation,,,
+2,1,0.2126114890939326,STI,41,0.64,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,41,0.64,approximation,unif-size,not-paired,full
+2,1,0.39286940461300285,STI,41,0.64,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,41,0.64,approximation,unif-set,not-paired,full
+2,1,0.09643073889502016,STI,41,0.64,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,41,0.64,approximation,ksh,not-paired,full
+2,1,0.0950580609213039,STI,41,0.64,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,41,0.64,approximation,faith,not-paired,full
+2,1,,STI,44,0.69,permutation,,,
+2,1,0.19382365027512172,STI,44,0.69,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,44,0.69,approximation,unif-size,not-paired,full
+2,1,0.19246898534583542,STI,44,0.69,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,44,0.69,approximation,unif-set,not-paired,full
+2,1,0.12910073050784057,STI,44,0.69,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,44,0.69,approximation,ksh,not-paired,full
+2,1,0.17944493096206665,STI,44,0.69,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,44,0.69,approximation,faith,not-paired,full
+2,1,,STI,48,0.75,permutation,,,
+2,1,0.3496392793950482,STI,48,0.75,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,48,0.75,approximation,unif-size,not-paired,full
+2,1,0.1826624603058491,STI,48,0.75,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,48,0.75,approximation,unif-set,not-paired,full
+2,1,0.1826489168269093,STI,48,0.75,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,48,0.75,approximation,ksh,not-paired,full
+2,1,0.16252922473691708,STI,48,0.75,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,48,0.75,approximation,faith,not-paired,full
+2,1,,STI,51,0.8,permutation,,,
+2,1,0.08819484325561154,STI,51,0.8,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,51,0.8,approximation,unif-size,not-paired,full
+2,1,0.2792439506656885,STI,51,0.8,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,51,0.8,approximation,unif-set,not-paired,full
+2,1,0.06668602702905316,STI,51,0.8,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,51,0.8,approximation,ksh,not-paired,full
+2,1,0.2559725652535697,STI,51,0.8,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,51,0.8,approximation,faith,not-paired,full
+2,1,,STI,54,0.84,permutation,,,
+2,1,0.14898392810738414,STI,54,0.84,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,54,0.84,approximation,unif-size,not-paired,full
+2,1,0.14127798289017374,STI,54,0.84,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,54,0.84,approximation,unif-set,not-paired,full
+2,1,0.1694297252811203,STI,54,0.84,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,54,0.84,approximation,ksh,not-paired,full
+2,1,0.08407878514856852,STI,54,0.84,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,54,0.84,approximation,faith,not-paired,full
+2,1,,STI,57,0.89,permutation,,,
+2,1,0.25554676605843635,STI,57,0.89,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,57,0.89,approximation,unif-size,not-paired,full
+2,1,0.05768313705295786,STI,57,0.89,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,57,0.89,approximation,unif-set,not-paired,full
+2,1,0.07911775964562609,STI,57,0.89,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,57,0.89,approximation,ksh,not-paired,full
+2,1,0.14707853485980618,STI,57,0.89,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,57,0.89,approximation,faith,not-paired,full
+2,1,0.2038050534979382,STI,60,0.94,permutation,,,
+2,1,0.1303798103152201,STI,60,0.94,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,60,0.94,approximation,unif-size,not-paired,full
+2,1,0.08898049181777141,STI,60,0.94,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,60,0.94,approximation,unif-set,not-paired,full
+2,1,0.2105094626588767,STI,60,0.94,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,60,0.94,approximation,ksh,not-paired,full
+2,1,0.10877071201214192,STI,60,0.94,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,60,0.94,approximation,faith,not-paired,full
+2,1,0.1441759256713394,STI,64,1.0,permutation,,,
+2,1,0.134177595617721,STI,64,1.0,approximation,unif-size,not-paired,not full
+2,1,0.09211972049154431,STI,64,1.0,approximation,unif-size,not-paired,full
+2,1,0.056571334645470074,STI,64,1.0,approximation,unif-set,not-paired,not full
+2,1,0.09211972049154431,STI,64,1.0,approximation,unif-set,not-paired,full
+2,1,0.29897896676409613,STI,64,1.0,approximation,ksh,not-paired,not full
+2,1,0.09211972049154431,STI,64,1.0,approximation,ksh,not-paired,full
+2,1,0.10248800494078528,STI,64,1.0,approximation,faith,not-paired,not full
+2,1,0.09211972049154431,STI,64,1.0,approximation,faith,not-paired,full
