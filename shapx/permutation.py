@@ -1,7 +1,7 @@
 import numpy as np
 
 from .base import BaseShapleyInteractions, powerset
-
+from scipy.special import binom
 
 class PermutationSampling(BaseShapleyInteractions):
 
@@ -14,7 +14,11 @@ class PermutationSampling(BaseShapleyInteractions):
         counts = np.zeros(np.repeat(self.n, self.s))
         val_empty = game({})
         val_full = game(self.N)
-        iteration_cost = 0
+        if self.interaction_type == "SII":
+            iteration_cost = (self.n-1)*2**self.s
+        if self.interaction_type == "STI":
+            iteration_cost = binom(self.n,self.s)*2**self.s
+        #iteration_cost = 0
         n_permutations = 0
         self.counter = 0
         while budget >= iteration_cost:
@@ -29,7 +33,8 @@ class PermutationSampling(BaseShapleyInteractions):
             counts_it = np.clip(counts_it, a_min=0, a_max=1, out=counts_it)
             counts += counts_it
             n_permutations += 1
-            iteration_cost = self.counter - start_counter
+            self.iteration_cost = iteration_cost
+            self.iteration_cost2 = self.counter - start_counter
             budget -= iteration_cost
         if self.interaction_type == "SII":
             results_out = np.divide(results, counts, out=results, where=counts != 0)
