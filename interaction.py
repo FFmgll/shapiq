@@ -22,12 +22,12 @@ if __name__ == "__main__":
     #game = NLPGame(input_text="I like the movie no more")
     #game = SparseLinearModel(n=30, n_interactions_per_order={1: 6, 2: 6, 3:6, 4:20, 5:3,6:5,7:3}, n_non_important_features=0)
     n_features = 10
-    game = ParameterizedSparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=20,max_interaction_size=5)
+    game = ParameterizedSparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=1000)
     #game = SyntheticNeuralNetwork(n=12)
     #game = SimpleGame(n=10)
-    N_FEATURES: int = 10
+    N_FEATURES: int = 70
     game = ParameterizedSparseLinearModel(
-        n=N_FEATURES, weighting_scheme="uniform", n_interactions=20)
+        n=N_FEATURES, weighting_scheme="uniform", n_interactions=2000)
 
     game_name = game.game_name
     # Game Parameters --------------------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ if __name__ == "__main__":
             shapx_exact[shapx.interaction_type] = shapx.compute_interactions_complete(game_fun)
     print("Exact computations finished")
 
-    ITERATIONS = 1
+    ITERATIONS = 0
 
     approx_errors_list = []
 
