@@ -4,7 +4,8 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import random
-from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel, customSparseLinearModel
+from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel, \
+    ParameterizedSparseLinearModel
 
 from shapx.interaction import ShapleyInteractionsEstimator
 from shapx.permutation import PermutationSampling
@@ -21,8 +22,10 @@ if __name__ == "__main__":
         #game = NLPGame(input_text="I like the movie no more")
         #n_features=10
         #game = customSparseLinearModel(n_features,weighting_scheme="uniform",n_interactions=0.1*2**n_features)
-        #game = SparseLinearModel(n=10, n_interactions_per_order={1: 6, 2:0, 3:6, 4:23, 5:40,6:50,7:20}, n_non_important_features=0)
-        game = SyntheticNeuralNetwork(n=12)
+        game = ParameterizedSparseLinearModel(
+            n=10, weighting_scheme="uniform", n_interactions=20, max_interaction_size=5)
+        #game = ParameterizedSparseLinearModel(
+        #    n=10, weighting_scheme="uniform", n_interactions=20, max_interaction_size=5)
         #game = SimpleGame(n=10)
 
         # Game Parameters --------------------------------------------------------------------------------------------------
@@ -43,7 +46,7 @@ if __name__ == "__main__":
         subset_weights = np.zeros(n + 1)
         subset_weights[subset_size] = [0.3,0.4,0.3]
 
-        subset_size = np.arange(0,12)
+        subset_size = np.arange(0,n)
         subset_weights = np.ones(n+1)/n
         max_budget = 0
         for k in subset_size:
@@ -148,6 +151,6 @@ if __name__ == "__main__":
                 approx_errors_list.append(run_dict)
 
         approx_errors_df = pd.DataFrame(approx_errors_list)
-        approx_errors_df.to_csv("interaction_sampling_k.csv", index=False)
+        approx_errors_df.to_csv("result/interaction_sampling_k.csv", index=False)
 
 

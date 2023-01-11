@@ -4,7 +4,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 
-from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel, customSparseLinearModel
+from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel, get_SparseLinearModel
 
 from shapx.interaction import ShapleyInteractionsEstimator
 from shapx.permutation import PermutationSampling
@@ -21,8 +21,8 @@ if __name__ == "__main__":
     # Game Function ----------------------------------------------------------------------------------------------------
     #game = NLPGame(input_text="I like the movie no more")
     #game = SparseLinearModel(n=30, n_interactions_per_order={1: 6, 2: 6, 3:6, 4:20, 5:3,6:5,7:3}, n_non_important_features=0)
-    n_features = 70
-    game = customSparseLinearModel(n_features,weighting_scheme="uniform",n_interactions=20)
+    n_features = 10
+    game = get_SparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=20)
     #game = SyntheticNeuralNetwork(n=12)
     #game = SimpleGame(n=10)
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     shapley_interaction_order = 2
 
     #If True, forces to sample all subset sizes
-    sampling_only=True
+    sampling_only=False
 
     min_budget = 0
     for k in range(shapley_interaction_order):
@@ -113,7 +113,7 @@ if __name__ == "__main__":
                     perm_run_id = '_'.join((run_id1, 'permutation'))
                     perm_sampler = permutation_samplers[interaction_type]
 
-                    approximated_interactions = copy.deepcopy(perm_sampler.permutation_approximation(game_fun, budget))
+                    approximated_interactions = copy.deepcopy(perm_sampler.approximate_with_budget(game_fun, budget))
                     shapx_sampling[perm_run_id] = approximated_interactions
                     approximation_errors[perm_run_id] = get_approximation_error(
                         approx=shapx_sampling[perm_run_id], exact=exact_values)/binom(shapx.n,shapx.s)

@@ -53,9 +53,6 @@ class BaseShapleyInteractions:
             current_s2[l] += delta*delta2
         return current_mean,current_s2,n_samples
 
-
-
-
     @staticmethod
     def scale_results(current, factor):
         rslt = {}
