@@ -32,9 +32,10 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
         self.last_sampling_params["q"] = q
         self.last_sampling_params["p"] = p
 
+        result_complete = self.init_results()
+        result_constant = self._constant_c(game)
+
         if budget > 0:
-            result_complete = self.init_results()
-            result_constant = self._constant_c(game)
 
             if sampling_only:
                 complete_subsets = []

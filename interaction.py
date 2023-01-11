@@ -25,6 +25,9 @@ if __name__ == "__main__":
     game = ParameterizedSparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=20,max_interaction_size=5)
     #game = SyntheticNeuralNetwork(n=12)
     #game = SimpleGame(n=10)
+    N_FEATURES: int = 10
+    game = ParameterizedSparseLinearModel(
+        n=N_FEATURES, weighting_scheme="uniform", n_interactions=20)
 
     game_name = game.game_name
     # Game Parameters --------------------------------------------------------------------------------------------------
