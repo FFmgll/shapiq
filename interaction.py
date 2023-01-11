@@ -4,7 +4,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 
-from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel, get_SparseLinearModel
+from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel, ParameterizedSparseLinearModel
 
 from shapx.interaction import ShapleyInteractionsEstimator
 from shapx.permutation import PermutationSampling
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     #game = NLPGame(input_text="I like the movie no more")
     #game = SparseLinearModel(n=30, n_interactions_per_order={1: 6, 2: 6, 3:6, 4:20, 5:3,6:5,7:3}, n_non_important_features=0)
     n_features = 10
-    game = get_SparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=20)
+    game = ParameterizedSparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=20,max_interaction_size=5)
     #game = SyntheticNeuralNetwork(n=12)
     #game = SimpleGame(n=10)
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     game_fun = game.set_call
 
     shapx_exact = {}
-    shapx_list = [shapley_extractor_sii, shapley_extractor_sti]#shapley_extractor_sfi]
+    shapx_list = [shapley_extractor_sii, shapley_extractor_sti,shapley_extractor_sfi]
     permutation_samplers = {"SII": shapley_extractor_sii_permutation, "STI": shapley_extractor_sti_permutation}
 
     # Compute exact interactions ---------------------------------------------------------------------------------------

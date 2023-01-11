@@ -6,13 +6,15 @@ import numpy as np
 if __name__ == "__main__":
     sns.set_theme(style="darkgrid")
 
-    file_name = "results/sparse_linear_model_10.csv"
+    #file_name = "results/sparse_linear_model_10.csv"
+    file_name = "sparse_linear_model_10_False.csv"
     #file_name = "interaction_sampling_k.csv"
 
     data = pd.read_csv(file_name)
 
     shapley_interaction_order = str(data["shapley_interaction_order"][0])
     data = data[data['full'].isin(['not full', np.NAN])].drop(columns=['full'])
+    data = data[data['sampling_kernel'].isin(['faith', np.NAN])]
     #data = data.drop(columns=['pairing', 'sampling_kernel', 'shapley_interaction_order'])
     data = data[data['n_absolute'] > 0]
 
