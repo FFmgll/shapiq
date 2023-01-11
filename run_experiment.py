@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from scipy.special import binom
 from tqdm import tqdm
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from games import ParameterizedSparseLinearModel, SparseLinearModel
 from shapx import ShapleyInteractionsEstimator, PermutationSampling
@@ -12,7 +14,7 @@ from shapx.regression import RegressionEstimator
 
 
 def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 0.00001) -> float:
-    error = np.sum((approx - exact) ** 2)
+    error = np.sum((approx - exact) ** 2) / binom(N_FEATURES, SHAPLEY_INTERACTION_ORDER)
     error = 0. if error < eps else error  # For pretty printing ...
     return error
 
@@ -22,7 +24,7 @@ if __name__ == "__main__":
     MAX_BUDGET: int = 10_000
     BUDGET_STEPS = np.arange(0, 1.05, 0.05)
     SHAPLEY_INTERACTION_ORDERS: list = [2]
-    ITERATIONS = 1
+    ITERATIONS = 5
     SAMPLING_KERNELS = ["faith"]
     PAIRWISE_LIST = [False]
 
@@ -174,7 +176,55 @@ if __name__ == "__main__":
                     pass
                 approx_errors_list.append(run_dict)
 
-    # Store All --------------------------------------------------------------------------------
+    # Store All ------------------------------------------------------------------------------------
     save_name = "_".join((game_name, str(N_FEATURES))) + ".csv"
     approx_errors_df = pd.DataFrame(approx_errors_list)
     approx_errors_df.to_csv(os.path.join("results", save_name), index=False)
+
+    # Plot -----------------------------------------------------------------------------------------
+
+    # Full -----------------------------------------------------------------------------------------
+    data = pd.read_csv(os.path.join("results", save_name))
+    shapley_interaction_order = str(data["shapley_interaction_order"][0])
+    data = data[data['full'].isin(['full', np.NAN])].drop(columns=['full'])
+    data = data[data['n_absolute'] > 0]
+
+    data = data.rename(columns={"interaction_index": "Interaction Index", "approx_type": "Method"})
+
+    plot_title = ' '.join(("Order:", shapley_interaction_order, "(only constant)"))
+    ax = sns.lineplot(
+        x='n_absolute',
+        y="approx_value",
+        hue="Interaction Index",
+        style='Method',
+        data=data
+    )
+    ax.set(
+        ylabel='Approximation Error',
+        xlabel='N Samples (absolute)',
+        title=plot_title
+    )
+    plt.show()
+
+    # Not Full -------------------------------------------------------------------------------------
+    data = pd.read_csv(os.path.join("results", save_name))
+    shapley_interaction_order = str(data["shapley_interaction_order"][0])
+    data = data[data['full'].isin(['not full', np.NAN])].drop(columns=['full'])
+    data = data[data['n_absolute'] > 0]
+
+    data = data.rename(columns={"interaction_index": "Interaction Index", "approx_type": "Method"})
+
+    plot_title = ' '.join(("Order:", shapley_interaction_order, "(with sampling)"))
+    ax = sns.lineplot(
+        x='n_absolute',
+        y="approx_value",
+        hue="Interaction Index",
+        style='Method',
+        data=data
+    )
+    ax.set(
+        ylabel='Approximation Error',
+        xlabel='N Samples (absolute)',
+        title=plot_title
+    )
+    plt.show()
