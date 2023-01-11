@@ -1,3 +1,5 @@
+import abc
+
 import numpy as np
 import copy
 from transformers import pipeline
@@ -9,55 +11,6 @@ from scipy.special import binom
 from shapx.base import powerset
 from collections import Counter
 
-def customSparseLinearModel(n,weighting_scheme,n_interactions,max_interaction_size=-1):
-    if max_interaction_size == -1:
-        max_interaction_size = n
-    n_interactions_per_order = {}
-    interaction_ratios = np.zeros(n+1)
-    weighting_ratios = np.zeros(n+1)
-
-    allowed_interaction_sizes = np.arange(1,max_interaction_size+1)
-
-    for k in allowed_interaction_sizes:
-        if weighting_scheme=="uniform":
-            weighting_ratios += 1
-        if weighting_scheme=="center":
-            weighting_ratios += binom(n,k)
-        if weighting_scheme=="tail":
-            weighting_ratios += 1/binom(n,k)
-    weighting_ratios /= np.sum(weighting_ratios)
-
-
-    interaction_sizes = random.choices(allowed_interaction_sizes, k=n_interactions,
-                                          weights=weighting_ratios[allowed_interaction_sizes])
-
-    n_interactions_per_order = Counter(interaction_sizes)
-    game = SparseLinearModel(n=n,n_interactions_per_order=n_interactions_per_order)
-    return game
-
-
-def customSparseLinearModel_old(n,weighting_scheme,sparsity,max_interaction=-1):
-    if max_interaction == -1:
-        max_interaction = n
-    n_interactions_per_order = {}
-    interaction_ratios = np.zeros(n+1)
-    normalizing_factor = 0
-
-    for k in range(1,max_interaction):
-        if weighting_scheme=="uniform":
-            interaction_ratios[k] = sparsity
-            normalizing_factor += 1
-        if weighting_scheme=="center":
-            normalizing_factor += binom(n,k)
-            interaction_ratios[k] = binom(n,k)*sparsity
-        if weighting_scheme=="tail":
-            normalizing_factor += 1/binom(n,k)
-            interaction_ratios[k] = sparsity/binom(n,k)
-    interaction_ratios /= normalizing_factor
-    for k in range(1,n):
-        n_interactions_per_order[k] = int(binom(n,k)*interaction_ratios[k])
-    game = SparseLinearModel(n=n,n_interactions_per_order=n_interactions_per_order)
-    return game
 
 def _sigmoid(x):
     return 1 / (1 + math.exp(-x))
@@ -142,9 +95,9 @@ class SparseLinearModel:
         except AttributeError:
             self._highest_interaction_order = 0
 
-    def exact_values(self, gamma_matrix, min_order, max_order):  # TODO add exact_values computation for the SII, STI and SFI
+    def exact_values(self, gamma_matrix, min_order, max_order):
         results = {}
-        for s in range(min_order,max_order+1):
+        for s in range(min_order, max_order+1):
             results[s] = np.zeros(np.repeat(self.n, s))
             for subset, weight in self.interaction_weights.items():
                 q = len(subset)
@@ -172,6 +125,27 @@ class SparseLinearModel:
         x = np.zeros(self.n)
         x[list(S)] = 1
         return self.call(x)
+
+
+class ParameterizedSparseLinearModel(SparseLinearModel):
+
+    def __init__(self, n, weighting_scheme, n_interactions, max_interaction_size=-1):
+        if max_interaction_size == -1:
+            max_interaction_size = n
+        weighting_ratios = np.zeros(n + 1)
+        allowed_interaction_sizes = np.arange(1, max_interaction_size + 1)
+        for k in allowed_interaction_sizes:
+            if weighting_scheme == "uniform":
+                weighting_ratios += 1
+            if weighting_scheme == "center":
+                weighting_ratios += binom(n, k)
+            if weighting_scheme == "tail":
+                weighting_ratios += 1 / binom(n, k)
+        weighting_ratios /= np.sum(weighting_ratios)
+        interaction_sizes = random.choices(allowed_interaction_sizes, k=n_interactions,
+                                           weights=weighting_ratios[allowed_interaction_sizes])
+        n_interactions_per_order = Counter(interaction_sizes)
+        super().__init__(n=n, n_interactions_per_order=n_interactions_per_order)
 
 
 class SimpleGame:
