@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # Game Function ----------------------------------------------------------------------------
     N_FEATURES: int = 10
     game = ParameterizedSparseLinearModel(
-        n=N_FEATURES, weighting_scheme="uniform", n_interactions=20)#, max_interaction_size=5)
+        n=N_FEATURES, weighting_scheme="uniform", n_interactions=20, max_interaction_size=5)
     # game = SparseLinearModel(
     #    n=N_FEATURES, n_interactions_per_order={1: 10, 2: 20, 3: 20}, n_non_important_features=0)
     game_name = game.game_name
