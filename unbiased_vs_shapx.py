@@ -34,7 +34,7 @@ class GameWrapper:
         return self.__call__(np.zeros((1, self.players), dtype=bool))[0]
 
 
-def get_S_and_game(budget, num_players, weight_vector, N, pairing):
+def get_S_and_game(budget, num_players, weight_vector, N, pairing, game_fun):
     complete_subsets, incomplete_subsets, budget = determine_complete_subsets(
         budget=budget, n=num_players, s=1, q=weight_vector)
 
@@ -80,7 +80,7 @@ def compare_unbiasedksh_and_shapx(
     weights = get_weights(num_players)
     weight_vector = (np.asarray([0] + [*weights] + [0])) / sum(weights)
     all_subsets_to_sample, game_values = get_S_and_game(
-        budget, num_players, weight_vector, N, pairing)
+        budget, num_players, weight_vector, N, pairing, game_fun)
 
     # Interaction estimator
     interaction_estimator = ShapleyInteractionsEstimator(
