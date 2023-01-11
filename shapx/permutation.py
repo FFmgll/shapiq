@@ -3,22 +3,24 @@ import numpy as np
 from .base import BaseShapleyInteractions, powerset
 from scipy.special import binom
 
+
 class PermutationSampling(BaseShapleyInteractions):
 
     def __init__(self, N, max_order, min_order=1, interaction_type="SII"):
         super().__init__(N, max_order, min_order)
         self.interaction_type = interaction_type
 
-    def permutation_approximation(self, game, budget):
+    def approximate_with_budget(self, game, budget, pairing: bool = False):
         results = np.zeros(np.repeat(self.n, self.s))
         counts = np.zeros(np.repeat(self.n, self.s))
         val_empty = game({})
         val_full = game(self.N)
         if self.interaction_type == "SII":
             iteration_cost = (self.n-1)*2**self.s
-        if self.interaction_type == "STI":
-            iteration_cost = binom(self.n,self.s)*2**self.s
-        #iteration_cost = 0
+        elif self.interaction_type == "STI":
+            iteration_cost = binom(self.n, self.s)*2**self.s
+        else:
+            raise ValueError("Wrong Interaction Type")
         n_permutations = 0
         self.counter = 0
         while budget >= iteration_cost:
