@@ -3,3 +3,4 @@ venv_small
 venv
 *.csv
 data
+plots

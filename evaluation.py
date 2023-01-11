@@ -13,7 +13,7 @@ STD_ALPHA = 0.10
 
 def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
                       x_min: int = None, y_max: float = None, y_min: float = None, shading: str = None, plot_title: str = None,
-                      x_label: str = None, y_label: str = None):
+                      x_label: str = None, y_label: str = None, save_name: str = None):
 
     grouping = ['n_absolute']
 
@@ -97,12 +97,17 @@ def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
     axis.set_ylabel(y_label)
     axis.set_ylim((y_min, y_max))
     plt.tight_layout()
+    if save_name is not None:
+        plt.savefig(save_name)
     plt.show()
 
 
 if __name__ == "__main__":
-    file_name = "results/synth_neural_network_11.csv"
+    file_name = "results/synth_neural_network_14.csv"
     plot_title = r"Synthetic Neural Network ($l = 2$, $n = 14$, $g = 20$)"
-    draw_approx_curve(df=pd.read_csv(file_name), figsize=(6, 5), x_min=250, shading="quant",
+    save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
+    draw_approx_curve(df=pd.read_csv(file_name), figsize=(6, 5), x_min=2000, shading="quant",
                       plot_title=plot_title,
-                      y_label="average squared distance", x_label="model evaluations")
+                      y_max=0.00044,
+                      y_label="average squared distance", x_label="model evaluations",
+                      save_name=save_name)

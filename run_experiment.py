@@ -38,9 +38,9 @@ if __name__ == "__main__":
     for iteration in range(1, ITERATIONS + 1):
         print(f"Starting Iteration {iteration}")
 
-        N_FEATURES: int = 11
-        game = SyntheticNeuralNetwork(n=N_FEATURES)
-        # game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=20, max_interaction_size=5)
+        N_FEATURES: int = 12
+        # game = SyntheticNeuralNetwork(n=N_FEATURES)
+        game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=20, max_interaction_size=6, min_interaction_size=3)
         # game = SparseLinearModel(n=N_FEATURES, n_interactions_per_order={1: 10, 2: 20, 3: 20}, n_non_important_features=0)
         game_name = game.game_name
         game_fun = game.set_call

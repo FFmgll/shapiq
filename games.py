@@ -162,7 +162,8 @@ class SparseLinearModel:
 
 class ParameterizedSparseLinearModel(SparseLinearModel):
 
-    def __init__(self, n, weighting_scheme, n_interactions, max_interaction_size=-1,min_interaction_size=1):
+    def __init__(self, n, weighting_scheme, n_interactions,
+                 max_interaction_size=-1, min_interaction_size=1):
         if max_interaction_size == -1:
             max_interaction_size = n
         weighting_ratios = np.zeros(n + 1)
