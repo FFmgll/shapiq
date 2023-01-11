@@ -179,13 +179,16 @@ class SyntheticNeuralNetwork:
         self.bias_1 = np.random.normal(loc=0, scale=1, size=100)
         self.weights_2 = np.random.normal(loc=0, scale=0.5, size=(10, 100))
         self.bias_2 = np.random.normal(loc=0, scale=1)
-        self.weights_3 = np.random.normal(loc=0, scale=0.05, size=(1, 10))
+        self.weights_3 = np.random.normal(loc=0, scale=0.05, size=(10, 10))
         self.bias_3 = np.random.normal(loc=0, scale=0.05)
+        self.weights_4 = np.random.normal(loc=0, scale=0.05, size=(1, 10))
+        self.bias_4 = np.random.normal(loc=0, scale=0.05)
 
     def call(self, x):
         x = np.maximum(0, np.dot(self.weights_1, x) + self.bias_1)
         x = np.maximum(0, np.dot(self.weights_2, x) + self.bias_2)
-        x = np.dot(self.weights_3, x) + self.bias_3
+        x = np.maximum(0, np.dot(self.weights_3, x) + self.bias_3)
+        x = np.dot(self.weights_4, x) + self.bias_4
         y = _sigmoid(x)
         return y
 
