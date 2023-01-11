@@ -6,6 +6,7 @@ import numpy as np
 import setuptools
 from scipy.special import binom
 
+
 from .base import BaseShapleyInteractions, powerset, determine_complete_subsets
 
 
@@ -21,44 +22,42 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
     def constant_budget(self):
         rslt = 0
         for t in range(self.s):
-            rslt += 2*binom(self.n,t)
+            rslt += 2 * binom(self.n, t)
         return rslt
 
     def compute_interactions_from_budget(self, game, budget, pairing=True, sampling_kernel="ksh", sampling_only=False):
         """Computes the Shapley interactions given a game and budget."""
-        q,p = self._init_sampling_weights(sampling_kernel)
-        budget = int(budget-self.constant_budget())
+        q, p = self._init_sampling_weights(sampling_kernel)
+
         self.last_sampling_params = {}
         self.last_sampling_params["q"] = q
         self.last_sampling_params["p"] = p
 
         result_complete = self.init_results()
-        result_constant = self._constant_c(game)
 
         if budget > 0:
-
             if sampling_only:
                 complete_subsets = []
                 incomplete_subsets = list(range(self.s, self.n - self.s + 1))
             else:
                 complete_subsets, incomplete_subsets, budget = determine_complete_subsets(self.s, self.n, budget, p)
 
-            # Calculate the subsets at the edge completely and store it away
-            for k in complete_subsets:
-                result_complete = self.update_results(result_complete, self._compute_interactions_complete_k(game, k))
-            constant_complete = self.update_results(result_constant, result_complete)
-            self.last_const_complete = copy.deepcopy(self._smooth_with_epsilon(constant_complete))
-            result_complete = copy.deepcopy(constant_complete)
-
-            # Update weights for samplings for the remaining subsets
-            #subset_weight_vector = np.asarray(
-            #    [q[subset_size] for subset_size in incomplete_subsets])
-
-            # Split the budget in case of pairing
-            if pairing:
-                total_budget = 2 * int(budget / 2)
+            if int(self.constant_budget()) <= budget:
+                result_constant = self._constant_c(game)
+                for k in complete_subsets:
+                    result_complete = self.update_results(result_complete, self._compute_interactions_complete_k(game, k))
+                constant_complete = self.update_results(result_constant, result_complete)
+                self.last_const_complete = copy.deepcopy(self._smooth_with_epsilon(constant_complete))
+                result_complete = copy.deepcopy(constant_complete)
+                budget -= int(self.constant_budget())
             else:
-                total_budget = budget
+                self.last_const_complete = copy.deepcopy(self._smooth_with_epsilon(result_complete))
+                result_complete = copy.deepcopy(result_complete)
+
+            if pairing:
+                budget = 2 * int(budget / 2)
+            else:
+                budget = budget
 
             self.last_sampling_params["sampling_budget"] = budget
             # Sample the remaining budget and update the approximations
@@ -68,7 +67,7 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                 subset_weight_vector = np.zeros(self.n+1)
                 n_samples = 0
                 for k in incomplete_subsets:
-                    subset_weight_vector[k] = q[k]*binom(self.n,k)
+                    subset_weight_vector[k] = q[k]*binom(self.n, k)
                 subset_weight_vector /= np.sum(subset_weight_vector[incomplete_subsets])
                 subset_sizes_samples = random.choices(incomplete_subsets, k=budget, weights=subset_weight_vector[incomplete_subsets])
                 r = np.zeros(self.n+1)
