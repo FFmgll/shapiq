@@ -193,3 +193,6 @@ class SyntheticNeuralNetwork:
         x = np.zeros(self.n)
         x[list(S)] = 1
         return self.call(x) - self.call(np.zeros(self.n))
+
+if __name__ == "__main__":
+    game = NLPGame("Cool Movie Bro")
