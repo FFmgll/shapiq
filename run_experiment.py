@@ -24,22 +24,23 @@ if __name__ == "__main__":
     MAX_BUDGET: int = 10_000
     BUDGET_STEPS = np.arange(0, 1.05, 0.05)
     SHAPLEY_INTERACTION_ORDERS: list = [2]
-    ITERATIONS = 5
+    ITERATIONS = 1
     SAMPLING_KERNELS = ["faith"]
     PAIRWISE_LIST = [False]
 
     approx_errors_list = []
+
+    # Game Function ----------------------------------------------------------------------------
+    N_FEATURES: int = 10
+    game = ParameterizedSparseLinearModel(
+        n=N_FEATURES, weighting_scheme="uniform", n_interactions=20, max_interaction_size=5)
+    # game = SparseLinearModel(
+    #    n=N_FEATURES, n_interactions_per_order={1: 10, 2: 20, 3: 20}, n_non_important_features=0)
+    game_name = game.game_name
+    game_fun = game.set_call
+
     for iteration in range(1, ITERATIONS + 1):
         print(f"Starting Iteration {iteration}")
-
-        # Game Function ----------------------------------------------------------------------------
-        N_FEATURES: int = 10
-        game = ParameterizedSparseLinearModel(
-            n=N_FEATURES, weighting_scheme="uniform", n_interactions=20, max_interaction_size=5)
-        #game = SparseLinearModel(
-        #    n=N_FEATURES, n_interactions_per_order={1: 10, 2: 20, 3: 20}, n_non_important_features=0)
-        game_name = game.game_name
-        game_fun = game.set_call
 
         for SHAPLEY_INTERACTION_ORDER in SHAPLEY_INTERACTION_ORDERS:
             print(f"Interaction Order: {SHAPLEY_INTERACTION_ORDER}")
@@ -139,7 +140,7 @@ if __name__ == "__main__":
                                     game_fun, budget,  pairing=pairwise,
                                     sampling_kernel=sampling_kernel, sampling_only=False)
                             )
-                            results['_'.join((run_id3, 'not full'))] = approximated_interactions
+                            results['_'.join((run_id3, 'not full'))] = copy.deepcopy(approximated_interactions)
                             approximation_errors['_'.join((run_id3, 'not full'))] = get_approximation_error(
                                 approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                 exact=exact_values

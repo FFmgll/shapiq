@@ -136,11 +136,11 @@ class ParameterizedSparseLinearModel(SparseLinearModel):
         allowed_interaction_sizes = np.arange(1, max_interaction_size + 1)
         for k in allowed_interaction_sizes:
             if weighting_scheme == "uniform":
-                weighting_ratios += 1
+                weighting_ratios[k] += 1
             if weighting_scheme == "center":
-                weighting_ratios += binom(n, k)
+                weighting_ratios[k] += binom(n, k)
             if weighting_scheme == "tail":
-                weighting_ratios += 1 / binom(n, k)
+                weighting_ratios[k] += 1 / binom(n, k)
         weighting_ratios /= np.sum(weighting_ratios)
         interaction_sizes = random.choices(allowed_interaction_sizes, k=n_interactions,
                                            weights=weighting_ratios[allowed_interaction_sizes])
