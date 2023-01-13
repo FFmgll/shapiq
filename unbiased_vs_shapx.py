@@ -1,7 +1,10 @@
+import copy
+
 import numpy as np
 import itertools
 import random
 
+from evaluation import draw_shapley_values
 from shapx.interaction import ShapleyInteractionsEstimator
 from shapx.base import determine_complete_subsets
 from shapx.unbiased import CovertRegression, calculate_uksh_from_samples, get_weights
@@ -82,15 +85,32 @@ def compare_unbiasedksh_and_shapx(
     all_subsets_to_sample, game_values = get_S_and_game(
         budget, num_players, weight_vector, N, pairing, game_fun)
 
-    # Interaction estimator
+    # SII
+    interaction_estimator = ShapleyInteractionsEstimator(
+        N=N, max_order=1, min_order=1, interaction_type='SII'
+    )
+    values_shapx_sfi = interaction_estimator.compute_from_samples(
+        S_list=all_subsets_to_sample, game_values=game_values,
+        val_empty=empty_value, val_full=full_value)
+    values_shapx_sii = copy.deepcopy(values_shapx_sfi[1])
+
+    # STI
+    interaction_estimator = ShapleyInteractionsEstimator(
+        N=N, max_order=1, min_order=1, interaction_type='STI'
+    )
+    values_shapx_sfi = interaction_estimator.compute_from_samples(
+        S_list=all_subsets_to_sample, game_values=game_values,
+        val_empty=empty_value, val_full=full_value)
+    values_shapx_sti = copy.deepcopy(values_shapx_sfi[1])
+
+    # SFI
     interaction_estimator = ShapleyInteractionsEstimator(
         N=N, max_order=1, min_order=1, interaction_type='SFI'
     )
-
-    values_shapx = interaction_estimator.compute_from_samples(
+    values_shapx_sfi = interaction_estimator.compute_from_samples(
         S_list=all_subsets_to_sample, game_values=game_values,
         val_empty=empty_value, val_full=full_value)
-    values_shapx = values_shapx[1]
+    values_shapx_sfi = copy.deepcopy(values_shapx_sfi[1])
 
     values_ksh = calculate_uksh_from_samples(
         game=GameWrapper(game),
@@ -107,20 +127,29 @@ def compare_unbiasedksh_and_shapx(
         paired_sampling=pairing
     )
 
-    values_shapx = [round(value, 5) for value in values_shapx]
+    values_shapx_sii = [round(value, 5) for value in values_shapx_sii]
+    values_shapx_sti = [round(value, 5) for value in values_shapx_sti]
+    values_shapx_sfi = [round(value, 5) for value in values_shapx_sfi]
     values_ksh = [round(value, 5) for value in values_ksh]
     u_ksh_covert = [round(value, 5) for value in u_ksh_covert]
 
-    print(f"shapx-defined-samples: {values_shapx} (n: {budget})\n"
+    print(f"shapx-defined-samples (sii): {values_shapx_sii} (n: {budget})\n"
+          f"shapx-defined-samples (sti): {values_shapx_sti} (n: {budget})\n"
+          f"shapx-defined-samples (sfi): {values_shapx_sfi} (n: {budget})\n"
           f"u-ksh-defined-samples: {values_ksh} (n: {budget})\n"
           f"u-ksh-sampling:        {u_ksh_covert} (n: {u_ksh_sample_size})")
 
-    return values_ksh, values_shapx
+    return values_ksh, values_shapx_sii, values_shapx_sti, values_shapx_sfi, u_ksh_covert
 
 
 if __name__ == "__main__":
-    from games import SparseLinearModel
-    game = SparseLinearModel(n=10, n_interactions_per_order={1:7}, n_non_important_features=3)
+    from games import SparseLinearModel, NLPLookupGame
+    game = NLPLookupGame(n=14, sentence_id=4161)
     game_fun = game.set_call
-    values_ksh, values_shapx = compare_unbiasedksh_and_shapx(
-        game=game, budget=500, pairing=True, u_ksh_sample_size=500)
+    values_ksh, values_shapx_sii, values_shapx_sti, values_shapx_sfi, u_ksh_covert = compare_unbiasedksh_and_shapx(
+        game=game, budget=2**14, pairing=True, u_ksh_sample_size=2**14)
+    feature_names = game.input_sentence.split(" ")
+    print(feature_names)
+    draw_shapley_values(
+        values_ksh, u_ksh_covert, values_shapx_sii, values_shapx_sti, values_shapx_sfi,
+        labels=feature_names, figsize=(8, 3.5), save_name="plots/shap_comparison.png")
