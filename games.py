@@ -1,7 +1,10 @@
 import abc
+import os
 
 import numpy as np
 import copy
+
+import pandas as pd
 from transformers import pipeline
 import random
 import math
@@ -54,6 +57,41 @@ class NLPGame:
         token_subset = self.tokenized_input[list(S)]
         x_text = self.tokenizer.decode(token_subset)
         return self.call(x_text)[0]
+
+
+class NLPLookupGame:
+
+    def __init__(self, n: int, sentence_id: int = None, used_ids: set = None):
+        if used_ids is None:
+            used_ids = set()
+        self.used_ids = used_ids
+        if sentence_id is None:
+            files = os.listdir(os.path.join("data", "nlp_values", str(n)))
+            files = list(set(files) - used_ids)
+            if len(files) == 0:
+                files = os.listdir(os.path.join("data", "nlp_values", str(n)))
+                self.used_ids = set()
+            sentence_id = random.choice(files)
+            sentence_id = int(sentence_id.split(".")[0])
+        self.used_ids.add(str(sentence_id) + ".csv")
+        data_path = os.path.join("data", "nlp_values", str(n), str(sentence_id) + ".csv")
+        self.df = pd.read_csv(data_path)
+        self.game_name = "language_model"
+        self.n = n
+        whole_data = pd.read_csv(os.path.join("data", "simplified_imdb.csv"))
+        self.input_sentence = str(whole_data[whole_data["id"] == sentence_id]["text"].values[0])
+
+        self.storage = {}
+        for _, sample in self.df.iterrows():
+            S_id = sample["set"]
+            value = float(sample["value"])
+            self.storage[S_id] = value
+
+    def set_call(self, S):
+        S_id = 's'
+        for player in sorted(S):
+            S_id += str(player)
+        return self.storage[S_id]
 
 
 class SparseLinearModel:
@@ -234,5 +272,6 @@ class SyntheticNeuralNetwork:
         x[list(S)] = 1
         return self.call(x) - self.call(np.zeros(self.n))
 
+
 if __name__ == "__main__":
-    game = NLPGame("Cool Movie Bro")
+    pass

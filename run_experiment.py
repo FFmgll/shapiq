@@ -11,7 +11,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from evaluation import draw_approx_curve
-from games import ParameterizedSparseLinearModel, SparseLinearModel, SyntheticNeuralNetwork
+from games import ParameterizedSparseLinearModel, SparseLinearModel, SyntheticNeuralNetwork, \
+    NLPLookupGame
 from shapx import ShapleyInteractionsEstimator, PermutationSampling
 from shapx.regression import RegressionEstimator
 
@@ -24,24 +25,28 @@ def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 
 
 if __name__ == "__main__":
 
-    MAX_BUDGET: int = 10_000
+    MAX_BUDGET: int = 2**14
     BUDGET_STEPS = np.arange(0, 1.05, 0.05)
-    SHAPLEY_INTERACTION_ORDERS: list = [2]
-    ITERATIONS = 10
-    INNER_ITERATIONS = 3
+    SHAPLEY_INTERACTION_ORDERS: list = [4]
+    ITERATIONS = 3
+    INNER_ITERATIONS = 2
     SAMPLING_KERNELS = ["faith"]
     PAIRWISE_LIST = [False]
 
     approx_errors_list = []
 
+    used_ids = set()  # for NLPLookupgame
+
     # Game Function --------------------------------------------------------------------------------
     for iteration in range(1, ITERATIONS + 1):
         print(f"Starting Iteration {iteration}")
 
-        N_FEATURES: int = 12
+        N_FEATURES: int = 14
         # game = SyntheticNeuralNetwork(n=N_FEATURES)
-        game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=20, max_interaction_size=6, min_interaction_size=3)
+        #game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=20, max_interaction_size=6, min_interaction_size=3)
         # game = SparseLinearModel(n=N_FEATURES, n_interactions_per_order={1: 10, 2: 20, 3: 20}, n_non_important_features=0)
+        game = NLPLookupGame(n=N_FEATURES)
+        used_ids = game.used_ids
         game_name = game.game_name
         game_fun = game.set_call
 
@@ -179,7 +184,7 @@ if __name__ == "__main__":
                     approx_errors_list.append(run_dict)
 
     # Store All ------------------------------------------------------------------------------------
-    save_name = "_".join((game_name, str(N_FEATURES))) + ".csv"
+    save_name = "_".join((game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER))) + ".csv"
     approx_errors_df = pd.DataFrame(approx_errors_list)
     approx_errors_df.to_csv(os.path.join("results", save_name), index=False)
 
