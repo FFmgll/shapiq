@@ -1,19 +1,22 @@
 import pandas as pd
 
+from matplotlib.colors import to_rgb
+from matplotlib.ticker import FixedLocator
 import matplotlib.pyplot as plt
 import numpy as np
 
 #  COLORS = {'SII': '#058ED9', 'STI': '#2D3142', 'SFI': '#CC2D35'}  # online inclusive colors
 COLORS = {'SII': '#44cfcb', 'STI': '#7d53de', 'SFI': '#ef27a6'}
+BACKGROUND_COLOR = '#f8f8f8'
 MARKERS = {'SII': 'X', 'STI': 'o', 'SFI': "s"}
-LABELS = {'SII': 'Shapley Interaction', 'STI': 'Shapley Taylor', 'SFI': "Shapley Faith"}
+LABELS = {'SII': 'Shapley Interaction', 'STI': 'Shapley Taylor', 'SFI': "Shapley Faith", 'U-KSH': "Unbiased Kernel Shap", "U-KSH-R": "Unbiased Kernel Shap (replacement)"}
 
 STD_ALPHA = 0.10
 
 
 def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
                       x_min: int = None, y_max: float = None, y_min: float = None, shading: str = None, plot_title: str = None,
-                      x_label: str = None, y_label: str = None, save_name: str = None):
+                      x_label: str = None, y_label: str = None, save_name: str = None, max_computation_cost_n: int = None):
 
     grouping = ['n_absolute']
 
@@ -96,6 +99,69 @@ def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
     axis.set_xlabel(x_label)
     axis.set_ylabel(y_label)
     axis.set_ylim((y_min, y_max))
+    axis.set_facecolor(BACKGROUND_COLOR)
+
+    axis.axhline(y=0, ls="dotted", c="gray")
+
+    if max_computation_cost_n is not None:
+        max_computation_cost = 2 ** max_computation_cost_n
+        labels = [item.get_text() for item in axis.get_xticklabels()]
+        for i in range(len(labels)):
+            value = int(labels[i])
+            labels[i] = labels[i] + "\n" + str(round(value / max_computation_cost, 2))
+        axis.set_xticklabels(labels)
+
+    plt.tight_layout()
+    if save_name is not None:
+        plt.savefig(save_name)
+    plt.show()
+
+
+def draw_shapley_values(uksh, uksh_rep, sii, sti, sfi, labels: list = None, figsize: tuple = (10, 10), save_name: str = None, plot_title: str = None):
+    x = np.arange(len(uksh))
+
+    alpha = 0.3
+
+    colors = {index: tuple([*to_rgb(color)] + [alpha]) for index, color in COLORS.items()}
+    colors_edge = {index: tuple([*to_rgb(color)] + [1.]) for index, color in COLORS.items()}
+
+    n_approximators = 4
+    width = 0.18
+
+    fig, axis = plt.subplots(1, 1, figsize=figsize)
+
+    title_1 = "$\\bf{Method}$"
+    axis.plot([], [], label=title_1, color="none")
+
+    axis.bar(x - width * 2, uksh, width * 0.7, label=LABELS["U-KSH"], fill=False, hatch='//////')
+    axis.bar(x - width, uksh_rep, width * 0.7, label=LABELS["U-KSH-R"], fill=False, hatch='//////', edgecolor="gray")
+    axis.bar(x, sii, width * 0.7, label=LABELS["SII"], color=colors["SII"], edgecolor=colors_edge["SII"])
+    axis.bar(x + width, sti, width * 0.7, label=LABELS["STI"], color=colors["STI"], edgecolor=colors_edge["STI"])
+    axis.bar(x + width * 2, sfi, width * 0.7, label=LABELS["SFI"], color=colors["SFI"], edgecolor=colors_edge["SFI"])
+
+    axis.set_xlim(0 - width * 2 - 0.2, len(x) - 1 + width * 2 + 0.2)
+
+    if labels is not None:
+        axis.xaxis.set_major_locator(FixedLocator(x))
+        #axis.set_xticks(ticks=x)
+        #axis.set_xticklabels(labels)
+        #axis.xaxis.set_ticks(x)
+        print(len(labels))
+        axis.xaxis.set_ticklabels(labels)
+
+    leg = axis.legend(loc='best')
+    for item, label in zip(leg.legendHandles, leg.texts):
+        if label._text == title_1:
+            width = item.get_window_extent(fig.canvas.get_renderer()).width
+            label.set_ha('left')
+            label.set_position((-2 * width, 0))
+
+    plt.title(plot_title)
+    axis.set_xlabel("Features")
+    axis.set_ylabel("Shapley Values")
+    axis.set_facecolor(BACKGROUND_COLOR)
+
+    #axis.axhline(y=0, ls="solid", c="gray", linewidth=1., alpha=0.5)
     plt.tight_layout()
     if save_name is not None:
         plt.savefig(save_name)
@@ -103,11 +169,25 @@ def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
 
 
 if __name__ == "__main__":
-    file_name = "results/synth_neural_network_14.csv"
-    plot_title = r"Synthetic Neural Network ($l = 2$, $n = 14$, $g = 20$)"
-    save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
-    draw_approx_curve(df=pd.read_csv(file_name), figsize=(6, 5), x_min=2000, shading="quant",
-                      plot_title=plot_title,
-                      y_max=0.00044,
-                      y_label="average squared distance", x_label="model evaluations",
-                      save_name=save_name)
+    if False:
+        file_name = "results/synth_neural_network_14.csv"
+        plot_title = r"Synth. Neural Network ($l = 2$, $n = 14$, $g = 20$)"
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
+        draw_approx_curve(df=pd.read_csv(file_name), figsize=(6, 5), x_min=2000, shading="quant",
+                          plot_title=plot_title,
+                          y_max=0.00033,
+                          y_label="average squared distance", x_label="model evaluations",
+                          save_name=save_name)
+
+    if True:
+        file_name = "results/language_model_14_4.csv"
+        plot_title = r"Language Model ($l = 2$, $n = 14$, $g = 10$)"
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
+        draw_approx_curve(df=pd.read_csv(file_name), figsize=(6, 5), x_min=2500, shading="quant",
+                          plot_title=plot_title,
+                          y_max=0.5, y_min=-0.01,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          save_name=save_name)
+
