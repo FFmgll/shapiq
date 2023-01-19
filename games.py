@@ -251,7 +251,7 @@ class SyntheticNeuralNetwork:
     Output: classification score between 0 and 1
     """
 
-    def __init__(self, n):
+    def __init__(self, n,set_zero=True):
         self.n = n
         self.game_name = "synth_neural_network"
         self.weights_1 = np.random.normal(loc=0, scale=10, size=(100, self.n))
@@ -262,6 +262,9 @@ class SyntheticNeuralNetwork:
         self.bias_3 = np.random.normal(loc=0, scale=0.05)
         self.weights_4 = np.random.normal(loc=0, scale=0.05, size=(1, 10))
         self.bias_4 = np.random.normal(loc=0, scale=0.05)
+        self.empty_val = 0
+        if set_zero:
+            self.empty_val = self.set_call({})
 
     def call(self, x):
         x = np.maximum(0, np.dot(self.weights_1, x) + self.bias_1)
@@ -274,8 +277,7 @@ class SyntheticNeuralNetwork:
     def set_call(self, S):
         x = np.zeros(self.n)
         x[list(S)] = 1
-        return self.call(x) - self.call(np.zeros(self.n))
-
+        return self.call(x) - self.empty_val
 
 if __name__ == "__main__":
     pass
