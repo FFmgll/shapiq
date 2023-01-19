@@ -190,21 +190,41 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
             S_list: typing.List[set],
             game_values: typing.List,
             val_empty,
-            val_full
+            val_full,
+            epsilon_correction = True
     ):
         subsets = copy.deepcopy(S_list)
         S_game_mapping = {tuple(S): game_value for S, game_value in zip(subsets, game_values)}
         S_game_mapping[tuple(set())] = val_empty
         S_game_mapping[tuple(self.N)] = val_full
-        subsets.append(set())
-        subsets.append(set(self.N))
+        #subsets.append(set())
+        #subsets.append(set(self.N))
+        #complete_subsets.append(0)
+        #complete_subsets.append(self.n)
 
+        baseline = (val_full-val_empty)/self.n
+
+        h = 0
+        for k in range(1,self.n):
+            h += 1/k
+
+        epsilons = self.init_results()
+        results_sample = self.init_results()
         results = self.init_results()
         for T in subsets:
             game_eval = S_game_mapping[tuple(T)]
             t = len(T)
-            for S in powerset(self.N, self.min_order, self.s):
+            for S in powerset(self.N,self.min_order,self.s):
                 s_t = len(set(S).intersection(T))
-                results[len(S)][S] += game_eval * self.weights[t, s_t]
+                results_sample[len(S)][S] += 2*h*game_eval*(s_t - t/self.n)
+                epsilons[len(S)][S] += 2*h*val_empty*(s_t-t/self.n)
+
+        results_sample[len(S)] = results_sample[len(S)]/len(subsets)
+        epsilons[len(S)] = epsilons[len(S)]/len(subsets)
+        results[len(S)] = baseline + results_sample[len(S)]
+
+        if epsilon_correction:
+            results[len(S)] = results[len(S)] - epsilons[len(S)]
+
         result_out = copy.deepcopy(self._smooth_with_epsilon(results))
         return result_out

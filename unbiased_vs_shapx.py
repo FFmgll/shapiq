@@ -38,8 +38,9 @@ class GameWrapper:
 
 
 def get_S_and_game(budget, num_players, weight_vector, N, pairing, game_fun):
-    complete_subsets, incomplete_subsets, budget = determine_complete_subsets(
-        budget=budget, n=num_players, s=1, q=weight_vector)
+    complete_subsets = []
+    incomplete_subsets = list(N)
+    incomplete_subsets.remove(0)
 
     all_subsets_to_sample = []
 
@@ -52,14 +53,14 @@ def get_S_and_game(budget, num_players, weight_vector, N, pairing, game_fun):
     remaining_weight = weight_vector[incomplete_subsets] / sum(weight_vector[incomplete_subsets])
 
     if len(incomplete_subsets) > 0:
-        sampled_subsets = set()
+        sampled_subsets = []
         while len(sampled_subsets) < budget:
             subset_size = random.choices(incomplete_subsets, remaining_weight, k=1)
             ids = np.random.choice(num_players, size=subset_size, replace=False)
-            sampled_subsets.add(tuple(sorted(ids)))
+            sampled_subsets.append(tuple(sorted(ids)))
             if pairing:
                 if len(sampled_subsets) < budget:
-                    sampled_subsets.add(tuple(N - set(ids)))
+                    sampled_subsets.append(tuple(N - set(ids)))
         for subset in sampled_subsets:
             all_subsets_to_sample.append(set(subset))
 
@@ -143,13 +144,27 @@ def compare_unbiasedksh_and_shapx(
 
 
 if __name__ == "__main__":
-    from games import SparseLinearModel, NLPLookupGame
-    game = NLPLookupGame(n=14, sentence_id=4161)
+    from games import SparseLinearModel, NLPLookupGame, SyntheticNeuralNetwork, NLPGame, ParameterizedSparseLinearModel
+    from interaction import ShapleyInteractionsEstimator
+    n = 14
+    #game = NLPLookupGame(n=n, sentence_id=172, set_zero=True)
+    #game = NLPGame("I like this movie a lot")
+    game = SyntheticNeuralNetwork(n=n,set_zero=True)
+    #game = ParameterizedSparseLinearModel(n=n,weighting_scheme="uniform",n_interactions=20,max_interaction_size=5)
+    N = set(range(n))
+
+    shap = ShapleyInteractionsEstimator(N,1,1,"SII")
+    #exact_values = game.exact_values(shap.weights,1,1)[1]
+    exact_values = shap.compute_interactions_complete(game.set_call)[1]
     game_fun = game.set_call
     values_ksh, values_shapx_sii, values_shapx_sti, values_shapx_sfi, u_ksh_covert = compare_unbiasedksh_and_shapx(
-        game=game, budget=2**14, pairing=True, u_ksh_sample_size=2**14)
-    feature_names = game.input_sentence.split(" ")
-    print(feature_names)
-    draw_shapley_values(
-        values_ksh, u_ksh_covert, values_shapx_sii, values_shapx_sti, values_shapx_sfi,
-        labels=feature_names, figsize=(8, 3.5), save_name="plots/shap_comparison.png")
+        game=game, budget=500, pairing=False, u_ksh_sample_size=2000)
+    #feature_names = game.input_sentence.split(" ")
+    #print(feature_names)
+    #draw_shapley_values(
+    #    values_ksh, u_ksh_covert, values_shapx_sii, values_shapx_sti, values_shapx_sfi,
+     #   labels=feature_names, figsize=(8, 3.5), save_name="plots/shap_comparison.png")
+
+    print(np.sum((exact_values-values_ksh)**2))
+    print(np.sum((exact_values-values_shapx_sii)**2))
+    assert values_ksh==values_shapx_sii

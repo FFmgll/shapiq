@@ -82,6 +82,15 @@ def calculate_exact_result_no_std(A, b, total):
         A_inv_vec -
         A_inv_one * (np.sum(A_inv_vec, axis=0, keepdims=True) - total)
         / np.sum(A_inv_one))
+
+    A_inv = np.linalg.solve(A, np.identity(num_players))
+    one_A_inv = np.dot(np.ones((1,num_players)),A_inv)
+    one_A_inv_b = np.dot(one_A_inv,b)
+    one_A_inv_b_nu = one_A_inv_b - total
+    one_A_inv_one = np.dot(one_A_inv,np.ones((num_players,1)))
+    diff = b - np.dot(np.ones((num_players,1)),one_A_inv_b_nu/one_A_inv_one)[:,0]
+    values_new = np.dot(A_inv,diff)
+
     return values
 
 
@@ -113,18 +122,23 @@ def calculate_uksh_from_samples(game, game_values, S_list):
         all_S[i, subset] = 1
 
     game_values = np.asarray(game_values)
+    counter = 1
     for it in range(n_samples):
 
         S = all_S[it * batch_size: batch_size + it * batch_size, :]
         game_eval = game_values[it * batch_size: batch_size + it * batch_size] - null
 
-        subset_length = int(np.sum(S))
-        proba = np.asarray(weights[subset_length-1] * (1 / comb(num_players, subset_length))) * S
-        b_sample = (proba.T * game_eval[:, np.newaxis].T).T
+        #subset_length = int(np.sum(S))
+        #proba = np.asarray(weights[subset_length-1] * (1 / comb(num_players, subset_length))) * S
+        #b_sample = (proba.T * game_eval[:, np.newaxis].T).T
 
-        b += b_sample
+        #b += b_sample
 
-        values = calculate_exact_result_no_std(A, b.flatten(), total)
+        b[S] += game_eval
+        b_input = b/counter
+        counter += 1
+
+        values = calculate_exact_result_no_std(A, b_input.flatten(), total)
 
     return values
 
