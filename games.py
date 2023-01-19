@@ -61,7 +61,7 @@ class NLPGame:
 
 class NLPLookupGame:
 
-    def __init__(self, n: int, sentence_id: int = None, used_ids: set = None):
+    def __init__(self, n: int, sentence_id: int = None, used_ids: set = None, set_zero: bool = False):
         if used_ids is None:
             used_ids = set()
         self.used_ids = used_ids
@@ -87,11 +87,15 @@ class NLPLookupGame:
             value = float(sample["value"])
             self.storage[S_id] = value
 
+        self.empty_value = 0
+        if set_zero:
+            self.empty_value = self.set_call(set())
+
     def set_call(self, S):
         S_id = 's'
         for player in sorted(S):
             S_id += str(player)
-        return self.storage[S_id]
+        return self.storage[S_id] - self.empty_value
 
 
 class SparseLinearModel:
