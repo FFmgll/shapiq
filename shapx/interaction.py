@@ -18,6 +18,8 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
             for k in range(max(0, self.s + t - self.n), min(self.s, t) + 1):
                 self.weights[t, k] = (-1) ** (self.s - k) * self._kernel_m(t - k)
         self.last_const_complete = self.init_results()
+        self.inf = 1000000
+
 
     def constant_budget(self):
         rslt = 0
@@ -38,21 +40,21 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
         if budget > 0:
             if sampling_only:
                 complete_subsets = []
-                incomplete_subsets = list(range(self.s, self.n - self.s + 1))
+                incomplete_subsets = list(range(self.n + 1))
             else:
-                complete_subsets, incomplete_subsets, budget = determine_complete_subsets(self.s, self.n, budget, p)
+                complete_subsets, incomplete_subsets, budget = determine_complete_subsets(0, self.n, budget, p)
 
-            if int(self.constant_budget()) <= budget:
-                result_constant = self._constant_c(game)
-                for k in complete_subsets:
-                    result_complete = self.update_results(result_complete, self._compute_interactions_complete_k(game, k))
-                constant_complete = self.update_results(result_constant, result_complete)
-                self.last_const_complete = copy.deepcopy(self._smooth_with_epsilon(constant_complete))
-                result_complete = copy.deepcopy(constant_complete)
-                budget -= int(self.constant_budget())
-            else:
-                self.last_const_complete = copy.deepcopy(self._smooth_with_epsilon(result_complete))
-                result_complete = copy.deepcopy(result_complete)
+            #if int(self.constant_budget()) <= budget:
+            #result_constant = self._constant_c(game)
+            for k in complete_subsets:
+                result_complete = self.update_results(result_complete, self._compute_interactions_complete_k(game, k))
+            #constant_complete = self.update_results(result_constant, result_complete)
+            #self.last_const_complete = copy.deepcopy(self._smooth_with_epsilon(constant_complete))
+            #result_complete = copy.deepcopy(constant_complete)
+            #budget -= int(self.constant_budget())
+            #else:
+            #    self.last_const_complete = copy.deepcopy(self._smooth_with_epsilon(result_complete))
+            #    result_complete = copy.deepcopy(result_complete)
 
             if pairing:
                 budget = 2 * int(budget / 2)
@@ -149,16 +151,24 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
     def _init_sampling_weights(self, sampling_kernel):
         q = np.zeros(self.n + 1)
         p = np.zeros(self.n + 1)
-        for t in range(self.s, self.n - self.s + 1):
+        #for t in range(self.s, self.n - self.s + 1):
+        #    q[t],p[t] = self._kernel_q(t, sampling_kernel)
+        for t in range(self.n+1):
             q[t],p[t] = self._kernel_q(t, sampling_kernel)
         return q,p
 
     def _kernel_q(self, t, sampling_kernel):
         if sampling_kernel == "ksh":
-            size_weight = np.math.factorial(self.n - t - self.s) * np.math.factorial(t - self.s) / np.math.factorial(
+            if t>=self.s and t<=self.n-self.s:
+                size_weight = np.math.factorial(self.n - t - self.s) * np.math.factorial(t - self.s) / np.math.factorial(
                 self.n - self.s + 1)
+            else:
+                size_weight = self.inf
         if sampling_kernel == "faith":
-            size_weight = np.math.factorial(self.n - t - 1) * np.math.factorial(t - 1) / np.math.factorial(self.n - 1)
+            if t>=1 and t<=self.n-1:
+                size_weight = np.math.factorial(self.n - t - 1) * np.math.factorial(t - 1) / np.math.factorial(self.n - 1)
+            else:
+                size_weight = self.inf
         if sampling_kernel == "unif-size":
             size_weight = 1
         if sampling_kernel == "unif-set":
