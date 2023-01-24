@@ -10,7 +10,7 @@ class PermutationSampling(BaseShapleyInteractions):
         super().__init__(N, max_order, min_order)
         self.interaction_type = interaction_type
 
-    def approximate_with_budget(self, game, budget, pairing: bool = False):
+    def approximate_with_budget(self, game, budget, pairing: bool = False, interaction_subsets={}):
         results = np.zeros(np.repeat(self.n, self.s))
         counts = np.zeros(np.repeat(self.n, self.s))
         val_empty = game({})
@@ -30,7 +30,7 @@ class PermutationSampling(BaseShapleyInteractions):
             vals[-1] = val_full
             pi = np.arange(self.n)
             np.random.shuffle(pi)
-            result_it, counts_it = self._estimate_from_permutation(game, pi)
+            result_it, counts_it = self._estimate_from_permutation(game, pi,interaction_subsets)
             results += result_it
             counts_it = np.clip(counts_it, a_min=0, a_max=1, out=counts_it)
             counts += counts_it
@@ -45,17 +45,22 @@ class PermutationSampling(BaseShapleyInteractions):
         results_out = self._smooth_with_epsilon(results_out)
         return results_out
 
-    def _estimate_from_permutation(self, game, pi):
+    def _estimate_from_permutation(self, game, pi, interaction_subsets):
         results = np.zeros(np.repeat(self.n, self.s))
         counts = np.zeros(np.repeat(self.n, self.s))
         if self.interaction_type == "SII":
-            results, counts = self._estimate_from_permutation_sii(game, pi, results, counts)
+            results, counts = self._estimate_from_permutation_sii(game, pi, results, counts, interaction_subsets)
         if self.interaction_type == "STI":
-            results, counts = self._estimate_from_permutation_sti(game, pi, results, counts)
+            results, counts = self._estimate_from_permutation_sti(game, pi, results, counts, interaction_subsets)
         return results, counts
 
-    def _estimate_from_permutation_sti(self, game, pi, results, counts):
-        for S in powerset(self.N, self.s, self.s):
+    def _estimate_from_permutation_sti(self, game, pi, results, counts, interaction_subsets={}):
+        if len(interaction_subsets) == 0:
+            interaction_subsets_iterator = powerset(self.N,self.s,self.s)
+        else:
+            interaction_subsets_iterator = interaction_subsets
+
+        for S in interaction_subsets_iterator:
             idx = 0
             for i in pi:
                 if i in S:
@@ -70,13 +75,14 @@ class PermutationSampling(BaseShapleyInteractions):
                 self.counter += 1
         return results, counts
 
-    def _estimate_from_permutation_sii(self, game, pi, results, counts):
+    def _estimate_from_permutation_sii(self, game, pi, results, counts, interaction_subsets={}):
         for k in range(self.n - self.s + 1):
             S = tuple(sorted(pi[k:k + self.s]))
-            subset = tuple(pi[:k])
-            for L in powerset(S):
-                l = len(L)
-                results[S] += game(subset + L) * (-1) ** (self.s - l)
-                counts[S] += 1
-                self.counter += 1
+            if len(interaction_subsets) == 0 or S in interaction_subsets.keys():
+                subset = tuple(pi[:k])
+                for L in powerset(S):
+                    l = len(L)
+                    results[S] += game(subset + L) * (-1) ** (self.s - l)
+                    counts[S] += 1
+                    self.counter += 1
         return results, counts

@@ -27,8 +27,8 @@ if __name__ == "__main__":
 
     MAX_BUDGET: int = 2**14
     BUDGET_STEPS = np.arange(0, 1.05, 0.05)
-    SHAPLEY_INTERACTION_ORDERS: list = [2]
-    SHAPLEY_INTERACTION_SUBSETS: dict = {}
+    SHAPLEY_INTERACTION_ORDERS: list = [5]
+    SHAPLEY_INTERACTION_SUBSETS: dict = {tuple({2,3,4,5,6})}
     ITERATIONS = 1
     INNER_ITERATIONS = 1
     SAMPLING_KERNELS = ["faith"]
@@ -107,7 +107,8 @@ if __name__ == "__main__":
                             shapx_exact_values[interaction_type] = copy.deepcopy(
                                 game.exact_values(gamma_matrix=approximator.weights,
                                                   min_order=SHAPLEY_INTERACTION_ORDER,
-                                                  max_order=SHAPLEY_INTERACTION_ORDER)
+                                                  max_order=SHAPLEY_INTERACTION_ORDER,
+                                                  interaction_subsets=SHAPLEY_INTERACTION_SUBSETS)
                             )
                         else:
                             print("Exact values are calculated via brute force.")
@@ -135,10 +136,10 @@ if __name__ == "__main__":
                         baseline_run_id = '_'.join((run_id1, 'baseline'))
                         baseline_approximator = baselines[interaction_type]
                         approximated_interactions = copy.deepcopy(
-                            baseline_approximator.approximate_with_budget(game_fun, budget))
+                            baseline_approximator.approximate_with_budget(game_fun, budget,interaction_subsets=SHAPLEY_INTERACTION_SUBSETS))
                         approximation_errors[baseline_run_id] = get_approximation_error(
                             approx=approximated_interactions,
-                            exact=exact_values
+                            exact=exact_values,
                         )
                         pbar.update(budget)
 
@@ -196,6 +197,6 @@ if __name__ == "__main__":
     plot_title = " ".join((game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER)))
     draw_approx_curve(df=pd.read_csv(os.path.join("results", save_name)),
                       figsize=(6, 5), x_min=int(0.01 * biggest_budget), shading="quant",
-                      #y_min=0, y_max=1,
+                      y_min=0, y_max=1,
                       plot_title=plot_title,
                       y_label="average squared distance", x_label="model evaluations")

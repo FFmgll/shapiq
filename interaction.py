@@ -19,15 +19,15 @@ def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 
 
 if __name__ == "__main__":
     # Game Function ----------------------------------------------------------------------------------------------------
-    #game = NLPGame(input_text="I like the movie no more")
+    game = NLPGame(input_text="I like the movie no more")
     #game = SparseLinearModel(n=30, n_interactions_per_order={1: 6, 2: 6, 3:6, 4:20, 5:3,6:5,7:3}, n_non_important_features=0)
-    n_features = 10
-    game = ParameterizedSparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=1000)
+    #n_features = 10
+    #game = ParameterizedSparseLinearModel(n_features, weighting_scheme="uniform", n_interactions=1000)
     #game = SyntheticNeuralNetwork(n=12)
     #game = SimpleGame(n=10)
-    N_FEATURES: int = 70
-    game = ParameterizedSparseLinearModel(
-        n=N_FEATURES, weighting_scheme="uniform", n_interactions=2000)
+    #N_FEATURES: int = 15
+    #game = ParameterizedSparseLinearModel(
+    #    n=N_FEATURES, weighting_scheme="uniform", n_interactions=30,max_interaction_size=5)
 
     game_name = game.game_name
     # Game Parameters --------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     budget_cap = 20000
     max_budget = min(total_subsets,budget_cap)
     #max_budget = 2000
-    budgets = np.arange(0.1,1.01,0.05)
+    budgets = np.arange(0.05,1.01,0.05)
     #budgets = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
     budgets = [int(budget * max_budget) for budget in budgets]
     budgets = np.array(budgets)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     shapx_sampling = {}
     approximation_errors = {}
-    sampling_kernels = ["unif-size","unif-set","ksh","faith"]
+    sampling_kernels = ["ksh"]
     pairwise_list = [False]#[True, False]
 
     # All interactions
@@ -91,7 +91,7 @@ if __name__ == "__main__":
             shapx_exact[shapx.interaction_type] = shapx.compute_interactions_complete(game_fun)
     print("Exact computations finished")
 
-    ITERATIONS = 0
+    ITERATIONS = 1
 
     approx_errors_list = []
 
@@ -162,3 +162,23 @@ if __name__ == "__main__":
     approx_errors_df = pd.DataFrame(approx_errors_list)
     approx_errors_df.to_csv(game_name+"_"+str(n)+"_"+str(sampling_only)+".csv", index=False)
 
+
+    from shapx.base import powerset
+
+    def delta(game_fun,T,S):
+        rslt = 0
+        s = len(S)
+        for L in powerset(S):
+            rslt += (-1)**(s-len(L))*game_fun(tuple(T)+L)
+        return rslt
+
+    test = {}
+    for k in range(3):
+        test[k] = np.zeros(np.repeat(n, k))
+    for S in powerset(N,1,1):
+        test[1][S] = delta(game_fun,{},S)
+
+
+
+
+    #test2 = np.sum(test[1])+ np.sum(shapx_sampling['STI_4000_0.12_approximation_ksh_not-paired_not full'][2])
