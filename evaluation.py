@@ -2,6 +2,7 @@ import pandas as pd
 
 from matplotlib.colors import to_rgb
 from matplotlib.ticker import FixedLocator
+from matplotlib.ticker import FormatStrFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -9,14 +10,16 @@ import numpy as np
 COLORS = {'SII': '#44cfcb', 'STI': '#7d53de', 'SFI': '#ef27a6'}
 BACKGROUND_COLOR = '#f8f8f8'
 MARKERS = {'SII': 'X', 'STI': 'o', 'SFI': "s"}
-LABELS = {'SII': 'Shapley Interaction', 'STI': 'Shapley Taylor', 'SFI': "Shapley Faith", 'U-KSH': "Unbiased Kernel Shap", "U-KSH-R": "Unbiased Kernel Shap (replacement)"}
+LABELS = {'SII': 'Shapley Interaction', 'STI': 'Shapley Taylor', 'SFI': "Faith-SHAP", 'U-KSH': "Unbiased Kernel Shap", "U-KSH-R": "Unbiased Kernel Shap (replacement)"}
 
 STD_ALPHA = 0.10
 
 
-def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
-                      x_min: int = None, y_max: float = None, y_min: float = None, shading: str = None, plot_title: str = None,
-                      x_label: str = None, y_label: str = None, save_name: str = None, max_computation_cost_n: int = None):
+def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10), error_type: str = "approx_value",
+                      mean_aggregation: bool = False, shading: bool = True,
+                      x_min: int = None, y_max: float = None, y_min: float = None, plot_title: str = None,
+                      x_label: str = None, y_label: str = None, save_name: str = None, max_computation_cost_n: int = None,
+                      horizontal_line_y: float = None):
 
     grouping = ['n_absolute']
 
@@ -34,34 +37,36 @@ def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
             subset = subset[subset["n_absolute"] >= x_min]
 
         if 'inner_iteration' in subset.columns:
-            subset = subset.groupby(by=['iteration', 'n_absolute', "Method"]).aggregate({"approx_value": "mean"}).reset_index()
+            subset = subset.groupby(by=['iteration', 'n_absolute', "Method"]).aggregate({error_type: "mean"}).reset_index()
 
         baseline = subset[subset["Method"] == "baseline"]
         approximation = subset[subset["Method"] == "approximation"]
 
-        baseline_mean = baseline.groupby(by=grouping)["approx_value"].quantile(q=0.5).reset_index()
-        baseline_quantile_l = baseline.groupby(by=grouping)["approx_value"].quantile(q=0.25).reset_index()["approx_value"]
-        baseline_quantile_h = baseline.groupby(by=grouping)["approx_value"].quantile(q=0.75).reset_index()["approx_value"]
-        approximation_mean = approximation.groupby(by=grouping)["approx_value"].quantile(q=0.5).reset_index()
-        approximation_quantile_l = approximation.groupby(by=grouping)["approx_value"].quantile(q=0.25).reset_index()["approx_value"]
-        approximation_quantile_h = approximation.groupby(by=grouping)["approx_value"].quantile(q=0.75).reset_index()["approx_value"]
+        if not mean_aggregation == "median":
+            baseline_mean = baseline.groupby(by=grouping)[error_type].quantile(q=0.5).reset_index()
+            baseline_quantile_l = baseline.groupby(by=grouping)[error_type].quantile(q=0.25).reset_index()[error_type]
+            baseline_quantile_h = baseline.groupby(by=grouping)[error_type].quantile(q=0.75).reset_index()[error_type]
+            approximation_mean = approximation.groupby(by=grouping)[error_type].quantile(q=0.5).reset_index()
+            approximation_quantile_l = approximation.groupby(by=grouping)[error_type].quantile(q=0.25).reset_index()[error_type]
+            approximation_quantile_h = approximation.groupby(by=grouping)[error_type].quantile(q=0.75).reset_index()[error_type]
+        else:
+            baseline_mean = baseline.groupby(by=grouping)[error_type].mean().reset_index()
+            approximation_mean = approximation.groupby(by=grouping)[error_type].mean().reset_index()
+            approximation_std = approximation.groupby(by=grouping)[error_type].std().reset_index()
+            approximation_quantile_l = approximation_mean[error_type] - approximation_std[error_type]
+            approximation_quantile_h = approximation_mean[error_type] + approximation_std[error_type]
+            baseline_std = baseline.groupby(by=grouping)[error_type].std().reset_index()
+            baseline_quantile_l = baseline_mean[error_type] - baseline_std[error_type]
+            baseline_quantile_h = baseline_mean[error_type] + baseline_std[error_type]
 
-        if shading == 'std':
-            approximation_std = approximation.groupby(by=grouping)["approx_value"].std().reset_index()
-            approximation_quantile_l = approximation_mean["approx_value"] - approximation_std["approx_value"]
-            approximation_quantile_h = approximation_mean["approx_value"] + approximation_std["approx_value"]
-            baseline_std = baseline.groupby(by=grouping)["approx_value"].std().reset_index()
-            baseline_quantile_l = baseline_mean["approx_value"] - baseline_std["approx_value"]
-            baseline_quantile_h = baseline_mean["approx_value"] + baseline_std["approx_value"]
-
-        axis.plot(baseline_mean["n_absolute"], baseline_mean["approx_value"],
+        axis.plot(baseline_mean["n_absolute"], baseline_mean[error_type],
                   ls="dashed", color=COLORS[interaction_index], linewidth=1,
                   marker=MARKERS[interaction_index], mec="white")
-        axis.plot(approximation_mean["n_absolute"], approximation_mean["approx_value"],
+        axis.plot(approximation_mean["n_absolute"], approximation_mean[error_type],
                   ls="solid", color=COLORS[interaction_index], linewidth=1,
                   marker=MARKERS[interaction_index], mec="white")
 
-        if shading is not None:
+        if shading:
             try:
                 axis.fill_between(approximation_mean["n_absolute"],
                                   approximation_quantile_l,
@@ -101,7 +106,8 @@ def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
     axis.set_ylim((y_min, y_max))
     axis.set_facecolor(BACKGROUND_COLOR)
 
-    axis.axhline(y=0, ls="dotted", c="gray")
+    if horizontal_line_y is not None:
+        axis.axhline(y=horizontal_line_y, ls="dotted", c="gray")
 
     if max_computation_cost_n is not None:
         max_computation_cost = 2 ** max_computation_cost_n
@@ -110,6 +116,11 @@ def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10),
             value = int(labels[i])
             labels[i] = labels[i] + "\n" + str(round(value / max_computation_cost, 2))
         axis.set_xticklabels(labels)
+
+    if error_type == "approx_value":
+        plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    else:
+        axis.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
     plt.tight_layout()
     if save_name is not None:
@@ -169,25 +180,337 @@ def draw_shapley_values(uksh, uksh_rep, sii, sti, sfi, labels: list = None, figs
 
 
 if __name__ == "__main__":
-    if False:
-        file_name = "results/synth_neural_network_14.csv"
-        plot_title = r"Synth. Neural Network ($l = 2$, $n = 14$, $g = 20$)"
-        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
-        draw_approx_curve(df=pd.read_csv(file_name), figsize=(6, 5), x_min=2000, shading="quant",
+    fig_size = (6, 5)
+
+    if True:  # Language Model --------------------------------------------------------------------
+        file_name = "results/42/1674598314.9941766_language_model_14_4.csv"
+        plot_title = r"Language Model ($l = 4$, $d = 14$, $g = 2$)"
+        x_min = 2_000
+        df = pd.read_csv(file_name)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_avgmse" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
                           plot_title=plot_title,
-                          y_max=0.00033,
-                          y_label="average squared distance", x_label="model evaluations",
+                          y_max=0.4, y_min=-0.01,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
                           save_name=save_name)
 
-    if True:
-        file_name = "results/language_model_14_4.csv"
-        plot_title = r"Language Model ($l = 2$, $n = 14$, $g = 10$)"
-        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
-        draw_approx_curve(df=pd.read_csv(file_name), figsize=(6, 5), x_min=2500, shading="quant",
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        df.rename(columns={"kendal_tau": "approx_value"}, inplace=True)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_kendaltau" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
                           plot_title=plot_title,
-                          y_max=0.5, y_min=-0.01,
-                          y_label="average squared distance",
+                          # y_max=0.0049, y_min=-0.0001,
+                          y_label="kendalls tau",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_precision" + ".png"
+        draw_approx_curve(df=df, error_type="precision_at_k",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          # y_max=1.01, y_min=-0.01,
+                          y_label="precision at 10",
                           x_label="model evaluations (absolute, relative)",
                           max_computation_cost_n=14,
                           save_name=save_name)
 
+        file_name = "results/finished/language_model_14_3.csv"
+        plot_title = r"Language Model ($l = 3$, $d = 14$, $g = 50$)"
+        x_min = 2_000
+        df = pd.read_csv(file_name)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_avgmse" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          # y_max=0.019, y_min=-0.001,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        df.rename(columns={"kendal_tau": "approx_value"}, inplace=True)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_kendaltau" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          # y_max=0.0049, y_min=-0.0001,
+                          y_label="kendalls tau",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_precision" + ".png"
+        draw_approx_curve(df=df, error_type="precision_at_k",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          # y_max=1.01, y_min=-0.01,
+                          y_label="precision at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          save_name=save_name)
+
+        file_name = "results/finished/language_model_14_2.csv"
+        plot_title = r"Language Model ($l = 2$, $d = 14$, $g = 50$)"
+        x_min = 2_000
+
+        df = pd.read_csv(file_name)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_avgmse" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          #y_max=0.019, y_min=-0.001,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        df.rename(columns={"kendal_tau": "approx_value"}, inplace=True)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_kendaltau" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          #y_max=0.0049, y_min=-0.0001,
+                          y_label="kendalls tau",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_precision" + ".png"
+        draw_approx_curve(df=df, error_type="precision_at_k",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          #y_max=1.01, y_min=-0.01,
+                          y_label="precision at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          save_name=save_name)
+
+        file_name = "results/finished/language_model_14_1.csv"
+        plot_title = r"Language Model, Shapley Values ($l = 1$, $d = 14$, $g = 7$)"
+        x_min = 2_000
+        df = pd.read_csv(file_name)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_avgmse" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+    if False:
+        file_name = "results/finished/tabular_game_14_2.csv"
+        plot_title = r"Adult Gradient Boosted Tree ($l = 2$, $d = 14$, $g = 50$)"
+        x_min = 2_000
+
+        df = pd.read_csv(file_name)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_avgmse" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_max=0.00004, y_min=-0.000001,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        df.rename(columns={"kendal_tau": "approx_value"}, inplace=True)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_kendaltau" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          #y_max=0.0049, y_min=-0.0001,
+                          y_label="kendalls tau",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name).drop(columns=["approx_value"])
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_precision" + ".png"
+        draw_approx_curve(df=df, error_type="precision_at_k",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          #y_max=1.01, y_min=-0.01,
+                          y_label="precision at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          save_name=save_name)
+
+
+        file_name = "results/finished/tabular_game_14_1.csv"
+        plot_title = r"Adult Gradient Boosted Tree, Shapley Values ($l = 1$, $d = 14$, $g = 7$)"
+        x_min = 2_000
+        df = pd.read_csv(file_name)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_avgmse" + ".png"
+        draw_approx_curve(df=df, error_type="approx_value",
+                          figsize=fig_size, x_min=x_min, mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_max=0.000008, y_min=-0.000001,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=14,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+    if False:
+        file_name = "results/tabular_game_14_2.csv"
+        plot_title = r"Adult Gradient Boosted Tree ($l = 2$, $n = 14$, $g = 50$)"
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
+        n = 14
+        df = pd.read_csv(file_name)
+        #df = df[df['interaction_index'] == 'SII']
+        draw_approx_curve(df=df, figsize=(6, 5), x_min=2500,
+                          mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          y_label="average squared distance", x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=n,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df_1 = df.drop(columns=["approx_value"])
+        df_1 = df_1.rename(columns={"approx_value_at_k": "approx_value"})
+        draw_approx_curve(df=df_1, figsize=(6, 5), x_min=2500,
+                          mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          y_label="squared distance at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=n,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        file_name = "results/gradien_boosted_14_2.csv"
+        plot_title = r"Adult Gradient Boosted Tree ($l = 2$, $n = 14$, $g = 3$)"
+        df = pd.read_csv(file_name)
+        df_1 = df.drop(columns=["approx_value"])
+        df_1 = df_1.rename(columns={"kendal_tau": "approx_value"})
+        draw_approx_curve(df=df_1, figsize=(6, 5), x_min=2500,
+                          mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_label="kendall tau",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=n,
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        file_name = "results/tabular_game_14_2.csv"
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_precision" + ".png"
+        draw_approx_curve(df=df, error_type="precision_at_k",
+                          figsize=(6, 5), x_min=2500, mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          y_max=1.01, y_min=-0.01,
+                          y_label="precision at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          max_computation_cost_n=n,
+                          save_name=save_name)
+
+    if False:
+        file_name = "results/sparse_linear_model_70_2.csv"
+        plot_title = r"Sparse Linear Model (low interaction) ($l = 2$, $n = 70$, $g = 1$)"
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
+        n = 70
+        df = pd.read_csv(file_name)
+        draw_approx_curve(df=df, figsize=(6, 5), x_min=2500,
+                          mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name)
+        df_1 = df.drop(columns=["approx_value"])
+        df_1 = df_1.rename(columns={"approx_value_at_k": "approx_value"})
+        draw_approx_curve(df=df_1, figsize=(6, 5), x_min=2500,
+                          mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_label="squared distance at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name)
+        df_1 = df.drop(columns=["approx_value"])
+        df_1 = df_1.rename(columns={"kendal_tau": "approx_value"})
+        draw_approx_curve(df=df_1, figsize=(6, 5), x_min=2500,
+                          mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_label="kendall tau",
+                          x_label="model evaluations (absolute, relative)",
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        file_name = "results/sparse_linear_model_70_2.csv"
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_precision" + ".png"
+        draw_approx_curve(df=df, error_type="precision_at_k",
+                          figsize=(6, 5), x_min=2500, mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          y_max=1.01, y_min=-0.01,
+                          y_label="precision at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          save_name=save_name)
+
+    if False:
+        file_name = "results/dense_linear_70_2.csv"
+        plot_title = r"Sparse Linear Model (high interaction) ($l = 2$, $n = 70$, $g = 1$)"
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + ".png"
+        n = 70
+        df = pd.read_csv(file_name)
+        # df = df[df['interaction_index'] == 'SII']
+        draw_approx_curve(df=df, figsize=(6, 5), x_min=5000,
+                          mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_label="average squared distance",
+                          x_label="model evaluations (absolute, relative)",
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+
+        df = pd.read_csv(file_name)
+        df_1 = df.drop(columns=["approx_value"])
+        df_1 = df_1.rename(columns={"approx_value_at_k": "approx_value"})
+        draw_approx_curve(df=df_1, figsize=(6, 5), x_min=5000,
+                          mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_max=10, y_min=-1,
+                          y_label="squared distance at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          horizontal_line_y=0.,
+                          save_name=save_name)
+        df = pd.read_csv(file_name)
+        df_1 = df.drop(columns=["approx_value"])
+        df_1 = df_1.rename(columns={"kendal_tau": "approx_value"})
+        draw_approx_curve(df=df_1, figsize=(6, 5), x_min=5000,
+                          mean_aggregation=True, shading=True,
+                          plot_title=plot_title,
+                          y_label="kendall tau",
+                          x_label="model evaluations (absolute, relative)",
+                          save_name=save_name)
+
+        file_name = "results/dense_linear_70_2.csv"
+        df = pd.read_csv(file_name)
+        save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_precision" + ".png"
+        draw_approx_curve(df=df, error_type="precision_at_k",
+                          figsize=(6, 5), x_min=5000, mean_aggregation=True, shading=False,
+                          plot_title=plot_title,
+                          y_max=1.01, y_min=-0.01,
+                          y_label="precision at 10",
+                          x_label="model evaluations (absolute, relative)",
+                          save_name=save_name)
