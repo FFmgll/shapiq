@@ -100,11 +100,9 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
 
                 if self.average_std < self.std_threshold*self.epsilon_sampling:
                     result_complete = self.update_results(result_complete, result_sample_mean)
-                    print("sampling used")
                     self.last_sampling_params["sampling"] = True
                 else:
                     self.last_sampling_params["sampling"] = False
-                    print("sampling not used")
 
             self.last_sampling_params["complete"] = result_complete
         #results_out = self._smooth_with_epsilon(result_complete)
