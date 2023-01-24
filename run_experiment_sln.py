@@ -71,7 +71,7 @@ def save_values(save_path: str, values: list):
 if __name__ == "__main__":
     # Parameters to change -------------------------------------------------------------------------
     SHAPLEY_INTERACTION_ORDER = 2
-    MIN_MAX_INTERACTIONS = [(0, 5), (5, 10), (10, 15), (20, 25), (25, 20)]
+    MIN_MAX_INTERACTIONS = [(0, 5), (5, 10), (10, 15)]#, (20, 25)]
 
     ITERATIONS = 2
 
@@ -101,7 +101,8 @@ if __name__ == "__main__":
         print(f"Starting Iteration {iteration}")
 
         for MIN_INTERACTIONS, MAX_INTERACTIONS in MIN_MAX_INTERACTIONS:
-            print(f"SLN with {N_NON_IMPORTANT_FEATURE_RATIO * 100}% unimportant features")
+            print(f"SLN with {N_NON_IMPORTANT_FEATURE_RATIO * 100}% unimportant features and "
+                  f"min {MIN_INTERACTIONS}, max {MAX_INTERACTIONS} interactions")
             game = ParameterizedSparseLinearModel(
                 n=N_FEATURES,
                 weighting_scheme="uniform",
@@ -256,20 +257,28 @@ if __name__ == "__main__":
                                     exact=exact_values
                                 )
                                 precisions[
-                                    '_'.join((run_id3, 'const and sampling'))] = get_precision_at_k(
+                                    '_'.join((run_id3, 'const and sampling',
+                                        str(approximator.last_sampling_params["sampling"]),
+                                        str(approximator.last_sampling_params["average_std"]),
+                                        str(approximator.last_sampling_params["std_threshold"])))] = get_precision_at_k(
                                     approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                     exact=exact_values,
                                     k=K
                                 )
                                 approximation_errors_at_k[
-                                    '_'.join((run_id3,
-                                              'const and sampling'))] = get_approximation_error_at_k(
+                                    '_'.join((run_id3, 'const and sampling',
+                                        str(approximator.last_sampling_params["sampling"]),
+                                        str(approximator.last_sampling_params["average_std"]),
+                                        str(approximator.last_sampling_params["std_threshold"])))] = get_approximation_error_at_k(
                                     approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                     exact=exact_values,
                                     k=K
                                 )
                                 kendal_taus[
-                                    '_'.join((run_id3, 'const and sampling'))] = get_kendals_tau(
+                                    '_'.join((run_id3, 'const and sampling',
+                                        str(approximator.last_sampling_params["sampling"]),
+                                        str(approximator.last_sampling_params["average_std"]),
+                                        str(approximator.last_sampling_params["std_threshold"])))] = get_kendals_tau(
                                     approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                     exact=exact_values
                                 )

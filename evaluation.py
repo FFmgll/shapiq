@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     if True:  # Language Model --------------------------------------------------------------------
         file_name = "results/42/1674598314.9941766_language_model_14_4.csv"
-        plot_title = r"Language Model ($l = 4$, $d = 14$, $g = 2$)"
+        plot_title = r"Language Model ($l = 4$, $d = 14$, $g = 6$)"
         x_min = 2_000
         df = pd.read_csv(file_name)
         save_name = "plots/" + file_name.split("/")[-1].split(".")[0] + "_avgmse" + ".png"
