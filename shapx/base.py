@@ -28,6 +28,12 @@ class BaseShapleyInteractions:
             results[k] = np.zeros(np.repeat(self.n, k))
         return results
 
+    def init_results_selected(self,interaction_subset):
+        results = {}
+        for S in interaction_subsets:
+            print(S)
+
+
     @staticmethod
     def update_results(current, update):
         rslt = {}
