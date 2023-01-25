@@ -9,6 +9,7 @@ from scipy.special import binom
 from scipy.stats import kendalltau
 from tqdm import tqdm
 
+from evaluation import draw_approx_curve
 from games import ParameterizedSparseLinearModel
 from shapx import ShapleyInteractionsEstimator, PermutationSampling
 from shapx.regression import RegressionEstimator
@@ -71,14 +72,14 @@ def save_values(save_path: str, values: list):
 if __name__ == "__main__":
     # Parameters to change -------------------------------------------------------------------------
     SHAPLEY_INTERACTION_ORDER = 2
-    MIN_MAX_INTERACTIONS = [(0, 5), (5, 10), (10, 15)]#, (20, 25)]
+    MIN_MAX_INTERACTIONS = [(0, 10), (0, 15), (0, 20), (0, 25), (0, 30)]
 
-    ITERATIONS = 2
+    ITERATIONS = 100
 
     # Parameters to probably not change ------------------------------------------------------------
     N_FEATURES: int = 30
-    N_INTERACTIONS: int = 100
-    N_NON_IMPORTANT_FEATURE_RATIO = 0.2
+    N_INTERACTIONS: int = 100  # and also a second run to 100 and a third ggf. to 500 (cluster first)
+    N_NON_IMPORTANT_FEATURE_RATIO = 0.
 
     # Parameters to not change Fabian plz ... nothing will work if you do ... just leave it be -----
     # This goes for everything down there
@@ -120,7 +121,8 @@ if __name__ == "__main__":
             # SAVE paths ---------------------------------------------------------------------------
             SAVE_NAME = '_'.join((
                 START_TIME, game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER),
-                str(N_NON_IMPORTANT_FEATURE_RATIO), str(MIN_INTERACTIONS), str(MAX_INTERACTIONS)
+                str(N_INTERACTIONS), str(N_NON_IMPORTANT_FEATURE_RATIO),
+                str(MIN_INTERACTIONS), str(MAX_INTERACTIONS)
             )) + ".csv"
             SAVE_PATH = os.path.join(RESULT_DIR, SAVE_NAME)
 
@@ -320,3 +322,11 @@ if __name__ == "__main__":
 
                 save_values(SAVE_PATH, approx_errors_list)
                 approx_errors_list = []
+
+
+        # Plot run ---------------------------------------------------------------------------------
+        plot_title = "error"
+        draw_approx_curve(df=pd.read_csv(SAVE_PATH),
+                          figsize=(6, 5), shading=False,
+                          plot_title=plot_title,
+                          y_label="average squared distance", x_label="model evaluations")
