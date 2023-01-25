@@ -18,8 +18,8 @@ from shapx.regression import RegressionEstimator
 
 
 def get_approximation_error_one(approx: np.ndarray, exact: np.ndarray, interaction, eps: float = 0.00001) -> float:
-    error = np.sum(np.abs(approx[interaction] - exact[interaction]))
-    error = 0. if error < eps else error  # For pretty printing ...
+    error = np.abs(approx[interaction] - exact[interaction])
+    #error = 0. if error < eps else error  # For pretty printing ...
     return error
 
 
@@ -27,9 +27,9 @@ if __name__ == "__main__":
     time_id = str(int(time.time()))
     MAX_BUDGET: int = 2**14
     BUDGET_STEPS = np.arange(0, 1.05, 0.05)
-    SHAPLEY_INTERACTION: dict = tuple({1,2,3,4,5,6,7,8,9,10})
+    SHAPLEY_INTERACTION: dict = tuple({1,2,3,4,5,6,7})
     SHAPLEY_INTERACTION_ORDERS: list = [len(SHAPLEY_INTERACTION)]
-    ITERATIONS = 5
+    ITERATIONS = 1
     INNER_ITERATIONS = 1
     SAMPLING_KERNELS = ["faith"]
     PAIRWISE_LIST = [False]
@@ -176,13 +176,13 @@ if __name__ == "__main__":
     # Store All ------------------------------------------------------------------------------------
     save_name = "_".join((str(time_id),str(len(SHAPLEY_INTERACTION)),game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER))) + ".csv"
     approx_errors_df = pd.DataFrame(approx_errors_list)
-    approx_errors_df.to_csv(os.path.join("results", save_name), index=False)
+    approx_errors_df.to_csv(os.path.join("results/high_interaction", save_name), index=False)
 
     # Plot run -------------------------------------------------------------------------------------
     plot_data = pd.read_csv(os.path.join("results/high_interaction", save_name))
     plot_title = " ".join((str(time_id),str(len(SHAPLEY_INTERACTION)),game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER)))
     draw_approx_curve(df=plot_data,
                       figsize=(6, 5), x_min=int(0.01 * biggest_budget), shading="quant",
-                      y_min=0, y_max=1,
+                      y_min=0, y_max=0.0001,
                       plot_title=plot_title,
                       y_label="average squared distance", x_label="model evaluations")
