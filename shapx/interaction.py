@@ -48,6 +48,7 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                 #compute all deterministic subset sizes
                 result_complete = self.update_results(result_complete, self._compute_interactions_complete_k_one(game, k, interaction))
 
+            self.result_no_sampling = copy.deepcopy(result_complete)
             #Adjust budget, if pairwise sampling is used
             if pairing:
                 budget = 2 * int(budget / 2)
@@ -97,6 +98,8 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
         self.last_sampling_params["std_threshold"] = 0
 
         result_complete = self.init_results()
+        self.result_no_sampling = self.init_results()
+        self.average_std_S = 0
 
         if budget > 0:
             if sampling_only:
@@ -112,6 +115,7 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
             for k in complete_subsets:
                 #compute all deterministic subset sizes
                 result_complete = self.update_results(result_complete, self._compute_interactions_complete_k(game, k))
+            self.result_no_sampling = copy.deepcopy(result_complete)
 
             #Adjust budget, if pairwise sampling is used
             if pairing:
