@@ -17,19 +17,19 @@ from shapx import ShapleyInteractionsEstimator, PermutationSampling
 from shapx.regression import RegressionEstimator
 
 
-def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 0.00001) -> float:
-    error = np.sum((approx - exact) ** 2) / binom(N_FEATURES, SHAPLEY_INTERACTION_ORDER)
+def get_approximation_error_one(approx: np.ndarray, exact: np.ndarray, interaction, eps: float = 0.00001) -> float:
+    error = np.sum(np.abs(approx[interaction] - exact[interaction]))
     error = 0. if error < eps else error  # For pretty printing ...
     return error
 
 
 if __name__ == "__main__":
-
+    time_id = str(int(time.time()))
     MAX_BUDGET: int = 2**14
     BUDGET_STEPS = np.arange(0, 1.05, 0.05)
-    SHAPLEY_INTERACTION_ORDERS: list = [5]
-    SHAPLEY_INTERACTION_SUBSETS: dict = {tuple({2,3,4,5,6})}
-    ITERATIONS = 1
+    SHAPLEY_INTERACTION: dict = tuple({1,2,3,4,5,6,7,8,9,10})
+    SHAPLEY_INTERACTION_ORDERS: list = [len(SHAPLEY_INTERACTION)]
+    ITERATIONS = 5
     INNER_ITERATIONS = 1
     SAMPLING_KERNELS = ["faith"]
     PAIRWISE_LIST = [False]
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         #game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=30, max_interaction_size=5)
         #game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform",n_interactions=30,min_interaction_size=25,n_non_important_features=35)
         #game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform",n_interactions=30,min_interaction_size=15,n_non_important_features=50)
-        game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform",min_interaction_size=5,n_interactions=30,n_non_important_features=10)
+        game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform",min_interaction_size=20,n_interactions=50,n_non_important_features=0)
 
         #game = SparseLinearModel(n=N_FEATURES, n_interactions_per_order={1: 10, 2: 20, 3: 20}, n_non_important_features=0)
         #game = NLPLookupGame(n=N_FEATURES,set_zero=True)
@@ -70,31 +70,19 @@ if __name__ == "__main__":
                 all_budgets = sum(budgets)
 
                 # Approximation Estimators ---------------------------------------------------------
-                shapley_extractor_sii = ShapleyInteractionsEstimator(
-                    N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
                 shapley_extractor_sti = ShapleyInteractionsEstimator(
-                    N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="STI")
-                shapley_extractor_sfi = ShapleyInteractionsEstimator(
-                    N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SFI")
+                   N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="STI")
 
                 approximators = {
-                    "SII": shapley_extractor_sii,
-                    "STI": shapley_extractor_sti,
-                    "SFI": shapley_extractor_sfi
+                    "STI": shapley_extractor_sti
                 }
 
                 # Baseline Estimator ---------------------------------------------------------------
-                shapley_extractor_sii_permutation = PermutationSampling(
-                    N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
                 shapley_extractor_sti_permutation = PermutationSampling(
                     N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="STI")
-                shapley_extractor_sfi_regression = RegressionEstimator(
-                    N, SHAPLEY_INTERACTION_ORDER)
 
                 baselines = {
-                    "SII": shapley_extractor_sii_permutation,
-                    "STI": shapley_extractor_sti_permutation,
-                    "SFI": shapley_extractor_sfi_regression
+                    "STI": shapley_extractor_sti_permutation
                 }
 
                 # Compute exact interactions -------------------------------------------------------
@@ -102,18 +90,13 @@ if __name__ == "__main__":
                     print("Starting exact computations")
                     shapx_exact_values = {}
                     for interaction_type, approximator in approximators.items():
-                        if hasattr(game, "exact_values"):
+                        if hasattr(game, "exact_values_one"):
                             print("Exact values from game are used.")
                             shapx_exact_values[interaction_type] = copy.deepcopy(
-                                game.exact_values(gamma_matrix=approximator.weights,
+                                game.exact_values_one(gamma_matrix=approximator.weights,
                                                   min_order=SHAPLEY_INTERACTION_ORDER,
                                                   max_order=SHAPLEY_INTERACTION_ORDER,
-                                                  interaction_subsets=SHAPLEY_INTERACTION_SUBSETS)
-                            )
-                        else:
-                            print("Exact values are calculated via brute force.")
-                            shapx_exact_values[interaction_type] = copy.deepcopy(
-                                approximator.compute_interactions_complete(game_fun)
+                                                  interaction=SHAPLEY_INTERACTION)
                             )
                     print("Exact computations finished")
 
@@ -136,10 +119,11 @@ if __name__ == "__main__":
                         baseline_run_id = '_'.join((run_id1, 'baseline'))
                         baseline_approximator = baselines[interaction_type]
                         approximated_interactions = copy.deepcopy(
-                            baseline_approximator.approximate_with_budget(game_fun, budget,interaction_subsets=SHAPLEY_INTERACTION_SUBSETS))
-                        approximation_errors[baseline_run_id] = get_approximation_error(
+                            baseline_approximator.approximate_with_budget_one(game_fun, budget,interaction=SHAPLEY_INTERACTION))
+                        approximation_errors[baseline_run_id] = get_approximation_error_one(
                             approx=approximated_interactions,
                             exact=exact_values,
+                            interaction=SHAPLEY_INTERACTION
                         )
                         pbar.update(budget)
 
@@ -154,16 +138,17 @@ if __name__ == "__main__":
 
                                 # Const. and Sampling ----------------------------------------------
                                 approximated_interactions = copy.deepcopy(
-                                    approximator.compute_interactions_from_budget(
+                                    approximator.compute_interactions_from_budget_one(
                                         game_fun, budget,  pairing=pairwise,
-                                        sampling_kernel=sampling_kernel,interaction_subsets=SHAPLEY_INTERACTION_SUBSETS)
+                                        sampling_kernel=sampling_kernel,interaction=SHAPLEY_INTERACTION)
                                 )
                                 results['_'.join((run_id3, 'const and sampling'))] = copy.deepcopy(
                                     approximated_interactions)
                                 approximation_errors[
-                                    '_'.join((run_id3, 'const and sampling'))] = get_approximation_error(
-                                    approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
-                                    exact=exact_values
+                                    '_'.join((run_id3, 'const and sampling'))] = get_approximation_error_one(
+                                    approx=approximated_interactions,
+                                    exact=exact_values,
+                                    interaction=SHAPLEY_INTERACTION
                                 )
                                 pbar.update(budget)
                     pbar.close()
@@ -189,13 +174,14 @@ if __name__ == "__main__":
                     approx_errors_list.append(run_dict)
 
     # Store All ------------------------------------------------------------------------------------
-    save_name = "_".join((game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER))) + ".csv"
+    save_name = "_".join((str(time_id),str(len(SHAPLEY_INTERACTION)),game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER))) + ".csv"
     approx_errors_df = pd.DataFrame(approx_errors_list)
     approx_errors_df.to_csv(os.path.join("results", save_name), index=False)
 
     # Plot run -------------------------------------------------------------------------------------
-    plot_title = " ".join((game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER)))
-    draw_approx_curve(df=pd.read_csv(os.path.join("results", save_name)),
+    plot_data = pd.read_csv(os.path.join("results/high_interaction", save_name))
+    plot_title = " ".join((str(time_id),str(len(SHAPLEY_INTERACTION)),game_name, str(N_FEATURES), str(SHAPLEY_INTERACTION_ORDER)))
+    draw_approx_curve(df=plot_data,
                       figsize=(6, 5), x_min=int(0.01 * biggest_budget), shading="quant",
                       y_min=0, y_max=1,
                       plot_title=plot_title,
