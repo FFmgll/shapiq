@@ -151,7 +151,7 @@ class SparseLinearModel:
                     results[s][S] += weight * self.coefficient_weighting(gamma_matrix, s, q, r)
         return results
 
-    def exact_values(self, gamma_matrix, min_order, max_order, interaction_subsets={}):
+    def exact_values(self, gamma_matrix, min_order, max_order):
         results = {}
         #pre-compute weights in matrix: order x interaction set sizes x intersection set sizes
         exact_value_weights = np.zeros((max_order+1,self.n+1,max_order+1))
@@ -174,15 +174,37 @@ class SparseLinearModel:
             results[s] = np.zeros(np.repeat(self.n, s))
             for subset, weight in self.interaction_weights.items():
                 q = len(subset)
-                if len(interaction_subsets) == 0:
-                    interaction_subsets_iterator = powerset(self.N, s, s)
-                else:
-                    interaction_subsets_iterator = copy.deepcopy(interaction_subsets)
-                for S in interaction_subsets_iterator:
+                for S in powerset(self.N, s, s):
                     r = len(set(subset).intersection(S))
                     results[s][S] += weight * exact_value_weights[s,q,r]
                     pbar.update(1)
         pbar.close()
+        return results
+
+    def exact_values_one(self, gamma_matrix, min_order, max_order,interaction):
+        results = {}
+        # pre-compute weights in matrix: order x interaction set sizes x intersection set sizes
+        exact_value_weights = np.zeros((max_order + 1, self.n + 1, max_order + 1))
+        pbar_budget_precomputation = (max_order - min_order + 1) * len(self.allowed_interaction_sizes) * (max_order + 1)
+        pbar = tqdm(total=pbar_budget_precomputation, desc="Exact values: pre-computed weights")
+        for s in range(min_order, max_order + 1):
+            for q in self.allowed_interaction_sizes:
+                for r in range(0, max_order + 1):
+                    exact_value_weights[s, q, r] = self.coefficient_weighting(gamma_matrix, s, q, r)
+                    pbar.update(1)
+        pbar.close()
+
+        number_of_interactions = 0
+        for s in range(min_order, max_order + 1):
+            number_of_interactions += binom(self.n, s)
+
+        for s in range(min_order, max_order + 1):
+            results[s] = {}
+            results[s][interaction] = 0
+            for subset, weight in self.interaction_weights.items():
+                q = len(subset)
+                r = len(set(subset).intersection(interaction))
+                results[s][interaction] += weight * exact_value_weights[s, q, r]
         return results
 
     def coefficient_weighting(self, gamma_matrix, s, q, s_cap_q):

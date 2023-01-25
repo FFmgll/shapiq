@@ -18,22 +18,20 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
         for t in range(0, self.n + 1):
             for k in range(max(0, self.s + t - self.n), min(self.s, t) + 1):
                 self.weights[t, k] = (-1) ** (self.s - k) * self._kernel_m(t - k)
-        self.last_const_complete = self.init_results()
         self.inf = 1000000
 
-    def compute_selected_from_budget(self, game, budget, interaction_subsets, pairing=False, sampling_kernel="ksh", sampling_only=False):
+    def compute_interactions_from_budget_one(self, game, budget, interaction, pairing=False, sampling_kernel="ksh", sampling_only=False):
         """Computes the Shapley interactions given a game and budget for selected interactions"""
         q, p = self._init_sampling_weights(sampling_kernel)
 
         self.last_sampling_params = {}
         self.last_sampling_params["q"] = q
         self.last_sampling_params["p"] = p
-        self.last_sampling_params["interaction_subsets"] = interaction_subsets
         self.last_sampling_params["sampling"] = False
         self.last_sampling_params["average_std"] = 0
         self.last_sampling_params["std_threshold"] = 0
 
-        result_complete = self.init_results_selected(interaction_subsets)
+        result_complete = {interaction:0}
 
         if budget > 0:
             if sampling_only:
@@ -48,7 +46,7 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
 
             for k in complete_subsets:
                 #compute all deterministic subset sizes
-                result_complete = self.update_results(result_complete, self._compute_interactions_complete_k_selected(game, k, interaction_subsets))
+                result_complete = self.update_results(result_complete, self._compute_interactions_complete_k_one(game, k, interaction))
 
             #Adjust budget, if pairwise sampling is used
             if pairing:
@@ -72,40 +70,19 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                     r[k] = subset_weight_vector[k]/binom(self.n,k)
 
                 self.last_sampling_params["p"] = p
-                result_sample_mean = self.init_results()
-                result_sample_s2 = self.init_results()
+                result_sample_mean = {interaction:0}
+                result_sample_s2 = {interaction:0}
                 for k in subset_sizes_samples:
                     T = set(np.random.choice(self.n, k, replace=False))
-                    result_sample_update = self._evaluate_subset(game, T, r[k])
+                    result_sample_update = self._evaluate_subset_one(game, T, r[k],interaction)
                     self.last_sampling_params["update"] = result_sample_update
                     result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
                     if pairing:
                         T_c = self.N - T
                         k_c = len(T_c)
-                        result_sample_update = self._evaluate_subset(game, T_c, r[k_c])
+                        result_sample_update = self._evaluate_subset_one(game, T_c, r[k_c],interaction)
                         result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
-                    if n_samples>1:
-                        self.result_sample_variance = self.scale_results(result_sample_s2, 1/(n_samples-1))
                     self.result_sample_mean = result_sample_mean
-
-                #result_complete = self.update_results(result_complete, result_sample_mean)
-                self.average_variance = (np.sum(self.result_sample_variance[self.s])/binom(self.n,self.s))/n_samples
-                self.average_squared_mean = (np.sum(self.result_sample_mean[self.s]**2)/binom(self.n,2))
-                self.max_value = np.max(self.result_sample_mean[self.s])
-                self.min_value = np.min(self.result_sample_mean[self.s])
-                self.std_threshold = np.abs(self.max_value - self.min_value)
-                self.last_sampling_params["std_threshold"] = self.std_threshold
-                self.average_std = np.sqrt(self.average_variance)
-                self.last_sampling_params["average_std"] = self.average_std
-
-                if self.average_std < self.std_threshold*self.epsilon_sampling:
-                    result_complete = self.update_results(result_complete, result_sample_mean)
-                    self.last_sampling_params["sampling"] = True
-                else:
-                    self.last_sampling_params["sampling"] = False
-
-            self.last_sampling_params["complete"] = result_complete
-        #results_out = self._smooth_with_epsilon(result_complete)
         return copy.deepcopy(result_complete)
 
     def compute_interactions_from_budget(self, game, budget, pairing=False, sampling_kernel="ksh", sampling_only=False):
@@ -224,18 +201,23 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                 result += factor * sign * ((-1) ** self.s * game(S) + game(set(self.N) - set(S)))
         return result / self.s
 
-    def _evaluate_subset(self, game, T, p,interaction_subsets={}):
+    def _evaluate_subset(self, game, T, p):
         tmp = self.init_results()
         game_eval = game(T)
         t = len(T)
-        if len(interaction_subsets) == 0:
-            interaction_subset_iterator = powerset(self.N,self.min_order,self.s)
-        else:
-            interaction_subset_iterator = copy.deepcopy(interaction_subsets)
-        for S in interaction_subset_iterator:
+        for S in powerset(self.N,self.min_order,self.s):
             size_intersection = len(set(S).intersection(T))
             tmp[len(S)][S] += game_eval * self.weights[t, size_intersection] / p
         return tmp
+
+    def _evaluate_subset_one(self, game, T, p, interaction):
+        tmp = {interaction:0}
+        game_eval = game(T)
+        t = len(T)
+        size_intersection = len(set(interaction).intersection(T))
+        tmp[interaction] += game_eval * self.weights[t, size_intersection] / p
+        return tmp
+
 
     def _init_sampling_weights(self, sampling_kernel):
         q = np.zeros(self.n + 1)
@@ -282,6 +264,16 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                 s_t = len(set(S).intersection(T))
                 results[len(S)][S] += game_eval * self.weights[t, s_t]
         return results
+
+    def _compute_interactions_complete_k_one(self, game, k, interaction):
+        results = {interaction:0}
+        for T in powerset(self.N, k, k):
+            game_eval = game(T)
+            t = len(T)
+            s_t = len(set(interaction).intersection(T))
+            results[interaction] += game_eval * self.weights[t, s_t]
+        return results
+
 
     def compute_from_samples(
             self,
