@@ -155,7 +155,6 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                         self.result_sample_variance = self.scale_results(result_sample_s2, 1/(n_samples-1))
                     self.result_sample_mean = result_sample_mean
 
-                #result_complete = self.update_results(result_complete, result_sample_mean)
                 self.average_std_S = np.sum(np.sqrt(self.result_sample_variance[self.s]))/binom(self.n,self.s)
                 self.average_variance = (np.sum(self.result_sample_variance[self.s])/binom(self.n,self.s))/n_samples
                 self.average_squared_mean = (np.sum(self.result_sample_mean[self.s]**2)/binom(self.n,2))
@@ -167,14 +166,6 @@ class ShapleyInteractionsEstimator(BaseShapleyInteractions):
                 self.last_sampling_params["average_std"] = self.average_std
 
                 result_complete = self.update_results(result_complete, result_sample_mean)
-
-                #if self.average_std < self.std_threshold*self.epsilon_sampling:
-                    #result_complete = self.update_results(result_complete, result_sample_mean)
-                    #print("sampling used")
-                    #self.last_sampling_params["sampling"] = True
-                #else:
-                    #self.last_sampling_params["sampling"] = False
-                    #print("sampling not used")
 
 
 

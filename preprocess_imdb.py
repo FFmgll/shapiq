@@ -4,7 +4,7 @@ import pandas as pd
 
 from transformers import pipeline
 from tqdm import tqdm
-from datasets import load_dataset
+from legacy.datasets import load_dataset
 
 
 def tokenize_input(input_text):

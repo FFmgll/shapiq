@@ -1,4 +1,3 @@
-import copy
 import os
 import time
 import random
@@ -18,7 +17,7 @@ except ImportError:
     pass
 
 from shapx.base import powerset
-from datasets import Adult, BikeSharing
+from legacy.datasets import Adult, BikeSharing
 
 
 def _sigmoid(x):
