@@ -1,1 +1,22 @@
-Initial upload
+Experiments for SHAP-IQ
+
+Run run_experiment.py for experiments of LM:
+-N_FEATURES: number of features d
+
+For LM use parameters:
+-N_FEATURES=14
+-game = NLPLookupGame(n=N_FEATURES, set_zero=True, used_ids=used_ids)
+-ITERATIONS: number of iterations (generated sentences)
+
+
+
+Run run_experiment_sln.py for experiments of SOUM:
+-n_interactions: number of interactions in SOUM (N)
+-min_max_interaction: minimum and maximum interactions size (min=1,l_max)
+-SHAPLEY_INTERACTION_ORDER: interaction order s_0
+-ITERATIONS: Number repeated iterations
+
+# Parameters to change -------------------------------------------------------------------------
+SHAPLEY_INTERACTION_ORDER = 2
+MIN_MAX_INTERACTIONS = [(0, 10), (0, 15), (0, 20), (0, 25), (0, 30)]
+ITERATIONS = 100
