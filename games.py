@@ -1,24 +1,88 @@
-import abc
-import os
-
-import numpy as np
 import copy
-
-import pandas as pd
-from transformers import pipeline
+import os
+import time
 import random
 import math
 import typing
-from scipy.special import binom
-
-from shapx.base import powerset
 from collections import Counter
+
+import numpy as np
+import pandas as pd
+from scipy.special import binom
 from tqdm import tqdm
 
+try:
+    from sklearn.ensemble import RandomForestClassifier
+    from transformers import pipeline
+except ImportError:
+    pass
+
+from shapx.base import powerset
+from datasets import Adult, BikeSharing
 
 
 def _sigmoid(x):
     return 1 / (1 + math.exp(-x))
+
+
+class MachineLearningMetaGame:
+
+    def __init__(self, model=None, dataset_name=None, random_seed=42, n=None, regression=False):
+        if dataset_name == "adult":
+            print("Selecting adult.")
+            dataset = Adult(random_seed=random_seed)
+        elif dataset_name == "bike":
+            print("Selecting bike.")
+            dataset = BikeSharing(random_seed=random_seed)
+        else:
+            raise NotImplementedError("Only adult implement.")
+        self.regression = regression
+        self.x_data = dataset.x_data.values
+        if n is not None:
+            self.x_data = self.x_data[:, 0:n]
+        self.y_data = dataset.y_data.values
+        self.n_samples = len(self.x_data)
+        self.replacement_values = np.mean(self.x_data, axis=0).reshape(1, -1)
+        self.n = len(self.replacement_values[0])
+        self.model = model
+        if self.model is None:
+            self.model = RandomForestClassifier()
+            self.model.fit(self.x_data, self.y_data)
+        self.empty_value = self.call_model(self.replacement_values, set())
+        print(model.score(self.x_data, self.y_data))
+
+    def call_model(self, x_i: np.ndarray, S: set):
+        x_input = np.zeros(shape=(1, self.n))
+        x_input[:, :] = self.replacement_values[:]
+        x_input[:, tuple(S)] = x_i[:, tuple(S)]
+        if self.regression:
+            output = self.model.predict(x_input)[0]
+        else:
+            output = self.model.predict_proba(x_input)[0][1]
+        return output
+
+
+class MachineLearningGame:
+
+    def __init__(self, meta_game: MachineLearningMetaGame, data_index: int = None, set_zero: bool = False):
+        if data_index is None:
+            data_index = random.randint(0, meta_game.n_samples - 1)
+        assert data_index <= meta_game.n_samples - 1, "Not enough data in this dataset."
+
+        self.meta_game = meta_game
+        self.data_point = meta_game.x_data[data_index]
+        self.data_point = self.data_point.reshape(1, -1)
+
+        self.empty_value = 0
+        if set_zero:
+            self.empty_value = self.meta_game.empty_value
+
+        self.n = meta_game.n
+        self.game_name = "tabular model"
+
+    def set_call(self, S):
+        output = self.meta_game.call_model(x_i=self.data_point, S=S)
+        return output - self.empty_value
 
 
 class NLPGame:
@@ -80,6 +144,43 @@ class NLPLookupGame:
         self.n = n
         whole_data = pd.read_csv(os.path.join("data", "simplified_imdb.csv"))
         self.input_sentence = str(whole_data[whole_data["id"] == sentence_id]["text"].values[0])
+
+        self.storage = {}
+        for _, sample in self.df.iterrows():
+            S_id = sample["set"]
+            value = float(sample["value"])
+            self.storage[S_id] = value
+
+        self.empty_value = 0
+        if set_zero:
+            self.empty_value = self.set_call(set())
+
+    def set_call(self, S):
+        S_id = 's'
+        for player in sorted(S):
+            S_id += str(player)
+        return self.storage[S_id] - self.empty_value
+
+
+class TabularLookUpGame:
+
+    def __init__(self, n: int, data_folder: str = "adult_42", data_id: int = None, used_ids: set = None, set_zero: bool = True):
+        if used_ids is None:
+            used_ids = set()
+        self.used_ids = used_ids
+        if data_id is None:
+            files = os.listdir(os.path.join("data", data_folder, str(n)))
+            files = list(set(files) - used_ids)
+            if len(files) == 0:
+                files = os.listdir(os.path.join("data", data_folder, str(n)))
+                self.used_ids = set()
+            data_id = random.choice(files)
+            data_id = int(data_id.split(".")[0])
+        self.used_ids.add(str(data_id) + ".csv")
+        data_path = os.path.join("data", data_folder, str(n), str(data_id) + ".csv")
+        self.df = pd.read_csv(data_path)
+        self.game_name = "tabular_game"
+        self.n = n
 
         self.storage = {}
         for _, sample in self.df.iterrows():
@@ -307,5 +408,17 @@ class SyntheticNeuralNetwork:
         x[list(S)] = 1
         return self.call(x) - self.empty_val
 
+
 if __name__ == "__main__":
-    pass
+    meta_game = MachineLearningMetaGame()
+    game = MachineLearningGame(meta_game=meta_game, data_index=5)
+
+    print("Start")
+    start = time.time()
+    for i in tqdm(range(2**10)):
+        size = random.randint(1, meta_game.n)
+        set_input = np.random.permutation(range(0, 14))
+        set_input = set(set_input[:size])
+        game.set_call(S=set_input)
+
+    print("Finished", time.time() - start)

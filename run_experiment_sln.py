@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     # Parameters to probably not change ------------------------------------------------------------
     N_FEATURES: int = 30
-    N_INTERACTIONS: int = 100  # and also a second run to 100 and a third ggf. to 500 (cluster first)
+    N_INTERACTIONS: int = 500  # and also a second run to 100 and a third ggf. to 500 (cluster first)
     N_NON_IMPORTANT_FEATURE_RATIO = 0.
 
     # Parameters to not change Fabian plz ... nothing will work if you do ... just leave it be -----
@@ -322,11 +322,3 @@ if __name__ == "__main__":
 
                 save_values(SAVE_PATH, approx_errors_list)
                 approx_errors_list = []
-
-
-        # Plot run ---------------------------------------------------------------------------------
-        plot_title = "error"
-        draw_approx_curve(df=pd.read_csv(SAVE_PATH),
-                          figsize=(6, 5), shading=False,
-                          plot_title=plot_title,
-                          y_label="average squared distance", x_label="model evaluations")

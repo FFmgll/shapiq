@@ -5,6 +5,7 @@ import random
 import numpy as np
 from scipy.special import binom
 
+from games import ParameterizedSparseLinearModel, NLPLookupGame
 from shapx import BaseShapleyInteractions
 from shapx.base import determine_complete_subsets, powerset
 
@@ -49,14 +50,14 @@ class RegressionEstimator(BaseShapleyInteractions):
             weight_vector[incomplete_subsets])
 
         if len(incomplete_subsets) > 0:
-            sampled_subsets = set()
+            sampled_subsets = []
             while len(sampled_subsets) < budget:
                 subset_size = random.choices(incomplete_subsets, remaining_weight, k=1)
                 ids = np.random.choice(num_players, size=subset_size, replace=False)
-                sampled_subsets.add(tuple(sorted(ids)))
+                sampled_subsets.append(tuple(sorted(ids)))
                 if pairing:
                     if len(sampled_subsets) < budget:
-                        sampled_subsets.add(tuple(N - set(ids)))
+                        sampled_subsets.append(tuple(N - set(ids)))
             for subset in sampled_subsets:
                 all_subsets_to_sample.append(set(subset))
 
@@ -86,6 +87,7 @@ class RegressionEstimator(BaseShapleyInteractions):
             subset = np.asarray(list(subset))
             all_S[i, subset] = 1
         game_values = np.asarray(game_values)
+        game_values = game_values - empty_value
 
         num_players: int = 0
         for s in range(1, self.s + 1):
@@ -110,12 +112,20 @@ class RegressionEstimator(BaseShapleyInteractions):
                     index = player_indices[combination]
                     new_S[i, index] = 1
 
+        #A = new_S
+        #B = game_values
+
+        #Atw = np.dot(A.T, np.diag(W))
+
+        #inv = np.linalg.inv(np.dot(Atw, A))
+        #phi = np.dot(np.dot(inv, Atw), B)
+
         A = new_S
         B = game_values
         W = np.sqrt(np.diag(W))
         Aw = np.dot(W, A)
         Bw = np.dot(B, W)
-        phi, residuals, rank, singular_values = np.linalg.lstsq(Aw, Bw)
+        phi, residuals, rank, singular_values = np.linalg.lstsq(Aw, Bw, rcond=None)
 
         result = np.zeros(np.repeat(self.n, self.s), dtype=float)
 
@@ -126,3 +136,31 @@ class RegressionEstimator(BaseShapleyInteractions):
             result[combination] = phi[i]
 
         return copy.deepcopy(self._smooth_with_epsilon(result))
+
+
+if __name__ == "__main__":
+    from shapx.interaction import ShapleyInteractionsEstimator
+
+    n = 14
+    #game = ParameterizedSparseLinearModel(n=n, weighting_scheme="uniform", n_interactions=4, max_interaction_size=2, min_interaction_size=2)
+    #game_fun = game.set_call
+
+    game = NLPLookupGame(n=n)
+    game_fun = game.set_call
+
+
+    N = set(range(0, n))
+
+    est_1 = ShapleyInteractionsEstimator(N, 2, 2, "SFI")
+
+    exact_values = copy.deepcopy(
+        est_1.compute_interactions_complete(game_fun)
+    )
+
+
+    est = RegressionEstimator(N, 2)
+    phi = est.approximate_with_budget(game_fun=game_fun, budget=2**10)
+
+    #exact_values = game.exact_values(est_1.weights, 2, 2)
+
+    np.sum((exact_values[2] - phi) ** 2)
