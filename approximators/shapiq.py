@@ -159,6 +159,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return result_out
 
     def compute_efficiency(self, game):
+        """ Computes efficiency value for SII """
         result = 0
         for t in range(self.s):
             factor = binom(self.n - t, self.s - t - 1)
@@ -168,6 +169,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return result / self.s
 
     def _evaluate_subset(self, game, T, p):
+        """ Evaluates and weights a single subset evaluation of T sampled with probability p(T) for all interactions """
         tmp = self.init_results()
         game_eval = game(T)
         t = len(T)
@@ -177,6 +179,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return tmp
 
     def _evaluate_subset_one(self, game, T, p, interaction):
+        """ Evaluates and weights a single subset evaluation of T sampled with probability p(T) for a single interaction """
         tmp = {interaction:0}
         game_eval = game(T)
         t = len(T)
