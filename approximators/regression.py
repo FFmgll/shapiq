@@ -6,8 +6,8 @@ import numpy as np
 from scipy.special import binom
 
 from games import ParameterizedSparseLinearModel, NLPLookupGame
-from shapx import BaseShapleyInteractions
-from shapx.base import determine_complete_subsets, powerset
+from approximators import BaseShapleyInteractions
+from approximators.base import determine_complete_subsets, powerset
 
 
 def get_weights(num_players):
@@ -139,7 +139,7 @@ class RegressionEstimator(BaseShapleyInteractions):
 
 
 if __name__ == "__main__":
-    from shapx.interaction import ShapleyInteractionsEstimator
+    from approximators.shapiq import SHAPIQEstimator
 
     n = 14
     #game = ParameterizedSparseLinearModel(n=n, weighting_scheme="uniform", n_interactions=4, max_interaction_size=2, min_interaction_size=2)
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     N = set(range(0, n))
 
-    est_1 = ShapleyInteractionsEstimator(N, 2, 2, "SFI")
+    est_1 = SHAPIQEstimator(N, 2, 2, "SFI")
 
     exact_values = copy.deepcopy(
         est_1.compute_interactions_complete(game_fun)

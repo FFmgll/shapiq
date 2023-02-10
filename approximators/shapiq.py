@@ -10,7 +10,7 @@ from scipy.special import binom
 from .base import BaseShapleyInteractions, powerset, determine_complete_subsets
 
 
-class ShapleyInteractionsEstimator(BaseShapleyInteractions):
+class SHAPIQEstimator(BaseShapleyInteractions):
     def __init__(self, N, max_order, min_order=1, interaction_type="SII"):
         super().__init__(N, max_order, min_order)
         self.epsilon_sampling = 1

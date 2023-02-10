@@ -5,9 +5,9 @@ import itertools
 import random
 
 from evaluation import draw_shapley_values
-from shapx.interaction import ShapleyInteractionsEstimator
-from shapx.base import determine_complete_subsets
-from shapx.unbiased import CovertRegression, calculate_uksh_from_samples, get_weights
+from approximators.shapiq import SHAPIQEstimator
+from approximators.base import determine_complete_subsets
+from approximators.unbiased import CovertRegression, calculate_uksh_from_samples, get_weights
 
 
 
@@ -87,7 +87,7 @@ def compare_unbiasedksh_and_shapx(
         budget, num_players, weight_vector, N, pairing, game_fun)
 
     # SII
-    interaction_estimator = ShapleyInteractionsEstimator(
+    interaction_estimator = SHAPIQEstimator(
         N=N, max_order=1, min_order=1, interaction_type='SII'
     )
     values_shapx_sfi = interaction_estimator.compute_from_samples(
@@ -96,7 +96,7 @@ def compare_unbiasedksh_and_shapx(
     values_shapx_sii = copy.deepcopy(values_shapx_sfi[1])
 
     # STI
-    interaction_estimator = ShapleyInteractionsEstimator(
+    interaction_estimator = SHAPIQEstimator(
         N=N, max_order=1, min_order=1, interaction_type='STI'
     )
     values_shapx_sfi = interaction_estimator.compute_from_samples(
@@ -105,7 +105,7 @@ def compare_unbiasedksh_and_shapx(
     values_shapx_sti = copy.deepcopy(values_shapx_sfi[1])
 
     # SFI
-    interaction_estimator = ShapleyInteractionsEstimator(
+    interaction_estimator = SHAPIQEstimator(
         N=N, max_order=1, min_order=1, interaction_type='SFI'
     )
     values_shapx_sfi = interaction_estimator.compute_from_samples(
@@ -145,7 +145,7 @@ def compare_unbiasedksh_and_shapx(
 
 if __name__ == "__main__":
     from games import SparseLinearModel, NLPLookupGame, SyntheticNeuralNetwork, NLPGame, ParameterizedSparseLinearModel
-    from interaction import ShapleyInteractionsEstimator
+    from interaction import SHAPIQEstimator
     n = 14
     game = NLPLookupGame(n=n, sentence_id=172, set_zero=True)
     #game = NLPGame("I like this movie a lot")
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     #game = ParameterizedSparseLinearModel(n=n,weighting_scheme="uniform",n_interactions=20,max_interaction_size=5)
     N = set(range(n))
 
-    shap = ShapleyInteractionsEstimator(N, 1,1, "SII")
+    shap = SHAPIQEstimator(N, 1, 1, "SII")
     #exact_values = game.exact_values(shap.weights,1,1)[1]
     exact_values = shap.compute_interactions_complete(game.set_call)[1]
     game_fun = game.set_call

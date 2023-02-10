@@ -9,10 +9,9 @@ from scipy.special import binom
 from scipy.stats import kendalltau
 from tqdm import tqdm
 
-from evaluation import draw_approx_curve
 from games import ParameterizedSparseLinearModel
-from shapx import ShapleyInteractionsEstimator, PermutationSampling
-from shapx.regression import RegressionEstimator
+from approximators import SHAPIQEstimator, PermutationSampling
+from approximators.regression import RegressionEstimator
 
 
 def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 0.0000001) -> float:
@@ -137,13 +136,13 @@ if __name__ == "__main__":
                 all_budgets = sum(budgets)
 
                 # Approximation Estimators ---------------------------------------------------------
-                shapley_extractor_sii = ShapleyInteractionsEstimator(
+                shapley_extractor_sii = SHAPIQEstimator(
                     N, SHAPLEY_INTERACTION_ORDER,
                     min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
-                shapley_extractor_sti = ShapleyInteractionsEstimator(
+                shapley_extractor_sti = SHAPIQEstimator(
                     N, SHAPLEY_INTERACTION_ORDER,
                     min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="STI")
-                shapley_extractor_sfi = ShapleyInteractionsEstimator(
+                shapley_extractor_sfi = SHAPIQEstimator(
                     N, SHAPLEY_INTERACTION_ORDER,
                     min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SFI")
 

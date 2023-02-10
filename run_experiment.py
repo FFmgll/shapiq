@@ -8,15 +8,10 @@ import pandas as pd
 from scipy.special import binom
 from scipy.stats import kendalltau
 from tqdm import tqdm
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-import games
-from evaluation import draw_approx_curve
-from games import ParameterizedSparseLinearModel, SparseLinearModel, SyntheticNeuralNetwork, \
-    NLPLookupGame
-from shapx import ShapleyInteractionsEstimator, PermutationSampling
-from shapx.regression import RegressionEstimator
+from games import ParameterizedSparseLinearModel, SparseLinearModel, SyntheticNeuralNetwork, NLPLookupGame
+from approximators import SHAPIQEstimator, PermutationSampling
+from approximators.regression import RegressionEstimator
 
 
 def get_approximation_error(approx: np.ndarray, exact: np.ndarray) -> float:
@@ -133,11 +128,11 @@ if __name__ == "__main__":
             all_budgets = sum(budgets)
 
             # Approximation Estimators ---------------------------------------------------------
-            shapley_extractor_sii = ShapleyInteractionsEstimator(
+            shapley_extractor_sii = SHAPIQEstimator(
                 N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
-            shapley_extractor_sti = ShapleyInteractionsEstimator(
+            shapley_extractor_sti = SHAPIQEstimator(
                 N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="STI")
-            shapley_extractor_sfi = ShapleyInteractionsEstimator(
+            shapley_extractor_sfi = SHAPIQEstimator(
                 N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SFI")
 
             approximators = {
@@ -292,11 +287,3 @@ if __name__ == "__main__":
 
             save_values(SAVE_PATH, approx_errors_list)
             approx_errors_list = []
-
-    if PLOT:
-        # Plot run ---------------------------------------------------------------------------------
-        plot_title = "error"
-        draw_approx_curve(df=pd.read_csv(SAVE_PATH),
-                          figsize=(6, 5), x_min=int(0.1 * biggest_budget), shading=True,
-                          plot_title=plot_title,
-                          y_label="average squared distance", x_label="model evaluations")

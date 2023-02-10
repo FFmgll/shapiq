@@ -16,8 +16,8 @@ try:
 except ImportError:
     pass
 
-from shapx.base import powerset
-from legacy.datasets import Adult, BikeSharing
+from approximators.base import powerset
+from datasets import Adult, BikeSharing
 
 
 def _sigmoid(x):

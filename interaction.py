@@ -6,8 +6,8 @@ import pandas as pd
 
 from games import NLPGame, SyntheticNeuralNetwork, SimpleGame, SparseLinearModel, ParameterizedSparseLinearModel
 
-from shapx.interaction import ShapleyInteractionsEstimator
-from shapx.permutation import PermutationSampling
+from approximators.shapiq import SHAPIQEstimator
+from approximators.permutation import PermutationSampling
 
 from scipy.special import binom
 
@@ -62,11 +62,11 @@ if __name__ == "__main__":
     pairwise_list = [False]#[True, False]
 
     # All interactions
-    shapley_extractor_sii = ShapleyInteractionsEstimator(
+    shapley_extractor_sii = SHAPIQEstimator(
         N, shapley_interaction_order, min_order=min_order, interaction_type="SII")
-    shapley_extractor_sti = ShapleyInteractionsEstimator(
+    shapley_extractor_sti = SHAPIQEstimator(
         N, shapley_interaction_order, min_order=min_order, interaction_type="STI")
-    shapley_extractor_sfi = ShapleyInteractionsEstimator(
+    shapley_extractor_sfi = SHAPIQEstimator(
         N, shapley_interaction_order, min_order=min_order, interaction_type="SFI")
 
     # Permutation Estimator
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     approx_errors_df.to_csv(game_name+"_"+str(n)+"_"+str(sampling_only)+".csv", index=False)
 
 
-    from shapx.base import powerset
+    from approximators.base import powerset
 
     def delta(game_fun,T,S):
         rslt = 0
