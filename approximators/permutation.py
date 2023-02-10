@@ -5,7 +5,7 @@ from scipy.special import binom
 
 
 class PermutationSampling(BaseShapleyInteractions):
-
+    """ Estimates the SI (for SII, STI) using the permutation sampling apporach """
     def __init__(self, N, max_order, min_order=1, interaction_type="SII"):
         super().__init__(N, max_order, min_order)
         self.interaction_type = interaction_type

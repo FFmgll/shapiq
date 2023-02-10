@@ -21,16 +21,19 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         self.inf = 1000000
 
     def compute_interactions_from_budget_one(self, game, budget, interaction, pairing=False, sampling_kernel="ksh", sampling_only=False):
-        """Computes the Shapley interactions given a game and budget for selected interactions"""
+        """Estimates the Shapley interactions given a game and budget for a single interaction
+
+        Parameters
+        ---------------------------------------
+        game: set functions with real-valued outputs
+        budget: budget of model evaluations and sampld subsets
+        interaction: interaction for which the estimate should be computed
+        pairing: if True, then subsets are sampled pairwise
+        sampling_kernel: determines the subset weights for sampling
+        sampling_only: if True, then sampling is enabled for all subset sizes
+
+        """
         q, p = self._init_sampling_weights(sampling_kernel)
-
-        self.last_sampling_params = {}
-        self.last_sampling_params["q"] = q
-        self.last_sampling_params["p"] = p
-        self.last_sampling_params["sampling"] = False
-        self.last_sampling_params["average_std"] = 0
-        self.last_sampling_params["std_threshold"] = 0
-
         result_complete = {interaction:0}
 
         if budget > 0:
@@ -41,21 +44,16 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 #sampling dependent on weights p
                 complete_subsets, incomplete_subsets, budget = determine_complete_subsets(0, self.n, budget, p)
 
-            self.last_sampling_params["complete_subsets"] = complete_subsets
-            self.last_sampling_params["incomplete_subsets"] = incomplete_subsets
-
             for k in complete_subsets:
                 #compute all deterministic subset sizes
                 result_complete = self.update_results(result_complete, self._compute_interactions_complete_k_one(game, k, interaction))
 
-            self.result_no_sampling = copy.deepcopy(result_complete)
             #Adjust budget, if pairwise sampling is used
             if pairing:
                 budget = 2 * int(budget / 2)
             else:
                 budget = budget
 
-            self.last_sampling_params["sampling_budget"] = budget
             # Sample the remaining budget and update the approximations
             if len(incomplete_subsets) > 0:
                 subset_weight_vector = np.zeros(self.n+1)
@@ -66,40 +64,35 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 subset_weight_vector /= np.sum(subset_weight_vector[incomplete_subsets])
                 subset_sizes_samples = random.choices(incomplete_subsets, k=budget, weights=subset_weight_vector[incomplete_subsets])
                 r = np.zeros(self.n+1)
-                self.last_sampling_params["subset_weight_vector"] = subset_weight_vector
                 for k in incomplete_subsets:
                     r[k] = subset_weight_vector[k]/binom(self.n,k)
 
-                self.last_sampling_params["p"] = p
                 result_sample_mean = {interaction:0}
                 result_sample_s2 = {interaction:0}
                 for k in subset_sizes_samples:
                     T = set(np.random.choice(self.n, k, replace=False))
                     result_sample_update = self._evaluate_subset_one(game, T, r[k],interaction)
-                    self.last_sampling_params["update"] = result_sample_update
                     result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
                     if pairing:
                         T_c = self.N - T
                         k_c = len(T_c)
                         result_sample_update = self._evaluate_subset_one(game, T_c, r[k_c],interaction)
                         result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
-                    self.result_sample_mean = result_sample_mean
         return copy.deepcopy(result_complete)
 
     def compute_interactions_from_budget(self, game, budget, pairing=False, sampling_kernel="ksh", sampling_only=False):
-        """Computes the Shapley interactions given a game and budget."""
+        """Estimates the Shapley interactions given a game and budget for all top-order interactions
+
+        Parameters
+        ---------------------------------------
+        game: set functions with real-valued outputs
+        budget: budget of model evaluations and sampld subsets
+        pairing: if True, then subsets are sampled pairwise
+        sampling_kernel: determines the subset weights for sampling
+        sampling_only: if True, then sampling is enabled for all subset sizes
+        """
         q, p = self._init_sampling_weights(sampling_kernel)
-
-        self.last_sampling_params = {}
-        self.last_sampling_params["q"] = q
-        self.last_sampling_params["p"] = p
-        self.last_sampling_params["sampling"] = True
-        self.last_sampling_params["average_std"] = 0
-        self.last_sampling_params["std_threshold"] = 0
-
         result_complete = self.init_results()
-        self.result_no_sampling = self.init_results()
-        self.average_std_S = 0
 
         if budget > 0:
             if sampling_only:
@@ -109,13 +102,9 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 #sampling dependent on weights p
                 complete_subsets, incomplete_subsets, budget = determine_complete_subsets(0, self.n, budget, p)
 
-            self.last_sampling_params["complete_subsets"] = complete_subsets
-            self.last_sampling_params["incomplete_subsets"] = incomplete_subsets
-
             for k in complete_subsets:
                 #compute all deterministic subset sizes
                 result_complete = self.update_results(result_complete, self._compute_interactions_complete_k(game, k))
-            self.result_no_sampling = copy.deepcopy(result_complete)
 
             #Adjust budget, if pairwise sampling is used
             if pairing:
@@ -123,7 +112,6 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             else:
                 budget = budget
 
-            self.last_sampling_params["sampling_budget"] = budget
             # Sample the remaining budget and update the approximations
             if len(incomplete_subsets) > 0:
                 subset_weight_vector = np.zeros(self.n+1)
@@ -134,17 +122,14 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 subset_weight_vector /= np.sum(subset_weight_vector[incomplete_subsets])
                 subset_sizes_samples = random.choices(incomplete_subsets, k=budget, weights=subset_weight_vector[incomplete_subsets])
                 r = np.zeros(self.n+1)
-                self.last_sampling_params["subset_weight_vector"] = subset_weight_vector
                 for k in incomplete_subsets:
                     r[k] = subset_weight_vector[k]/binom(self.n,k)
 
-                self.last_sampling_params["p"] = p
                 result_sample_mean = self.init_results()
                 result_sample_s2 = self.init_results()
                 for k in subset_sizes_samples:
                     T = set(np.random.choice(self.n, k, replace=False))
                     result_sample_update = self._evaluate_subset(game, T, r[k])
-                    self.last_sampling_params["update"] = result_sample_update
                     result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
                     if pairing:
                         T_c = self.N - T
@@ -153,23 +138,9 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                         result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
                     if n_samples>1:
                         self.result_sample_variance = self.scale_results(result_sample_s2, 1/(n_samples-1))
-                    self.result_sample_mean = result_sample_mean
-
-                self.average_std_S = np.sum(np.sqrt(self.result_sample_variance[self.s]))/binom(self.n,self.s)
-                self.average_variance = (np.sum(self.result_sample_variance[self.s])/binom(self.n,self.s))/n_samples
-                self.average_squared_mean = (np.sum(self.result_sample_mean[self.s]**2)/binom(self.n,2))
-                self.max_value = np.max(self.result_sample_mean[self.s])
-                self.min_value = np.min(self.result_sample_mean[self.s])
-                self.std_threshold = np.abs(self.max_value - self.min_value)
-                self.last_sampling_params["std_threshold"] = self.std_threshold
-                self.average_std = np.sqrt(self.average_variance)
-                self.last_sampling_params["average_std"] = self.average_std
 
                 result_complete = self.update_results(result_complete, result_sample_mean)
 
-
-
-            self.last_sampling_params["complete"] = result_complete
         results_out = self._smooth_with_epsilon(result_complete)
         return copy.deepcopy(results_out)
 
@@ -215,6 +186,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
 
 
     def _init_sampling_weights(self, sampling_kernel):
+        """ Initializes the subset weights for sampling for one subset of that size (q) and any subset of that size (p) """
         q = np.zeros(self.n + 1)
         p = np.zeros(self.n + 1)
         for t in range(self.n+1):
@@ -222,6 +194,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return q,p
 
     def _kernel_q(self, t, sampling_kernel):
+        """ Determines the sampling weights for a subset of size t (size_weight) and the weight for any subset of size t (size_weight*binom(n,t)) """
         if sampling_kernel == "ksh":
             if t>=self.s and t<=self.n-self.s:
                 size_weight = np.math.factorial(self.n - t - self.s) * np.math.factorial(t - self.s) / np.math.factorial(
@@ -240,6 +213,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return size_weight, size_weight*binom(self.n,t)
 
     def _kernel_m(self, t):
+        """ Returns the weight for each interaction type for a subset of size t """
         if self.interaction_type == "SII":
             return np.math.factorial(self.n - t - self.s) * np.math.factorial(t) / np.math.factorial(
                 self.n - self.s + 1)
@@ -250,6 +224,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 self.n - t - 1) * np.math.factorial(t + self.s - 1) / np.math.factorial(self.n + self.s - 1)
 
     def _compute_interactions_complete_k(self, game, k):
+        """ Computes the SI values for all interactions over all subsets of size k for a given game """
         results = self.init_results()
         for T in powerset(self.N, k, k):
             game_eval = game(T)
@@ -261,6 +236,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return results
 
     def _compute_interactions_complete_k_one(self, game, k, interaction):
+        """ Computes the SI values for a single interaction over all subsets of size k for a given game """
+
         results = {interaction:0}
         for T in powerset(self.N, k, k):
             game_eval = game(T)
@@ -278,6 +255,17 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             val_full,
             epsilon_correction = True
     ):
+        """ Estimates all Shapley values using a list of sampled subsets for a given game
+
+        Parameters
+        ------------------------------------
+        S_list: List of sampled subsets
+        game_values: List of game evaluations for elements in S_list
+        val_empty: model evaluated for the empty set
+        val_full: model evaluated for the full set (self.N)
+        epsilon_correction: if True, then yields the exact values of Unbiased KernelSHAP (only differs for sets with game({}) <> 0
+
+        """
         subsets = copy.deepcopy(S_list)
         S_game_mapping = {tuple(S): game_value for S, game_value in zip(subsets, game_values)}
         S_game_mapping[tuple(set())] = val_empty

@@ -18,7 +18,7 @@ def get_weights(num_players):
 
 
 class RegressionEstimator(BaseShapleyInteractions):
-
+    """ Estimates the SI (for FSI) using the weighted least square approach """
     def __init__(self, N, max_order):
         min_order = max_order
         super().__init__(N, max_order, min_order=min_order)
@@ -111,14 +111,6 @@ class RegressionEstimator(BaseShapleyInteractions):
                 for combination in itertools.combinations(S, s):
                     index = player_indices[combination]
                     new_S[i, index] = 1
-
-        #A = new_S
-        #B = game_values
-
-        #Atw = np.dot(A.T, np.diag(W))
-
-        #inv = np.linalg.inv(np.dot(Atw, A))
-        #phi = np.dot(np.dot(inv, Atw), B)
 
         A = new_S
         B = game_values

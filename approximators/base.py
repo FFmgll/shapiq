@@ -13,14 +13,7 @@ class BaseShapleyInteractions:
         self.s = max_order
         self.N = N
         self.n = len(N)
-        self.counter = 0
         self.weights = np.zeros((self.n + 1, self.s + 1))
-
-    def constant_R(self, incomplete_subsets, q):
-        R = 0
-        for t in incomplete_subsets:
-            R += q[t] * binom(self.n, t)
-        return R
 
     def init_results(self):
         results = {}
@@ -28,24 +21,11 @@ class BaseShapleyInteractions:
             results[k] = np.zeros(np.repeat(self.n, k))
         return results
 
-    def init_results_selected(self,interaction_subset):
-        results = {}
-        for S in interaction_subsets:
-            print(S)
-
-
     @staticmethod
     def update_results(current, update):
         rslt = {}
         for l in current:
             rslt[l] = current[l] + update[l]
-        return rslt
-
-    @staticmethod
-    def update_mean(current_mean, update, n_samples):
-        rslt = {}
-        for l in current_mean:
-            rslt[l] = (current_mean[l]*(n_samples-1) + update[l])/n_samples
         return rslt
 
     @staticmethod
@@ -64,13 +44,6 @@ class BaseShapleyInteractions:
         rslt = {}
         for l in current:
             rslt[l] = current[l] * factor
-        return rslt
-
-    @staticmethod
-    def apply_sqrt(current):
-        rslt = {}
-        for l in current:
-            rslt[l] = np.sqrt(current[l])
         return rslt
 
     @staticmethod

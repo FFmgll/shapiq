@@ -127,19 +127,10 @@ def calculate_uksh_from_samples(game, game_values, S_list):
 
         S = all_S[it * batch_size: batch_size + it * batch_size, :]
         game_eval = game_values[it * batch_size: batch_size + it * batch_size] - null
-
-        #subset_length = int(np.sum(S))
-        #proba = np.asarray(weights[subset_length-1] * (1 / comb(num_players, subset_length))) * S
-        #b_sample = (proba.T * game_eval[:, np.newaxis].T).T
-
-        #b += b_sample
-
         b[S] += game_eval
         b_input = b/counter
         counter += 1
-
         values = calculate_exact_result_no_std(A, b_input.flatten(), total)
-
     return values
 
 
