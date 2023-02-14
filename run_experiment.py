@@ -79,7 +79,7 @@ if __name__ == "__main__":
     BUDGET_STEPS = np.arange(0, 1.05, 0.05)
     SHAPLEY_INTERACTION_ORDER = 2
     SHAPLEY_INTERACTION_SUBSETS: dict = {}
-    ITERATIONS = 1
+    ITERATIONS = 10
     INNER_ITERATIONS = 1
     SAMPLING_KERNELS = ["faith"]
     PAIRWISE_LIST = [False]
@@ -96,9 +96,9 @@ if __name__ == "__main__":
         print(f"Starting Iteration {iteration}")
 
         #game = SyntheticNeuralNetwork(n=N_FEATURES)
-        game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=30, max_interaction_size=5, min_interaction_size=1)
+        #game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=30, max_interaction_size=5, min_interaction_size=1)
         #game = SparseLinearModel(n=N_FEATURES, n_interactions_per_order={50: 30}, n_non_important_features=0)
-        #game = NLPLookupGame(n=N_FEATURES, set_zero=True, used_ids=used_ids)
+        game = NLPLookupGame(n=N_FEATURES, set_zero=True, used_ids=used_ids)
         #game = games.TabularLookUpGame(data_folder="adult_1", n=N_FEATURES, used_ids=used_ids, set_zero=True)
 
         try:

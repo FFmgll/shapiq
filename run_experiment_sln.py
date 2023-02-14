@@ -73,11 +73,11 @@ if __name__ == "__main__":
     SHAPLEY_INTERACTION_ORDER = 2
     MIN_MAX_INTERACTIONS = [(0, 10), (0, 15), (0, 20), (0, 25), (0, 30)]
 
-    ITERATIONS = 100
+    ITERATIONS = 10
 
     # Parameters to probably not change ------------------------------------------------------------
     N_FEATURES: int = 30
-    N_INTERACTIONS: int = 500  # and also a second run to 100 and a third ggf. to 500 (cluster first)
+    N_INTERACTIONS: int = 100  # and also a second run to 100 and a third ggf. to 500 (cluster first)
     N_NON_IMPORTANT_FEATURE_RATIO = 0.
 
     # Parameters to not change Fabian plz ... nothing will work if you do ... just leave it be -----
@@ -249,37 +249,26 @@ if __name__ == "__main__":
                                     approximated_interactions)
                                 approximation_errors[
                                     '_'.join((
-                                        run_id3, 'const and sampling',
-                                        str(approximator.last_sampling_params["sampling"]),
-                                        str(approximator.last_sampling_params["average_std"]),
-                                        str(approximator.last_sampling_params["std_threshold"])))
+                                        run_id3, 'const and sampling'))
                                 ] = get_approximation_error(
                                     approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                     exact=exact_values
                                 )
                                 precisions[
-                                    '_'.join((run_id3, 'const and sampling',
-                                        str(approximator.last_sampling_params["sampling"]),
-                                        str(approximator.last_sampling_params["average_std"]),
-                                        str(approximator.last_sampling_params["std_threshold"])))] = get_precision_at_k(
+                                    '_'.join((run_id3, 'const and sampling'))
+                                ] = get_precision_at_k(
                                     approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                     exact=exact_values,
                                     k=K
                                 )
                                 approximation_errors_at_k[
-                                    '_'.join((run_id3, 'const and sampling',
-                                        str(approximator.last_sampling_params["sampling"]),
-                                        str(approximator.last_sampling_params["average_std"]),
-                                        str(approximator.last_sampling_params["std_threshold"])))] = get_approximation_error_at_k(
+                                    '_'.join((run_id3, 'const and sampling'))] = get_approximation_error_at_k(
                                     approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                     exact=exact_values,
                                     k=K
                                 )
                                 kendal_taus[
-                                    '_'.join((run_id3, 'const and sampling',
-                                        str(approximator.last_sampling_params["sampling"]),
-                                        str(approximator.last_sampling_params["average_std"]),
-                                        str(approximator.last_sampling_params["std_threshold"])))] = get_kendals_tau(
+                                    '_'.join((run_id3, 'const and sampling'))] = get_kendals_tau(
                                     approx=approximated_interactions[SHAPLEY_INTERACTION_ORDER],
                                     exact=exact_values
                                 )
@@ -312,9 +301,6 @@ if __name__ == "__main__":
                         run_dict['sampling_kernel'] = id_parts[4]
                         run_dict['pairing'] = id_parts[5]
                         run_dict['sampling'] = id_parts[6]
-                        run_dict['sampling_used'] = id_parts[7]
-                        run_dict['avg_variance'] = id_parts[8]
-                        run_dict['std_threshold'] = id_parts[9]
                     except IndexError:
                         pass
                     approx_errors_list.append(run_dict)

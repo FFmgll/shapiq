@@ -13,7 +13,6 @@ from .base import BaseShapleyInteractions, powerset, determine_complete_subsets
 class SHAPIQEstimator(BaseShapleyInteractions):
     def __init__(self, N, max_order, min_order=1, interaction_type="SII"):
         super().__init__(N, max_order, min_order)
-        self.epsilon_sampling = 1
         self.interaction_type = interaction_type
         for t in range(0, self.n + 1):
             for k in range(max(0, self.s + t - self.n), min(self.s, t) + 1):
@@ -80,7 +79,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                         result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
         return copy.deepcopy(result_complete)
 
-    def compute_interactions_from_budget(self, game, budget, pairing=False, sampling_kernel="ksh", sampling_only=False):
+    def compute_interactions_from_budget(self, game, budget, pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False):
         """Estimates the Shapley interactions given a game and budget for all top-order interactions
 
         Parameters
@@ -90,6 +89,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         pairing: if True, then subsets are sampled pairwise
         sampling_kernel: determines the subset weights for sampling
         sampling_only: if True, then sampling is enabled for all subset sizes
+        stratification: if True, then stratification is used for estimation
+
         """
         q, p = self._init_sampling_weights(sampling_kernel)
         result_complete = self.init_results()
@@ -115,31 +116,67 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             # Sample the remaining budget and update the approximations
             if len(incomplete_subsets) > 0:
                 subset_weight_vector = np.zeros(self.n+1)
-                n_samples = 0
                 for k in incomplete_subsets:
                     subset_weight_vector[k] = q[k]*binom(self.n, k)
 
                 subset_weight_vector /= np.sum(subset_weight_vector[incomplete_subsets])
                 subset_sizes_samples = random.choices(incomplete_subsets, k=budget, weights=subset_weight_vector[incomplete_subsets])
-                r = np.zeros(self.n+1)
-                for k in incomplete_subsets:
-                    r[k] = subset_weight_vector[k]/binom(self.n,k)
 
-                result_sample_mean = self.init_results()
-                result_sample_s2 = self.init_results()
-                for k in subset_sizes_samples:
-                    T = set(np.random.choice(self.n, k, replace=False))
-                    result_sample_update = self._evaluate_subset(game, T, r[k])
-                    result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
-                    if pairing:
-                        T_c = self.N - T
-                        k_c = len(T_c)
-                        result_sample_update = self._evaluate_subset(game, T_c, r[k_c])
+                if stratification:
+                    r = np.zeros(self.n + 1)
+                    for k in incomplete_subsets:
+                        r[k] = 1 / (binom(self.n, k))
+
+                    n_samples = {}
+                    result_sample_mean = {}
+                    result_sample_s2 = {}
+                    self.result_sample_variance ={}
+
+                    for k in incomplete_subsets:
+                        n_samples[k] = 0
+                        result_sample_mean[k] = self.init_results()
+                        result_sample_s2[k] = self.init_results()
+
+                    for k in subset_sizes_samples:
+                        T = set(np.random.choice(self.n, k, replace=False))
+                        result_sample_update = self._evaluate_subset(game, T, r[k])
+                        result_sample_mean[k], result_sample_s2[k], n_samples[k] = self.update_mean_variance(result_sample_mean[k],
+                                                                                                    result_sample_s2[k],
+                                                                                                    n_samples[k],
+                                                                                                    result_sample_update)
+                        if pairing:
+                            T_c = self.N - T
+                            k_c = len(T_c)
+                            result_sample_update = self._evaluate_subset(game, T_c, r[k_c])
+                            result_sample_mean[k], result_sample_s2[k], n_samples[k] = self.update_mean_variance(
+                                result_sample_mean[k], result_sample_s2[k], n_samples[k], result_sample_update)
+                        if n_samples[k] > 1:
+                            self.result_sample_variance[k] = self.scale_results(result_sample_s2[k], 1 / (n_samples[k] - 1))
+
+                    for k in incomplete_subsets:
+                        result_complete = self.update_results(result_complete,result_sample_mean[k])
+
+                else:
+                    r = np.zeros(self.n + 1)
+                    for k in incomplete_subsets:
+                        r[k] = subset_weight_vector[k] / binom(self.n, k)
+
+                    n_samples = 0
+                    result_sample_mean = self.init_results()
+                    result_sample_s2 = self.init_results()
+                    for k in subset_sizes_samples:
+                        T = set(np.random.choice(self.n, k, replace=False))
+                        result_sample_update = self._evaluate_subset(game, T, r[k])
                         result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
-                    if n_samples>1:
-                        self.result_sample_variance = self.scale_results(result_sample_s2, 1/(n_samples-1))
+                        if pairing:
+                            T_c = self.N - T
+                            k_c = len(T_c)
+                            result_sample_update = self._evaluate_subset(game, T_c, r[k_c])
+                            result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(result_sample_mean,result_sample_s2,n_samples,result_sample_update)
+                        if n_samples>1:
+                            self.result_sample_variance = self.scale_results(result_sample_s2, 1/(n_samples-1))
 
-                result_complete = self.update_results(result_complete, result_sample_mean)
+                    result_complete = self.update_results(result_complete, result_sample_mean)
 
         results_out = self._smooth_with_epsilon(result_complete)
         return copy.deepcopy(results_out)
