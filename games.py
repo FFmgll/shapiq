@@ -1,3 +1,4 @@
+"""This Module gathers game functions that can be used to test the approximation methods"""
 import os
 import time
 import random
@@ -34,7 +35,7 @@ class MachineLearningMetaGame:
             print("Selecting bike.")
             dataset = BikeSharing(random_seed=random_seed)
         else:
-            raise NotImplementedError("Only adult implement.")
+            raise NotImplementedError("Only adult or bike implemented.")
         self.regression = regression
         self.x_data = dataset.x_data.values
         if n is not None:
@@ -123,6 +124,8 @@ class NLPGame:
 
 
 class NLPLookupGame:
+    """Wrapper for the NLP Game to use precomputed model outputs for faster runtime in experimental
+    settings."""
 
     def __init__(self, n: int, sentence_id: int = None, used_ids: set = None, set_zero: bool = False):
         if used_ids is None:
@@ -162,6 +165,8 @@ class NLPLookupGame:
 
 
 class TabularLookUpGame:
+    """Wrapper for the Machine Learning Game to use precomputed model outputs for faster runtime in
+    experimental settings."""
 
     def __init__(self, n: int, data_folder: str = "adult_42", data_id: int = None, used_ids: set = None, set_zero: bool = True):
         if used_ids is None:
@@ -198,8 +203,10 @@ class TabularLookUpGame:
         return self.storage[S_id] - self.empty_value
 
 
-class SparseLinearModel:
-    """Synthetic Linear Function where you know the Shapley values and interaction terms beforehand.
+class BaseSparseLinearModel:
+    """Base class. Do not use this class but the derived one.
+
+    Synthetic Linear Function where you know the Shapley values and interaction terms beforehand.
     To be used to create high dimensional data with ground truths.
 
     Players: the input features (zero or one)
@@ -328,7 +335,13 @@ class SparseLinearModel:
         return self.call(x)
 
 
-class ParameterizedSparseLinearModel(SparseLinearModel):
+class ParameterizedSparseLinearModel(BaseSparseLinearModel):
+    """Synthetic Linear Function where you know the Shapley values and interaction terms beforehand.
+    To be used to create high dimensional data with ground truths.
+
+    Players: the input features (zero or one)
+    Output: regression score -Inf, Inf
+    """
 
     def __init__(self, n, weighting_scheme, n_interactions,
                  max_interaction_size=-1, min_interaction_size=1,n_non_important_features=0):
@@ -351,11 +364,17 @@ class ParameterizedSparseLinearModel(SparseLinearModel):
                                            weights=weighting_ratios[allowed_interaction_sizes])
         n_interactions_per_order = Counter(interaction_sizes)
         for k in allowed_interaction_sizes:
-            n_interactions_per_order[k] = min(n_interactions_per_order[k],binom(n-n_non_important_features,k))
-        super().__init__(n=n, n_interactions_per_order=n_interactions_per_order,n_non_important_features=n_non_important_features)
+            n_interactions_per_order[k] = min(n_interactions_per_order[k], binom(n - n_non_important_features, k))
+        super().__init__(n=n, n_interactions_per_order=n_interactions_per_order, n_non_important_features=n_non_important_features)
 
 
 class SimpleGame:
+    """Very simple game where each feature of a linear model has a random weight and there exist one
+    2nd-order interaction and one 3rd-order interaction.
+
+    Players: the input features (zero or one)
+    Output: regression score -Inf, Inf
+    """
     def __init__(self, n):
         self.weights = np.random.rand(n)
         self.n = n
@@ -379,7 +398,7 @@ class SyntheticNeuralNetwork:
     Output: classification score between 0 and 1
     """
 
-    def __init__(self, n,set_zero=True):
+    def __init__(self, n, set_zero=True):
         self.n = n
         self.game_name = "synth_neural_network"
         self.weights_1 = np.random.normal(loc=0, scale=10, size=(100, self.n))

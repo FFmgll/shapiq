@@ -5,7 +5,7 @@ import random
 import numpy as np
 from scipy.special import binom
 
-from games import ParameterizedSparseLinearModel, NLPLookupGame
+from games import NLPLookupGame
 from approximators import BaseShapleyInteractions
 from approximators.base import determine_complete_subsets, powerset
 

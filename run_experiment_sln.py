@@ -1,6 +1,6 @@
+"""This module is used to run experiments given the SparseLinearModels with exact ground-truth values."""
 import copy
 import os
-
 import time
 
 import numpy as np
@@ -14,9 +14,8 @@ from approximators import SHAPIQEstimator, PermutationSampling
 from approximators.regression import RegressionEstimator
 
 
-def get_approximation_error(approx: np.ndarray, exact: np.ndarray, eps: float = 0.0000001) -> float:
+def get_approximation_error(approx: np.ndarray, exact: np.ndarray) -> float:
     error = np.sum((approx - exact) ** 2) / binom(N_FEATURES, SHAPLEY_INTERACTION_ORDER)
-    error = 0. if error < eps else error
     return error
 
 
@@ -69,32 +68,35 @@ def save_values(save_path: str, values: list):
 
 
 if __name__ == "__main__":
-    # Parameters to change -------------------------------------------------------------------------
-    SHAPLEY_INTERACTION_ORDER = 2
-    MIN_MAX_INTERACTIONS = [(0, 10), (0, 15), (0, 20), (0, 25), (0, 30)]
 
-    ITERATIONS = 10
-
-    # Parameters to probably not change ------------------------------------------------------------
-    N_FEATURES: int = 30
-    N_INTERACTIONS: int = 100  # and also a second run to 100 and a third ggf. to 500 (cluster first)
-    N_NON_IMPORTANT_FEATURE_RATIO = 0.
-
-    # Parameters to not change Fabian plz ... nothing will work if you do ... just leave it be -----
-    # This goes for everything down there
-    time_id = str(int(time.time()))
     RESULT_DIR = os.path.join("results", "sln")
     if not os.path.exists(RESULT_DIR):
         os.mkdir(RESULT_DIR)
 
-    MAX_BUDGET: int = 2**14
-    BUDGET_STEPS = np.arange(0, 1.05, 0.05)
-    SHAPLEY_INTERACTION_SUBSETS: dict = {}
+    # game settings
+    N_FEATURES: int = 30  # number of players
+    N_INTERACTIONS: int = 100  # number of interactions in the model
+    N_NON_IMPORTANT_FEATURE_RATIO = 0.  # percentage of dummy players (zero value players)
+
+    # SHAP-IQ settings
+    SHAPLEY_INTERACTION_ORDER = 2  # interaction order to compute values for
+    SAMPLING_KERNELS = ["faith"]  # sampling weights (for drawing subsets)
+    PAIRWISE_LIST = [False]  # weather or not to use pairwise sampling (also select the inverse of the subset choosen) or not possible values [True, False]
+
+    # sampling budgets settings
+    MAX_BUDGET: int = 2 ** 14  # max computation budget
+    BUDGET_STEPS = np.arange(0, 1.05, 0.05)  # step size of computation budgets
+
+    # experiment iterations settings
+    ITERATIONS = 10
     INNER_ITERATIONS = 1
-    SAMPLING_KERNELS = ["faith"]
-    PAIRWISE_LIST = [False]
-    K = 10
+    MIN_MAX_INTERACTIONS = [(0, 10), (0, 15), (0, 20), (0, 25), (0, 30)]
+
+    # evaluation settings
+    K = 10  # approx at k value
+
     START_TIME = str(time.time())
+    time_id = str(int(time.time()))
     approx_errors_list = []
     # Game Function --------------------------------------------------------------------------------
     for iteration in range(1, ITERATIONS + 1):

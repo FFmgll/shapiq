@@ -3,9 +3,7 @@ import random
 import typing
 
 import numpy as np
-import setuptools
 from scipy.special import binom
-
 
 from .base import BaseShapleyInteractions, powerset, determine_complete_subsets
 

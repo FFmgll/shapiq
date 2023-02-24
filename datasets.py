@@ -1,3 +1,4 @@
+"""This module gathers two datasets from the openml open source repository."""
 import pandas as pd
 import openml
 

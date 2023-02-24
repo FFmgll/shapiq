@@ -1,3 +1,4 @@
+"""This module is used to run experiments given any game function, where ground-truth values are computed via brute force."""
 import copy
 import os
 
@@ -9,7 +10,7 @@ from scipy.special import binom
 from scipy.stats import kendalltau
 from tqdm import tqdm
 
-from games import ParameterizedSparseLinearModel, SparseLinearModel, SyntheticNeuralNetwork, NLPLookupGame
+from games import ParameterizedSparseLinearModel, BaseSparseLinearModel, SyntheticNeuralNetwork, NLPLookupGame
 from approximators import SHAPIQEstimator, PermutationSampling
 from approximators.regression import RegressionEstimator
 
@@ -68,38 +69,38 @@ def save_values(save_path: str, values: list):
 
 
 if __name__ == "__main__":
-    PLOT = True
+    PLOT = True  # weather or not to plot in the end of the experiment
     INDEPENDENT_ITERATIONS = False  # controls if each iteration is saved independetly (one at a time for running on cluster)
 
     RESULT_DIR = os.path.join("results", "42")
     if not os.path.exists(RESULT_DIR):
         os.mkdir(RESULT_DIR)
 
-    MAX_BUDGET: int = 2**14
-    BUDGET_STEPS = np.arange(0, 1.05, 0.05)
-    SHAPLEY_INTERACTION_ORDER = 2
-    SHAPLEY_INTERACTION_SUBSETS: dict = {}
-    ITERATIONS = 10
-    INNER_ITERATIONS = 1
-    SAMPLING_KERNELS = ["faith"]
-    PAIRWISE_LIST = [False]
+    # game settings
+    N_FEATURES: int = 14  # player size
+    used_ids = set()  # only used for LookUpGames such that we draw a new game every iteration
 
-    used_ids = set()  # for LoopUpGame
+    # SHAP-IQ settings
+    SHAPLEY_INTERACTION_ORDER = 2  # interaction order to compute values for
+    SAMPLING_KERNELS = ["faith"]  # sampling weights (for drawing subsets)
+    PAIRWISE_LIST = [False]  # weather or not to use pairwise sampling (also select the inverse of the subset choosen) or not possible values [True, False]
 
-    N_FEATURES: int = 14
-    K = 10
+    # sampling budgets settings
+    MAX_BUDGET: int = 2**14  # max computation budget
+    BUDGET_STEPS = np.arange(0, 1.05, 0.05)  # step size of computation budgets
+
+    # experiment iterations settings
+    ITERATIONS = 10  # number of experiments to run
+    INNER_ITERATIONS = 1  # number of runs of the same game function (to sample different subsets)
+
+    # evaluation settings
+    K = 10  # approx at k value
 
     START_TIME = str(time.time())
-
     approx_errors_list = []
     for iteration in range(1, ITERATIONS + 1):
         print(f"Starting Iteration {iteration}")
-
-        #game = SyntheticNeuralNetwork(n=N_FEATURES)
-        #game = ParameterizedSparseLinearModel(n=N_FEATURES, weighting_scheme="uniform", n_interactions=30, max_interaction_size=5, min_interaction_size=1)
-        #game = SparseLinearModel(n=N_FEATURES, n_interactions_per_order={50: 30}, n_non_important_features=0)
         game = NLPLookupGame(n=N_FEATURES, set_zero=True, used_ids=used_ids)
-        #game = games.TabularLookUpGame(data_folder="adult_1", n=N_FEATURES, used_ids=used_ids, set_zero=True)
 
         try:
             used_ids = game.used_ids
@@ -117,17 +118,17 @@ if __name__ == "__main__":
         for inner_iteration in range(1, INNER_ITERATIONS + 1):
             print(f"Interaction Order: {SHAPLEY_INTERACTION_ORDER}")
 
-            # Game Parameters ------------------------------------------------------------------
+            # Game Parameters ----------------------------------------------------------------------
             n = game.n
             N = set(range(n))
 
-            # Budgets --------------------------------------------------------------------------
+            # Budgets ------------------------------------------------------------------------------
             total_subsets = 2 ** N_FEATURES
             biggest_budget = min(MAX_BUDGET, total_subsets)
             budgets = [int(budget * biggest_budget) for budget in BUDGET_STEPS]
             all_budgets = sum(budgets)
 
-            # Approximation Estimators ---------------------------------------------------------
+            # Approximation Estimators -------------------------------------------------------------
             shapley_extractor_sii = SHAPIQEstimator(
                 N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
             shapley_extractor_sti = SHAPIQEstimator(
@@ -141,7 +142,7 @@ if __name__ == "__main__":
                 "SFI": shapley_extractor_sfi
             }
 
-            # Baseline Estimator ---------------------------------------------------------------
+            # Baseline Estimator -------------------------------------------------------------------
             shapley_extractor_sii_permutation = PermutationSampling(
                 N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
             shapley_extractor_sti_permutation = PermutationSampling(
@@ -155,7 +156,7 @@ if __name__ == "__main__":
                 "SFI": shapley_extractor_sfi_regression
             }
 
-            # Compute exact interactions -------------------------------------------------------
+            # Compute exact interactions -----------------------------------------------------------
             if inner_iteration <= 1:
                 print("Starting exact computations")
                 shapx_exact_values = {}
@@ -174,7 +175,7 @@ if __name__ == "__main__":
                         )
                 print("Exact computations finished")
 
-            # Approximate ----------------------------------------------------------------------
+            # Approximate --------------------------------------------------------------------------
             print("Starting approximation computations")
             shapx_sampling = {}
             approximation_errors = {}
@@ -182,7 +183,7 @@ if __name__ == "__main__":
             precisions = {}
             approximation_errors_at_k = {}
             kendal_taus = {}
-            # Each Interaction Index -----------------------------------------------------------
+            # Each Interaction Index ---------------------------------------------------------------
             for interaction_type, approximator in approximators.items():
                 time.sleep(0.1)
                 pbar_budget = all_budgets * len(PAIRWISE_LIST) * len(SAMPLING_KERNELS) + all_budgets
@@ -192,7 +193,7 @@ if __name__ == "__main__":
                     relative_budget = round(budget / total_subsets, 2)
                     run_id1 = '_'.join((interaction_type, str(budget), str(relative_budget)))
 
-                    # Baseline Approximations --------------------------------------------------
+                    # Baseline Approximations ------------------------------------------------------
                     baseline_run_id = '_'.join((run_id1, 'baseline'))
                     baseline_approximator = baselines[interaction_type]
                     approximated_interactions = copy.deepcopy(
@@ -217,16 +218,16 @@ if __name__ == "__main__":
                     )
                     pbar.update(budget)
 
-                    # Sampling Approximations --------------------------------------------------
+                    # Sampling Approximations ------------------------------------------------------
                     for sampling_kernel in SAMPLING_KERNELS:
                         run_id2 = '_'.join((run_id1, 'approximation', sampling_kernel))
 
-                        # Pairwise Approximations ----------------------------------------------
+                        # Pairwise Approximations --------------------------------------------------
                         for pairwise in PAIRWISE_LIST:
                             pairwise_id = 'pairwise' if pairwise else 'not-paired'
                             run_id3 = '_'.join((run_id2, pairwise_id))
 
-                            # Const. and Sampling ----------------------------------------------
+                            # Const. and Sampling --------------------------------------------------
                             approximated_interactions = copy.deepcopy(
                                 approximator.compute_interactions_from_budget(
                                     game_fun, budget,  pairing=pairwise,
@@ -259,7 +260,7 @@ if __name__ == "__main__":
                             pbar.update(budget)
                 pbar.close()
 
-            # Store Iteration  -----------------------------------------------------------------
+            # Store Iteration  ---------------------------------------------------------------------
             for approximator_id, approximation_error in approximation_errors.items():
                 run_dict = {}
                 id_parts = approximator_id.split('_')

@@ -1,3 +1,4 @@
+"""This Module can be used to precompute model outputs for the adult dataset TabularLookUpGame"""
 import random
 import os
 
