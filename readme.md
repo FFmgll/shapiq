@@ -36,7 +36,7 @@ shapiq_sii = SHAPIQEstimator(
 
 sii_scores = shapiq_sii.compute_interactions_from_budget(
     game=game_fun, budget=budget,
-    pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False  # control the sampling procedure
+    pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False 
 )
 ```
 #### SHAP-IQ to approximate the Shapley Taylor Index
@@ -48,7 +48,7 @@ shapiq_sti = SHAPIQEstimator(
 
 sti_scores = shapiq_sti.compute_interactions_from_budget(
     game=game_fun, budget=budget,
-    pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False  # control the sampling procedure
+    pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False
 ) 
 ```
 #### SHAP-IQ to approximate the Shapley Faith Index
@@ -60,7 +60,7 @@ shapiq_sfi = SHAPIQEstimator(
 
 sfi_scores = shapiq_sfi.compute_interactions_from_budget(
     game=game_fun, budget=budget,
-    pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False  # control the sampling procedure
+    pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False
 )
 ```
 
