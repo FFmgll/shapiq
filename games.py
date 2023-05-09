@@ -49,7 +49,7 @@ class MachineLearningMetaGame:
             self.model = RandomForestClassifier()
             self.model.fit(self.x_data, self.y_data)
         self.empty_value = self.call_model(self.replacement_values, set())
-        print(model.score(self.x_data, self.y_data))
+        print(self.model.score(self.x_data, self.y_data))
 
     def call_model(self, x_i: np.ndarray, S: set):
         x_input = np.zeros(shape=(1, self.n))

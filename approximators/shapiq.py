@@ -208,7 +208,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         tmp = self.init_results()
         game_eval = game(T)
         t = len(T)
-        for S in powerset(self.N,self.min_order,self.s):
+        for S in powerset(self.N, self.min_order, self.s):
             size_intersection = len(set(S).intersection(T))
             tmp[len(S)][S] += game_eval * self.weights[t, size_intersection] / p
         return tmp
