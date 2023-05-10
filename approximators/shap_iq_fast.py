@@ -38,7 +38,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         self.interaction_type = "SII"
 
         super().__init__(N=player_names, max_order=max_order, min_order=min_order)
-
+        self.s = self.s_0
         weights_q, weights_p = _init_sampling_weights(n_players=self.n, interaction_order=self.s)
         self.weights_q = weights_q
         self.weights_p = weights_p

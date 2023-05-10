@@ -18,6 +18,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 for k in range(max(0, s + t - self.n), min(s, t) + 1):
                     self.weights[s][t, k] = (-1) ** (s - k) * self._kernel_m(t - k, s)
         self.inf = 1000000
+        self.interaction_values = self.init_results()
 
     def compute_interactions_from_budget_one(self, game, budget, interaction, pairing=False,
                                              sampling_kernel="ksh", sampling_only=False):
@@ -86,6 +87,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                                                                          interaction)
                         result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(
                             result_sample_mean, result_sample_s2, n_samples, result_sample_update)
+        self.interaction_values = result_complete
         return copy.deepcopy(result_complete)
 
     def compute_interactions_from_budget(self, game, budget, pairing=False, sampling_kernel="ksh",
@@ -204,6 +206,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                     result_complete = self.update_results(result_complete, result_sample_mean)
 
         results_out = self._smooth_with_epsilon(result_complete)
+        self.interaction_values = result_complete
         return copy.deepcopy(results_out)
 
     def compute_interactions_complete(self, game, interaction_subsets={}):
@@ -218,6 +221,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 s_t = len(set(S).intersection(T))
                 results[len(S)][S] += game_eval * self.weights[len(S)][t, s_t]
         result_out = copy.deepcopy(self._smooth_with_epsilon(results))
+        self.interaction_values = results
         return result_out
 
     def compute_efficiency(self, game):
@@ -372,7 +376,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         result_out = copy.deepcopy(self._smooth_with_epsilon(results))
         return result_out
 
-    def transform_interactions_in_n_shapley(self, interaction_values: Dict[int, np.ndarray],
+    def transform_interactions_in_n_shapley(self, interaction_values: Dict[int, np.ndarray] = None,
                                             n: int = None,
                                             reduce_one_dimension: bool = False):
         """Computes the n-Shapley values from the interaction values
@@ -386,6 +390,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         """
         if n is None:
             n = self.s_0
+        if interaction_values is None:
+            interaction_values = self.interaction_values
         # bernoulli_numbers = self._compute_bernoulli_numbers(n=n + 1)
         bernoulli_numbers = bernoulli(n)
         result = self.init_results()
@@ -401,7 +407,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 # get the effect of T
                 T_effect = interaction_values[len(T)][T]
                 # normalization with bernoulli numbers
-                S_effect = S_effect + bernoulli_numbers[len(T) - subset_size] * T_effect
+                S_effect += bernoulli_numbers[len(T) - subset_size] * T_effect
             result[len(S)][tuple(S)] = S_effect
         if not reduce_one_dimension:
             return result
@@ -410,10 +416,12 @@ class SHAPIQEstimator(BaseShapleyInteractions):
     def _convert_n_shapley_values_to_one_dimension(self, n_shapley_values, n: int = None):
         """Converts the n-Shapley values to one dimension"""
         if n is None:
-            n = max((len(k), _) for k, v in n_shapley_values.iteritems())
+            n = max(n_shapley_values.keys())
         result_pos = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
         result_neg = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
-        for S, n_shap_value in n_shapley_values.items():
+        for S in powerset(self.N, min_size=1, max_size=n):
+            n_shap_value = n_shapley_values[len(S)][tuple(S)]
+        #for S, n_shap_value in n_shapley_values.items():
             for player in S:
                 if n_shap_value > 0:
                     result_pos[len(S)][player] += n_shap_value / len(S)
@@ -421,7 +429,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                     result_neg[len(S)][player] += n_shap_value / len(S)
         return result_pos, result_neg
 
-    def _compute_bernoulli_numbers(self, n: int):
+    @staticmethod
+    def _compute_bernoulli_numbers(n: int):
         """ Computes the Bernoulli numbers up to order n and returns a list of length n+1"""
         bernoulli_numbers = np.zeros(n + 1)
         bernoulli_numbers[0] = 1
