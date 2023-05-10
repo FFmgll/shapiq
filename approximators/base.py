@@ -10,14 +10,16 @@ class BaseShapleyInteractions:
 
     def __init__(self, N, max_order, min_order=1):
         self.min_order = min_order
-        self.s = max_order
+        self.s_0 = max_order
         self.N = N
         self.n = len(N)
-        self.weights = np.zeros((self.n + 1, self.s + 1))
+        self.weights = {}
+        for s in range(min_order,max_order+1):
+            self.weights[s] = np.zeros((self.n + 1, s + 1))
 
     def init_results(self):
         results = {}
-        for k in range(self.min_order, self.s + 1):
+        for k in range(self.min_order, self.s_0 + 1):
             results[k] = np.zeros(np.repeat(self.n, k))
         return results
 
