@@ -19,7 +19,7 @@ def get_weights(num_players):
 class RegressionEstimator(BaseShapleyInteractions):
     """ Estimates the SI (for FSI) using the weighted least square approach """
     def __init__(self, N, max_order):
-        min_order = max_order
+        min_order = 1
         super().__init__(N, max_order, min_order=min_order)
         self._big_M = float(10_000_000)
         self.interaction_type = 'SFI'
@@ -110,13 +110,13 @@ class RegressionEstimator(BaseShapleyInteractions):
         game_values = game_values - empty_value
 
         num_players: int = 0
-        for s in range(1, self.s + 1):
+        for s in range(1, self.s_0 + 1):
             num_players += int(binom(self.n, s))
 
         i = 0
         player_indices = {}
         player_indices_inv = {}
-        for combination in powerset(self.N, max_size=self.s, min_size=1):
+        for combination in powerset(self.N, max_size=self.s_0, min_size=1):
             player_indices[combination] = i
             player_indices_inv[i] = combination
             i += 1
@@ -127,7 +127,7 @@ class RegressionEstimator(BaseShapleyInteractions):
         for i, S in enumerate(all_S):
             S = N_arr[S]
             W[i] = kernel_weights[tuple(S)]
-            for s in range(1, self.s + 1):
+            for s in range(1, self.s_0 + 1):
                 for combination in itertools.combinations(S, s):
                     index = player_indices[combination]
                     new_S[i, index] = 1
@@ -139,12 +139,89 @@ class RegressionEstimator(BaseShapleyInteractions):
         Bw = np.dot(B, W)
         phi, residuals, rank, singular_values = np.linalg.lstsq(Aw, Bw, rcond=None)
 
-        result = np.zeros(np.repeat(self.n, self.s), dtype=float)
+        #result = np.zeros(np.repeat(self.n, self.s_0), dtype=float)
+
+        #for i in range(len(phi)):
+        #    combination = player_indices_inv[i]
+        #    if len(combination) != self.s_0:
+        #        continue
+        #   result[combination] = phi[i]
+
+        result = self.init_results()
 
         for i in range(len(phi)):
             combination = player_indices_inv[i]
-            if len(combination) != self.s:
-                continue
-            result[combination] = phi[i]
+            result[len(combination)][combination] = phi[i]
 
         return copy.deepcopy(self._smooth_with_epsilon(result))
+
+
+    def compute_exact_values(self, game_fun):
+        S_list = []
+        game_values = []
+        kernel_weights = {}
+
+        sampling_weight = self._init_sampling_weights()
+        for T in powerset(self.N,1,self.n-1):
+            S_list.append(set(T))
+            game_values.append(game_fun(T))
+            kernel_weights[T] = sampling_weight[len(T)]
+
+        empty_value = game_fun({})
+        full_value = game_fun(self.N)
+        S_list.append(set())
+        S_list.append(self.N)
+        game_values.append(empty_value)
+        game_values.append(full_value)
+        kernel_weights[()] = self._big_M
+        kernel_weights[tuple(self.N)] = self._big_M
+
+        # transform s and v into np.ndarrays
+        all_S = np.zeros(shape=(len(S_list), self.n), dtype=bool)
+        for i, subset in enumerate(S_list):
+            if len(subset) == 0:
+                continue
+            subset = np.asarray(list(subset))
+            all_S[i, subset] = 1
+        game_values = np.asarray(game_values)
+        game_values = game_values - empty_value
+
+        num_players: int = 0
+        for s in range(1, self.s_0 + 1):
+            num_players += int(binom(self.n, s))
+
+        i = 0
+        player_indices = {}
+        player_indices_inv = {}
+        for combination in powerset(self.N, max_size=self.s_0, min_size=1):
+            player_indices[combination] = i
+            player_indices_inv[i] = combination
+            i += 1
+
+        N_arr = np.arange(0, self.n)
+        W = np.zeros(shape=game_values.shape, dtype=float)
+        new_S = np.zeros(shape=(len(S_list), num_players), dtype=bool)
+        for i, S in enumerate(all_S):
+            S = N_arr[S]
+            W[i] = kernel_weights[tuple(S)]
+            for s in range(1, self.s_0 + 1):
+                for combination in itertools.combinations(S, s):
+                    index = player_indices[combination]
+                    new_S[i, index] = 1
+
+        A = new_S
+        B = game_values
+        W = np.sqrt(np.diag(W))
+        Aw = np.dot(W, A)
+        Bw = np.dot(B, W)
+        phi, residuals, rank, singular_values = np.linalg.lstsq(Aw, Bw, rcond=None)
+
+        #result = np.zeros(np.repeat(self.n, self.s_0), dtype=float)
+        result = self.init_results()
+
+        for i in range(len(phi)):
+            combination = player_indices_inv[i]
+            result[len(combination)][combination] = phi[i]
+
+        return copy.deepcopy(self._smooth_with_epsilon(result))
+
