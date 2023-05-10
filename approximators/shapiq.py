@@ -13,8 +13,9 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         super().__init__(N, max_order, min_order)
         self.interaction_type = interaction_type
         for t in range(0, self.n + 1):
-            for k in range(max(0, self.s + t - self.n), min(self.s, t) + 1):
-                self.weights[t, k] = (-1) ** (self.s - k) * self._kernel_m(t - k)
+            for s in range(min_order,max_order+1):
+                for k in range(max(0, s + t - self.n), min(s, t) + 1):
+                    self.weights[s][t, k] = (-1) ** (s - k) * self._kernel_m(t - k,s)
         self.inf = 1000000
 
     def compute_interactions_from_budget_one(self, game, budget, interaction, pairing=False, sampling_kernel="ksh", sampling_only=False):
@@ -186,21 +187,21 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             game_eval = game(T)
             t = len(T)
             if len(interaction_subsets) == 0:
-                interaction_subsets_iterator = powerset(self.N, self.min_order, self.s)
+                interaction_subsets_iterator = powerset(self.N, self.min_order, self.s_0)
             for S in interaction_subsets_iterator:
                 s_t = len(set(S).intersection(T))
-                results[len(S)][S] += game_eval * self.weights[t, s_t]
+                results[len(S)][S] += game_eval * self.weights[len(S)][t, s_t]
         result_out = copy.deepcopy(self._smooth_with_epsilon(results))
         return result_out
 
     def compute_efficiency(self, game):
         """ Computes efficiency value for SII """
         result = 0
-        for t in range(self.s):
-            factor = binom(self.n - t, self.s - t - 1)
+        for t in range(self.s_0):
+            factor = binom(self.n - t, self.s_0 - t - 1)
             sign = (-1) ** t
             for S in powerset(self.N, t, t):
-                result += factor * sign * ((-1) ** self.s * game(S) + game(set(self.N) - set(S)))
+                result += factor * sign * ((-1) ** self.s_0 * game(S) + game(set(self.N) - set(S)))
         return result / self.s
 
     def _evaluate_subset(self, game, T, p):
@@ -208,9 +209,9 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         tmp = self.init_results()
         game_eval = game(T)
         t = len(T)
-        for S in powerset(self.N, self.min_order, self.s):
+        for S in powerset(self.N, self.min_order, self.s_0):
             size_intersection = len(set(S).intersection(T))
-            tmp[len(S)][S] += game_eval * self.weights[t, size_intersection] / p
+            tmp[len(S)][S] += game_eval * self.weights[len(S)][t, size_intersection] / p
         return tmp
 
     def _evaluate_subset_one(self, game, T, p, interaction):
@@ -219,7 +220,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         game_eval = game(T)
         t = len(T)
         size_intersection = len(set(interaction).intersection(T))
-        tmp[interaction] += game_eval * self.weights[t, size_intersection] / p
+        tmp[interaction] += game_eval * self.weights[len(interaction)][t, size_intersection] / p
         return tmp
 
 
@@ -234,9 +235,9 @@ class SHAPIQEstimator(BaseShapleyInteractions):
     def _kernel_q(self, t, sampling_kernel):
         """ Determines the sampling weights for a subset of size t (size_weight) and the weight for any subset of size t (size_weight*binom(n,t)) """
         if sampling_kernel == "ksh":
-            if t>=self.s and t<=self.n-self.s:
-                size_weight = np.math.factorial(self.n - t - self.s) * np.math.factorial(t - self.s) / np.math.factorial(
-                self.n - self.s + 1)
+            if t>=self.s_0 and t<=self.n-self.s_0:
+                size_weight = np.math.factorial(self.n - t - self.s_0) * np.math.factorial(t - self.s_0) / np.math.factorial(
+                self.n - self.s_0 + 1)
             else:
                 size_weight = self.inf
         if sampling_kernel == "faith":
@@ -250,16 +251,22 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             size_weight = 1/binom(self.n, t)
         return size_weight, size_weight*binom(self.n,t)
 
-    def _kernel_m(self, t):
-        """ Returns the weight for each interaction type for a subset of size t """
+    def _kernel_m(self, t, s):
+        """ Returns the weight for each interaction type for a subset of size t and interaction of size s"""
         if self.interaction_type == "SII":
-            return np.math.factorial(self.n - t - self.s) * np.math.factorial(t) / np.math.factorial(
-                self.n - self.s + 1)
+            return np.math.factorial(self.n - t - s) * np.math.factorial(t) / np.math.factorial(
+                self.n - s + 1)
         if self.interaction_type == "STI":
-            return self.s * np.math.factorial(self.n - t - 1) * np.math.factorial(t) / np.math.factorial(self.n)
+            if s==self.s_0:
+                return self.s_0 * np.math.factorial(self.n - t - 1) * np.math.factorial(t) / np.math.factorial(self.n)
+            else:
+                return 1.0*(t==0)
         if self.interaction_type == "SFI":
-            return np.math.factorial(2 * self.s - 1) / np.math.factorial(self.s - 1) ** 2 * np.math.factorial(
-                self.n - t - 1) * np.math.factorial(t + self.s - 1) / np.math.factorial(self.n + self.s - 1)
+            if s == self.s_0:
+                return np.math.factorial(2 * s - 1) / np.math.factorial(s - 1) ** 2 * np.math.factorial(
+                    self.n - t - 1) * np.math.factorial(t + s - 1) / np.math.factorial(self.n + s - 1)
+            else:
+                raise ValueError("Lower order interactions are not supported.")
 
     def _compute_interactions_complete_k(self, game, k):
         """ Computes the SI values for all interactions over all subsets of size k for a given game """
@@ -267,10 +274,10 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         for T in powerset(self.N, k, k):
             game_eval = game(T)
             t = len(T)
-            interaction_subset_iterator = powerset(self.N, self.min_order, self.s)
+            interaction_subset_iterator = powerset(self.N, self.min_order, self.s_0)
             for S in interaction_subset_iterator:
                 s_t = len(set(S).intersection(T))
-                results[len(S)][S] += game_eval * self.weights[t, s_t]
+                results[len(S)][S] += game_eval * self.weights[len(S)][t, s_t]
         return results
 
     def _compute_interactions_complete_k_one(self, game, k, interaction):
@@ -281,7 +288,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             game_eval = game(T)
             t = len(T)
             s_t = len(set(interaction).intersection(T))
-            results[interaction] += game_eval * self.weights[t, s_t]
+            results[interaction] += game_eval * self.weights[len(interaction)][t, s_t]
         return results
 
 
@@ -321,7 +328,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         for T in subsets:
             game_eval = S_game_mapping[tuple(T)]
             t = len(T)
-            for S in powerset(self.N,self.min_order,self.s):
+            for S in powerset(self.N,self.min_order,self.s_0):
                 s_t = len(set(S).intersection(T))
                 results_sample[len(S)][S] += 2*h*game_eval*(s_t - t/self.n)
                 epsilons[len(S)][S] += 2*h*val_empty*(s_t-t/self.n)
