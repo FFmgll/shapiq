@@ -245,6 +245,7 @@ class BaseSparseLinearModel:
             self._highest_interaction_order = max(n_interactions_per_order.keys())
         except AttributeError:
             self._highest_interaction_order = 0
+        self.gamma_matrix = self._get_gamma_weights(n, s=1)
 
     #OLD EXACT CALCULATION
     def exact_values_old(self, gamma_matrix, min_order, max_order):
@@ -258,7 +259,9 @@ class BaseSparseLinearModel:
                     results[s][S] += weight * self.coefficient_weighting(gamma_matrix, s, q, r)
         return results
 
-    def exact_values(self, gamma_matrix, min_order, max_order):
+    def exact_values(self, gamma_matrix=None, min_order=2, max_order=2):
+        if gamma_matrix is None:
+            gamma_matrix = self.gamma_matrix
         results = {}
         #pre-compute weights in matrix: order x interaction set sizes x intersection set sizes
         exact_value_weights = np.zeros((max_order+1,self.n+1,max_order+1))
@@ -334,6 +337,17 @@ class BaseSparseLinearModel:
         x[list(S)] = 1
         return self.call(x)
 
+
+    def _get_gamma_weights(self, n, s):
+        weights = np.zeros((n + 1, s + 1))
+        for t in range(0, n + 1):
+            for k in range(max(0, s + t - n), min(s, t) + 1):
+                weights[t, k] = (-1) ** (s - k) * self._kernel_m(n, t - k, s)
+        return weights
+
+    @staticmethod
+    def _kernel_m(n, t, s):
+        return np.math.factorial(n - t - s) * np.math.factorial(t) / np.math.factorial(n - s + 1)
 
 class ParameterizedSparseLinearModel(BaseSparseLinearModel):
     """Synthetic Linear Function where you know the Shapley values and interaction terms beforehand.

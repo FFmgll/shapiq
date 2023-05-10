@@ -14,7 +14,7 @@ class BaseShapleyInteractions:
         self.N = N
         self.n = len(N)
         self.weights = {}
-        for s in range(min_order,max_order+1):
+        for s in range(min_order, max_order+1):
             self.weights[s] = np.zeros((self.n + 1, s + 1))
 
     def init_results(self):
