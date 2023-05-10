@@ -5,7 +5,6 @@ import random
 import numpy as np
 from scipy.special import binom
 
-from games import NLPLookupGame
 from approximators import BaseShapleyInteractions
 from approximators.base import determine_complete_subsets, powerset
 
@@ -28,10 +27,9 @@ class RegressionEstimator(BaseShapleyInteractions):
     def _init_sampling_weights(self):
         weight_vector = np.zeros(shape=self.n - 1)
         for subset_size in range(1, self.n):
-            weight_vector[subset_size - 1] = (self.n - 1) / (binom(self.n, subset_size) * subset_size * (self.n - subset_size))
+            weight_vector[subset_size - 1] = (self.n - 1) / (subset_size * (self.n - subset_size))
         sampling_weight = (np.asarray([0] + [*weight_vector] + [0])) / sum(weight_vector)
-        regression_weights = (np.asarray([self._big_M] + [*weight_vector] + [self._big_M]))
-        return sampling_weight, regression_weights
+        return sampling_weight
 
     @staticmethod
     def get_S_and_values(budget, num_players, weight_vector, N, pairing, game_fun):
@@ -39,45 +37,67 @@ class RegressionEstimator(BaseShapleyInteractions):
             budget=budget, n=num_players, s=1, q=weight_vector)
 
         all_subsets_to_sample = []
+        kernel_weights = {}
 
         for complete_subset in complete_subsets:
             combinations = itertools.combinations(N, complete_subset)
             for subset in combinations:
                 subset = set(subset)
                 all_subsets_to_sample.append(subset)
+                kernel_weights[tuple(sorted(subset))] = weight_vector[len(subset)] / binom(num_players, len(subset))
 
         remaining_weight = weight_vector[incomplete_subsets] / sum(
             weight_vector[incomplete_subsets])
+        kernel_weights_sampling = {}
 
         if len(incomplete_subsets) > 0:
-            sampled_subsets = []
+            sampled_subsets = set()
+            n_sampled_subsets = 0
             while len(sampled_subsets) < budget:
                 subset_size = random.choices(incomplete_subsets, remaining_weight, k=1)
                 ids = np.random.choice(num_players, size=subset_size, replace=False)
-                sampled_subsets.append(tuple(sorted(ids)))
+                sampled_subset = tuple(sorted(ids))
+                if sampled_subset not in sampled_subsets:
+                    sampled_subsets.add(sampled_subset)
+                    kernel_weights_sampling[sampled_subset] = 1.
+                else:
+                    kernel_weights_sampling[sampled_subset] += 1.
+                n_sampled_subsets += 1
                 if pairing:
                     if len(sampled_subsets) < budget:
-                        sampled_subsets.append(tuple(N - set(ids)))
+                        sampled_subset_paired = tuple(sorted(set(N) - set(ids)))
+                        if sampled_subset_paired not in sampled_subsets:
+                            sampled_subsets.add(sampled_subset_paired)
+                            kernel_weights_sampling[sampled_subset_paired] = 1.
+                        else:
+                            kernel_weights_sampling[sampled_subset_paired] += 1.
+                        n_sampled_subsets += 1
             for subset in sampled_subsets:
                 all_subsets_to_sample.append(set(subset))
 
+            # re-normalize kernel weights
+            weight_left = np.sum(weight_vector[incomplete_subsets])
+            kernel_weights_sampling = {subset: weight * (weight_left / n_sampled_subsets) for
+                                       subset, weight in kernel_weights_sampling.items()}
+            kernel_weights.update(kernel_weights_sampling)
+
         game_values = [game_fun(subset) for subset in all_subsets_to_sample]
-        return all_subsets_to_sample, game_values
+        return all_subsets_to_sample, game_values, kernel_weights
 
     def approximate_with_budget(self, game_fun, budget, pairing: bool = True):
-        sampling_weight, regression_weights = self._init_sampling_weights()
+        sampling_weight = self._init_sampling_weights()
 
-        S_list, game_values = self.get_S_and_values(
+        S_list, game_values, kernel_weights = self.get_S_and_values(
             budget, self.n, sampling_weight, self.N, pairing, game_fun)
 
         empty_value = game_fun({})
         full_value = game_fun(self.N)
-
         S_list.append(set())
         S_list.append(self.N)
-
         game_values.append(empty_value)
         game_values.append(full_value)
+        kernel_weights[()] = self._big_M
+        kernel_weights[tuple(self.N)] = self._big_M
 
         # transform s and v into np.ndarrays
         all_S = np.zeros(shape=(len(S_list), self.n), dtype=bool)
@@ -106,7 +126,7 @@ class RegressionEstimator(BaseShapleyInteractions):
         new_S = np.zeros(shape=(len(S_list), num_players), dtype=bool)
         for i, S in enumerate(all_S):
             S = N_arr[S]
-            W[i] = regression_weights[len(S)]
+            W[i] = kernel_weights[tuple(S)]
             for s in range(1, self.s + 1):
                 for combination in itertools.combinations(S, s):
                     index = player_indices[combination]
@@ -128,31 +148,3 @@ class RegressionEstimator(BaseShapleyInteractions):
             result[combination] = phi[i]
 
         return copy.deepcopy(self._smooth_with_epsilon(result))
-
-
-if __name__ == "__main__":
-    from approximators.shapiq import SHAPIQEstimator
-
-    n = 14
-    #game = ParameterizedSparseLinearModel(n=n, weighting_scheme="uniform", n_interactions=4, max_interaction_size=2, min_interaction_size=2)
-    #game_fun = game.set_call
-
-    game = NLPLookupGame(n=n)
-    game_fun = game.set_call
-
-
-    N = set(range(0, n))
-
-    est_1 = SHAPIQEstimator(N, 2, 2, "SFI")
-
-    exact_values = copy.deepcopy(
-        est_1.compute_interactions_complete(game_fun)
-    )
-
-
-    est = RegressionEstimator(N, 2)
-    phi = est.approximate_with_budget(game_fun=game_fun, budget=2**10)
-
-    #exact_values = game.exact_values(est_1.weights, 2, 2)
-
-    np.sum((exact_values[2] - phi) ** 2)
