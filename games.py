@@ -390,6 +390,26 @@ class SimpleGame:
         return self.call(x)
 
 
+class LinearModelWithCrosses:
+    """A simple synthetic game presented in
+    Sundararajan et al. (2020). The Shapley Taylor Interaction Index
+    Players: the input features (zero or one)
+    Output: regression score -Inf, Inf
+    """
+    def __init__(self, n):
+        self.n = n
+        self.c = random.random()
+        self.game_name = "linear_model_with_crosses"
+
+    def call(self, x):
+        return np.sum(x) + self.c * np.prod(x)
+
+    def set_call(self, S):
+        x = np.zeros(self.n)
+        x[list(S)] = 1
+        return self.call(x)
+
+
 class SyntheticNeuralNetwork:
     """Synthetic Neural Network
     To be used to have a function behaving like a neural network with custom controls
