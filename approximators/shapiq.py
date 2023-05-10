@@ -2,8 +2,11 @@ import copy
 import random
 import typing
 
+
 import numpy as np
-from scipy.special import binom
+from scipy.special import binom, bernoulli
+from typing import Dict
+
 
 from .base import BaseShapleyInteractions, powerset, determine_complete_subsets
 
@@ -342,3 +345,63 @@ class SHAPIQEstimator(BaseShapleyInteractions):
 
         result_out = copy.deepcopy(self._smooth_with_epsilon(results))
         return result_out
+
+
+    def transform_interactions_in_n_shapley(self, interaction_values: Dict[int, np.ndarray], n: int = None,
+                                            reduce_one_dimension: bool = False):
+        """Computes the n-Shapley values from the interaction values
+
+        Args:
+            n (int, optional): The order of the Shapley values. Defaults to None.
+            reduce_one_dimension (bool, optional): If True, the n-Shapley values are reduced to one dimension. Defaults to False.
+
+        Returns:
+            dict: A dictionary containing the n-Shapley values
+        """
+        if n is None:
+            n = self.s_0
+        #bernoulli_numbers = self._compute_bernoulli_numbers(n=n + 1)
+        bernoulli_numbers = bernoulli(n)
+        result = self.init_results()
+        # all subsets S with 1 <= |S| <= n
+        for S in powerset(self.N, min_size=1, max_size=n):
+            # get un-normalized interaction value (delta_S(x))
+            S_effect = interaction_values[len(S)][S]
+            subset_size = len(S)
+            # go over all subsets T of length |S| + 1, ..., n that contain S
+            for T in powerset(self.N, min_size=subset_size + 1, max_size=n):
+                if not set(S).issubset(T):
+                    continue
+                # get the effect of T
+                T_effect = interaction_values[len(T)][T]
+                # normalization with bernoulli numbers
+                S_effect = S_effect + bernoulli_numbers[len(T) - subset_size] * T_effect
+            result[len(S)][tuple(S)] = S_effect
+        if not reduce_one_dimension:
+            return result
+        return self._convert_n_shapley_values_to_one_dimension(result, n=n)
+
+    def _convert_n_shapley_values_to_one_dimension(self, n_shapley_values, n: int = None):
+        """Converts the n-Shapley values to one dimension"""
+        if n is None:
+            n = max((len(k), _) for k, v in n_shapley_values.iteritems())
+        result_pos = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
+        result_neg = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
+        for S, n_shap_value in n_shapley_values.items():
+            for player in S:
+                if n_shap_value > 0:
+                    result_pos[len(S)][player] += n_shap_value / len(S)
+                if n_shap_value < 0:
+                    result_neg[len(S)][player] += n_shap_value / len(S)
+        return result_pos, result_neg
+
+
+    def _compute_bernoulli_numbers(self, n: int):
+        """ Computes the Bernoulli numbers up to order n and returns a list of length n+1"""
+        bernoulli_numbers = np.zeros(n + 1)
+        bernoulli_numbers[0] = 1
+        for k in range(1, n):
+            bernoulli_number = -1 / (k + 1) * np.sum(
+                [binom(k + 1, j) * bernoulli_numbers[j] for j in range(k)])
+            bernoulli_numbers[k] = bernoulli_number
+        return bernoulli_numbers

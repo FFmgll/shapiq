@@ -3,8 +3,8 @@ import copy
 import numpy as np
 from scipy.special import binom
 
-from games import LinearModelWithCrosses
-from approximators import SHAPIQEstimator, PermutationSampling
+from games import LinearModelWithCrosses,ParameterizedSparseLinearModel
+from approximators import SHAPIQEstimator
 from approximators.regression import RegressionEstimator
 
 
@@ -12,7 +12,14 @@ if __name__ == "__main__":
 
     # setup the game function (here we use a
     game = LinearModelWithCrosses(n=3)
-
+    #game = ParameterizedSparseLinearModel(
+    #    n=10,
+    #    weighting_scheme="uniform",
+    #    min_interaction_size=2,
+    #    max_interaction_size=7,
+    #    n_interactions=100,
+    #    n_non_important_features=0
+    #)
     game_name = game.game_name
     game_fun = game.set_call
     n = game.n
@@ -66,4 +73,4 @@ if __name__ == "__main__":
                 N, interaction_order)
             shapx_exact_values[interaction_type] = shapley_extractor_sfi_regression.compute_exact_values(game_fun)
 
-
+    shapx_exact_values["n_shapley"] = approximators["SII"].transform_interactions_in_n_shapley(shapx_exact_values["SII"])
