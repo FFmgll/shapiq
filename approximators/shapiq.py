@@ -13,7 +13,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
     """Estimates the Shapley interactions using the SHAPIQ estimator"""
 
     def __init__(self, N, order, interaction_type="SII", top_order: bool = True):
-        min_order = top_order if top_order else 1
+        min_order = order if top_order else 1
         super().__init__(N, order, min_order)
         self.interaction_type = interaction_type
         for t in range(0, self.n + 1):
