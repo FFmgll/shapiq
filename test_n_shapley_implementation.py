@@ -15,12 +15,7 @@ if __name__ == "__main__":
     interaction_order = 3
     budget = 2 ** 10
 
-    shap_iq = SHAPIQEstimator(
-        N=N,
-        max_order=interaction_order,
-        min_order=1,
-        interaction_type="SII"
-    )
+    shap_iq = SHAPIQEstimator(N=N, order=interaction_order, interaction_type="SII")
 
     # setup the game function (here we use a
     #game = NLPLookupGame(n=14, sentence_id=105, set_zero=True)

@@ -86,27 +86,21 @@ def compare_unbiasedksh_and_shapx(
         budget, num_players, weight_vector, N, pairing, game_fun)
 
     # SII
-    interaction_estimator = SHAPIQEstimator(
-        N=N, max_order=1, min_order=1, interaction_type='SII'
-    )
+    interaction_estimator = SHAPIQEstimator(N=N, order=1, interaction_type='SII')
     values_shapx_sfi = interaction_estimator.compute_from_samples(
         S_list=all_subsets_to_sample, game_values=game_values,
         val_empty=empty_value, val_full=full_value)
     values_shapx_sii = copy.deepcopy(values_shapx_sfi[1])
 
     # STI
-    interaction_estimator = SHAPIQEstimator(
-        N=N, max_order=1, min_order=1, interaction_type='STI'
-    )
+    interaction_estimator = SHAPIQEstimator(N=N, order=1, interaction_type='STI')
     values_shapx_sfi = interaction_estimator.compute_from_samples(
         S_list=all_subsets_to_sample, game_values=game_values,
         val_empty=empty_value, val_full=full_value)
     values_shapx_sti = copy.deepcopy(values_shapx_sfi[1])
 
     # SFI
-    interaction_estimator = SHAPIQEstimator(
-        N=N, max_order=1, min_order=1, interaction_type='SFI'
-    )
+    interaction_estimator = SHAPIQEstimator(N=N, order=1, interaction_type='SFI')
     values_shapx_sfi = interaction_estimator.compute_from_samples(
         S_list=all_subsets_to_sample, game_values=game_values,
         val_empty=empty_value, val_full=full_value)
@@ -150,7 +144,7 @@ if __name__ == "__main__":
     game = NLPLookupGame(n=n, sentence_id=172, set_zero=True)
     game_fun = game.set_call
 
-    shap = SHAPIQEstimator(N, 1, 1, "SII")
+    shap = SHAPIQEstimator(N, 1, "SII")
     exact_values = shap.compute_interactions_complete(game_fun)[1]
 
     result = compare_unbiasedksh_and_shapx(

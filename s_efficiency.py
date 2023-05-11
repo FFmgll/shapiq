@@ -30,12 +30,9 @@ if __name__ == "__main__":
     N = set(range(n))
 
     # Estimator ------------------------------------------------------------------------------------
-    shapley_extractor_sfi = SHAPIQEstimator(
-        N, max_order=s_0, min_order=s_0, interaction_type="SFI")
-    shapley_extractor_sti = SHAPIQEstimator(
-        N, max_order=s_0, min_order=s_0, interaction_type="STI")
-    shapley_extractor_sii = SHAPIQEstimator(
-        N, max_order=s_0, min_order=s_0, interaction_type="SII")
+    shapley_extractor_sfi = SHAPIQEstimator(N, order=s_0, interaction_type="SFI")
+    shapley_extractor_sti = SHAPIQEstimator(N, order=s_0, interaction_type="STI")
+    shapley_extractor_sii = SHAPIQEstimator(N, order=s_0, interaction_type="SII")
 
     shap_iq_estimators = {
         "SII": shapley_extractor_sii,

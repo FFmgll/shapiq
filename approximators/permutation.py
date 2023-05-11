@@ -6,8 +6,9 @@ from scipy.special import binom
 
 class PermutationSampling(BaseShapleyInteractions):
     """ Estimates the SI (for SII, STI) using the permutation sampling apporach """
-    def __init__(self, N, max_order, min_order=1, interaction_type="SII"):
-        super().__init__(N, max_order, min_order)
+    def __init__(self, N, order, interaction_type="SII", top_order: bool = True):
+        min_order = order if top_order else 1
+        super().__init__(N, order, min_order)
         self.interaction_type = interaction_type
 
     def approximate_with_budget(self, game, budget, pairing: bool = False):

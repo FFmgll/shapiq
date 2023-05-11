@@ -20,7 +20,7 @@ if __name__ == "__main__":
     N = set(range(0, n))
 
     # get exact values
-    exact_estimator = SHAPIQEstimator(N, interaction_order, interaction_order, "SFI")
+    exact_estimator = SHAPIQEstimator(N, interaction_order, "SFI")
     try:
         exact_values = game.exact_values(gamma_matrix=exact_estimator.weights, max_order=interaction_order, min_order=interaction_order)[interaction_order]
     except AttributeError:
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     pprint(phi_regression)
 
     # get approximated values with the SHAPIQ approximator
-    shapiq = SHAPIQEstimator(N, interaction_order, interaction_order, "SFI")
+    shapiq = SHAPIQEstimator(N, interaction_order, "SFI")
     phi_shapiq = shapiq.compute_interactions_from_budget(game=game_fun, budget=budget)[interaction_order]
     pprint(phi_shapiq)
 

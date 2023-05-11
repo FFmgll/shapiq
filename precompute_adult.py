@@ -38,13 +38,13 @@ if __name__ == "__main__":
 
     df = meta_game.x_data
 
-    save_dir = os.path.join("data", "adult_" + str(RANDOM_STATE), str(n))
+    save_dir = os.path.join("games/data", "adult_" + str(RANDOM_STATE), str(n))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     while sampled_n < N_SAMPLES:
         data_index = random.randint(0, meta_game.n_samples)
-        files = list(os.listdir(os.path.join("data", "adult_", str(n))))
+        files = list(os.listdir(os.path.join("games/data", "adult_", str(n))))
         sample_path = str(data_index) + ".csv"
         if sample_path in files:
             continue

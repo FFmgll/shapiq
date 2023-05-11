@@ -72,7 +72,7 @@ if __name__ == "__main__":
     PLOT = True  # weather or not to plot in the end of the experiment
     INDEPENDENT_ITERATIONS = False  # controls if each iteration is saved independetly (one at a time for running on cluster)
 
-    RESULT_DIR = os.path.join("results", "42")
+    RESULT_DIR = os.path.join("results_old", "42")
     if not os.path.exists(RESULT_DIR):
         os.mkdir(RESULT_DIR)
 
@@ -129,12 +129,12 @@ if __name__ == "__main__":
             all_budgets = sum(budgets)
 
             # Approximation Estimators -------------------------------------------------------------
-            shapley_extractor_sii = SHAPIQEstimator(
-                N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
-            shapley_extractor_sti = SHAPIQEstimator(
-                N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="STI")
-            shapley_extractor_sfi = SHAPIQEstimator(
-                N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SFI")
+            shapley_extractor_sii = SHAPIQEstimator(N, SHAPLEY_INTERACTION_ORDER,
+                                                    interaction_type="SII")
+            shapley_extractor_sti = SHAPIQEstimator(N, SHAPLEY_INTERACTION_ORDER,
+                                                    interaction_type="STI")
+            shapley_extractor_sfi = SHAPIQEstimator(N, SHAPLEY_INTERACTION_ORDER,
+                                                    interaction_type="SFI")
 
             approximators = {
                 "SII": shapley_extractor_sii,
@@ -143,10 +143,10 @@ if __name__ == "__main__":
             }
 
             # Baseline Estimator -------------------------------------------------------------------
-            shapley_extractor_sii_permutation = PermutationSampling(
-                N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="SII")
-            shapley_extractor_sti_permutation = PermutationSampling(
-                N, SHAPLEY_INTERACTION_ORDER, min_order=SHAPLEY_INTERACTION_ORDER, interaction_type="STI")
+            shapley_extractor_sii_permutation = PermutationSampling(N, SHAPLEY_INTERACTION_ORDER,
+                                                                    interaction_type="SII")
+            shapley_extractor_sti_permutation = PermutationSampling(N, SHAPLEY_INTERACTION_ORDER,
+                                                                    interaction_type="STI")
             shapley_extractor_sfi_regression = RegressionEstimator(
                 N, SHAPLEY_INTERACTION_ORDER)
 

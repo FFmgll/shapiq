@@ -7,5 +7,5 @@ __all__ = [
     "SHAPIQEstimator",
     "PermutationSampling",
     "calculate_uksh_from_samples",
-    "BaseShapleyInteractions"
+    "BaseShapleyInteractions",
 ]

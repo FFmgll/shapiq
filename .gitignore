@@ -2,6 +2,6 @@
 venv_small
 venv
 *.csv
-data
+games/data
 plots
 code_for_patrick.py

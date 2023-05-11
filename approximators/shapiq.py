@@ -10,11 +10,14 @@ from .base import BaseShapleyInteractions, powerset, determine_complete_subsets
 
 
 class SHAPIQEstimator(BaseShapleyInteractions):
-    def __init__(self, N, max_order, min_order=1, interaction_type="SII"):
-        super().__init__(N, max_order, min_order)
+    """Estimates the Shapley interactions using the SHAPIQ estimator"""
+
+    def __init__(self, N, order, interaction_type="SII", top_order: bool = True):
+        min_order = top_order if top_order else 1
+        super().__init__(N, order, min_order)
         self.interaction_type = interaction_type
         for t in range(0, self.n + 1):
-            for s in range(min_order, max_order + 1):
+            for s in range(min_order, order + 1):
                 for k in range(max(0, s + t - self.n), min(s, t) + 1):
                     self.weights[s][t, k] = (-1) ** (s - k) * self._kernel_m(t - k, s)
         self.inf = 1000000
@@ -209,8 +212,10 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         self.interaction_values = result_complete
         return copy.deepcopy(results_out)
 
-    def compute_interactions_complete(self, game, interaction_subsets={}):
+    def compute_interactions_complete(self, game, interaction_subsets=None):
         """Computes the Exact Shapley interactions given a game (becomes computationally challenging around n = 15)."""
+        if interaction_subsets is None:
+            interaction_subsets = {}
         results = self.init_results()
         for T in powerset(self.N):
             game_eval = game(T)

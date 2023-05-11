@@ -7,7 +7,7 @@ if __name__ == "__main__":
 
     if True:  # LM --------------------------------------------------------------------
 
-        file_name = "results/finished/language_model_14_4.csv"
+        file_name = "results_old/finished/language_model_14_4.csv"
         plot_title = r"LM ($s_0 = 4$, $d = 14$, $g = 10$)"
         x_min = 2_000
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
                           max_computation_cost_n=14,
                           save_name=save_name)
 
-        file_name = "results/finished/language_model_14_3.csv"
+        file_name = "results_old/finished/language_model_14_3.csv"
         plot_title = r"LM ($s_0 = 3$, $d = 14$, $g = 50$)"
         x_min = 2_000
         y_max = 0.1
@@ -92,7 +92,7 @@ if __name__ == "__main__":
                           max_computation_cost_n=14,
                           save_name=save_name)
 
-        file_name = "results/finished/language_model_14_2.csv"
+        file_name = "results_old/finished/language_model_14_2.csv"
         plot_title = r"LM ($s_0 = 2$, $d = 14$, $g = 50$)"
         x_min = 2_000
         df = pd.read_csv(file_name)
@@ -107,7 +107,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/finished/language_model_14_2.csv"
+        file_name = "results_old/finished/language_model_14_2.csv"
         this_title = r"LM ($s_0 = 2$, $d = 14$, $g = 50$)"
         x_min = 2_000
         df = pd.read_csv(file_name)
@@ -150,7 +150,7 @@ if __name__ == "__main__":
                           max_computation_cost_n=14,
                           save_name=save_name)
 
-        file_name = "results/finished/language_model_14_1.csv"
+        file_name = "results_old/finished/language_model_14_1.csv"
         plot_title = r"LM, SV ($s_0 = 1$, $d = 14$, $g = 7$)"
         x_min = 2_000
         df = pd.read_csv(file_name)
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
     if True:  # Gradient Boosted Trees
 
-        file_name = "results/finished/tabular_game_14_2.csv"
+        file_name = "results_old/finished/tabular_game_14_2.csv"
         plot_title = r"Adult GBT ($s_0 = 2$, $d = 14$, $g = 50$)"
         x_min = 2_000
 
@@ -200,7 +200,7 @@ if __name__ == "__main__":
                           save_name=save_name)
 
 
-        file_name = "results/finished/tabular_game_14_1.csv"
+        file_name = "results_old/finished/tabular_game_14_1.csv"
         plot_title = r"Adult-GBT, SV ($s_0 = 1$, $d = 14$, $g = 50$)"
         x_min = 2_000
         df = pd.read_csv(file_name)
@@ -225,7 +225,7 @@ if __name__ == "__main__":
         y_min = -0.01
         y_max = 0.9
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_10.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_10.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 10, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -243,7 +243,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_15.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_15.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 15, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -261,7 +261,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_20.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_20.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 20, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -279,7 +279,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_25.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_25.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 25, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -297,7 +297,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_30.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_30.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 30, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         x_min = 2_000
@@ -322,7 +322,7 @@ if __name__ == "__main__":
         y_min = -0.1
         y_max = 7
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_10.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_10.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 10, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -341,7 +341,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_15.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_15.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 15, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -360,7 +360,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_20.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_20.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 20, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -379,7 +379,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_25.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_25.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 25, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -398,7 +398,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_30.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_30.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 30, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -424,7 +424,7 @@ if __name__ == "__main__":
         y_min = 0
         y_max = 1
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_10.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_10.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 10, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -441,7 +441,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_15.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_15.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 15, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -458,7 +458,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_20.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_20.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 20, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -475,7 +475,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_25.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_25.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 25, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -492,7 +492,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_100_0.0_0_30.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_100_0.0_0_30.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 30, $N = 100$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -516,7 +516,7 @@ if __name__ == "__main__":
         y_min = -0.001
         y_max = 0.1
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_10.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_10.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 10, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -534,7 +534,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_15.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_15.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 15, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -552,7 +552,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_20.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_20.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 20, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -570,7 +570,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_25.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_25.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 25, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -588,7 +588,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_30.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_30.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 30, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         x_min = 2_000
@@ -613,7 +613,7 @@ if __name__ == "__main__":
         y_min = -0.1
         y_max = 7
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_10.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_10.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 10, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -632,7 +632,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_15.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_15.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 15, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -651,7 +651,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_20.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_20.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 20, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -670,7 +670,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_25.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_25.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 25, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -689,7 +689,7 @@ if __name__ == "__main__":
                           horizontal_line_y=0.,
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_30.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_30.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 30, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -715,7 +715,7 @@ if __name__ == "__main__":
         y_min = 0
         y_max = 1
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_10.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_10.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 10, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -732,7 +732,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_15.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_15.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 15, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -749,7 +749,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_20.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_20.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 30, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -766,7 +766,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_25.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_25.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 25, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)
@@ -783,7 +783,7 @@ if __name__ == "__main__":
                           x_label="model evaluations",
                           save_name=save_name)
 
-        file_name = "results/sln_final/sparse_linear_model_30_2_30_0.0_0_30.csv"
+        file_name = "results_old/sln_final/sparse_linear_model_30_2_30_0.0_0_30.csv"
         file_name_second = "results/sln_final/" + "1_" + file_name.split("/")[-1]
         plot_title = r"SOUM (0 - 30, $N = 30$, $s_0 = 2$, $d = 30$, $g = 50$)"
         df = pd.read_csv(file_name)

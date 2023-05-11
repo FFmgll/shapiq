@@ -20,7 +20,7 @@ if __name__ == "__main__":
     N = set(range(0, n))
 
     # get exact values
-    shap_iq_estimator = SHAPIQEstimator(N, interaction_order, interaction_order, "SFI")
+    shap_iq_estimator = SHAPIQEstimator(N, interaction_order, "SFI")
     try:
         exact_values = game.exact_values(gamma_matrix=shap_iq_estimator.weights[interaction_order], max_order=interaction_order, min_order=interaction_order)[interaction_order]
     except AttributeError:

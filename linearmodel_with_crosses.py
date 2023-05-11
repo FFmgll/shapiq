@@ -30,28 +30,13 @@ if __name__ == "__main__":
 
 
     # SHAP-IQ to approximate the Shapley Interaction Index
-    shapley_extractor_sii = SHAPIQEstimator(
-        N=N,
-        max_order=interaction_order,
-        min_order=1,
-        interaction_type="SII"
-    )
+    shapley_extractor_sii = SHAPIQEstimator(N=N, order=interaction_order, interaction_type="SII")
 
     # SHAP-IQ to approximate the Shapley Taylor Index
-    shapley_extractor_sti = SHAPIQEstimator(
-        N=N,
-        max_order=interaction_order,
-        min_order=1,
-        interaction_type="STI"
-    )
+    shapley_extractor_sti = SHAPIQEstimator(N=N, order=interaction_order, interaction_type="STI")
 
     # SHAP-IQ to approximate the Shapley Faith Index
-    shapley_extractor_sfi = SHAPIQEstimator(
-        N=N,
-        max_order=interaction_order,
-        min_order=interaction_order,
-        interaction_type="SFI"
-    )
+    shapley_extractor_sfi = SHAPIQEstimator(N=N, order=interaction_order, interaction_type="SFI")
 
     approximators = {
         "SII": shapley_extractor_sii,

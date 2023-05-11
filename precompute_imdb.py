@@ -14,19 +14,19 @@ N_SAMPLES = 1
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("data/simplified_imdb.csv")
+    df = pd.read_csv("games/data/simplified_imdb.csv")
     df = df[df['length'] == n]
 
     sampled_n = 0
 
-    save_dir = os.path.join("data", "nlp_values", str(n))
+    save_dir = os.path.join("games/data", "nlp_values", str(n))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     while sampled_n < N_SAMPLES:
         sentence_id = random.choice(list(df["id"].values))
         sentence = str(df[df["id"] == sentence_id]["text"].values[0])
-        files = list(os.listdir(os.path.join("data", "nlp_values", str(n))))
+        files = list(os.listdir(os.path.join("games/data", "nlp_values", str(n))))
         sentence_path = str(sentence_id) + ".csv"
         if sentence_path in files:
             continue
