@@ -426,6 +426,33 @@ class LinearModelWithCrosses:
         if self.variant=="FSI_n_shapley_m3":
             return np.sum(x) + x[0]*x[1] + x[0]*x[2] + x[0]*x[1]*x[2]
 
+
+
+    def set_call(self, S):
+        x = np.zeros(self.n)
+        x[list(S)] = 1
+        return self.call(x)
+
+
+class MarginalUtility:
+    """A simple synthetic game presented in
+    Faith-Shap
+    Players: the input features (zero or one)
+    Output: regression score -Inf, Inf
+    """
+
+    def __init__(self,n,p):
+        self.n = n
+        self.game_name = "diminishing_marginal_utility"
+        self.p = p
+
+    def call(self, x):
+        num_players = np.sum(x)
+        if num_players <= 1:
+            return 0
+        else:
+            return num_players - self.p*binom(num_players,2)
+
     def set_call(self, S):
         x = np.zeros(self.n)
         x[list(S)] = 1
