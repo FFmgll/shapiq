@@ -12,9 +12,9 @@ if __name__ == "__main__":
 
     # setup the game function (here we use a
     game_list= [LinearModelWithCrosses(n=3,variant="STI_example",c=1),
-                LinearModelWithCrosses(n=5,variant="STI_example",c=1),
-                LinearModelWithCrosses(n=4,variant="FSI_n_shapley_m2"),
-                LinearModelWithCrosses(n=4,variant="FSI_n_shapley_m3")]
+                LinearModelWithCrosses(n=4,variant="STI_example",c=1),
+                LinearModelWithCrosses(n=5,variant="FSI_n_shapley_m2"),
+                LinearModelWithCrosses(n=5,variant="FSI_n_shapley_m3")]
 
     for game in game_list:
 
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         n = game.n
         N = set(range(n))
 
-        interaction_order = 3
+        interaction_order = 2
 
         # SHAP-IQ to approximate the Shapley Interaction Index
         shapley_extractor_sii = SHAPIQEstimator(
