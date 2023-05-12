@@ -410,9 +410,12 @@ class LinearModelWithCrosses:
     Players: the input features (zero or one)
     Output: regression score -Inf, Inf
     """
-    def __init__(self, n,variant="STI_example"):
+    def __init__(self, n,variant="STI_example",c=None):
         self.n = n
-        self.c = random.random()
+        if c==None:
+            self.c = random.random()
+        else:
+            self.c = c
         self.game_name = "linear_model_with_crosses"
         self.variant = variant
     def call(self, x):

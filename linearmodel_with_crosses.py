@@ -11,22 +11,19 @@ from approximators.regression import RegressionEstimator
 if __name__ == "__main__":
 
     # setup the game function (here we use a
-    game_list= [LinearModelWithCrosses(n=3,variant="STI_example"),
-                LinearModelWithCrosses(n=4,variant="STI_example"),
+    game_list= [LinearModelWithCrosses(n=3,variant="STI_example",c=1),
+                LinearModelWithCrosses(n=5,variant="STI_example",c=1),
                 LinearModelWithCrosses(n=4,variant="FSI_n_shapley_m2"),
                 LinearModelWithCrosses(n=4,variant="FSI_n_shapley_m3")]
 
     for game in game_list:
-
 
         game_name = game.game_name
         game_fun = game.set_call
         n = game.n
         N = set(range(n))
 
-        interaction_order = 2
-
-
+        interaction_order = 3
 
         # SHAP-IQ to approximate the Shapley Interaction Index
         shapley_extractor_sii = SHAPIQEstimator(
@@ -67,5 +64,5 @@ if __name__ == "__main__":
         shapx_exact_values["n_shapley"] = approximators["SII"].transform_interactions_in_n_shapley(shapx_exact_values["SII"])
 
         for vals in shapx_exact_values:
-            print(game.n," features: ",game.variant)
+            print(game.n," features: ",game.variant, vals)
             print(shapx_exact_values[vals])
