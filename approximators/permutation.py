@@ -24,7 +24,7 @@ class PermutationSampling(BaseShapleyInteractions):
         if self.interaction_type == "SII":
             iteration_cost = 0
             for s in range(self.min_order, self.s_0+1):
-                iteration_cost += (self.n-s+1)*2**self.s_0
+                iteration_cost += (self.n-s+1)*2**s
         elif self.interaction_type == "STI":
             iteration_cost = binom(self.n, self.s_0)*2**self.s_0
             # Compute lower order interactions:

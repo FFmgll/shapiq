@@ -4,14 +4,14 @@ import copy
 from approximators.shapiq import SHAPIQEstimator
 
 if __name__=="__main__":
-    game = LinearModelWithCrosses(n=10, variant="STI_example")
+    game = LinearModelWithCrosses(n=5, variant="STI_example",c=1)
     game_name = game.game_name
     game_fun = game.set_call
     n = game.n
     N = set(range(n))
 
-    budget = 10000
-    interaction_order = 2
+    budget = 5000
+    interaction_order = 3
 
     shapley_extractor_sii_permutation = PermutationSampling(N, interaction_order,
                         interaction_type="SII", top_order=False)
