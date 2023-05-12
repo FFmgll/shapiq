@@ -1,19 +1,21 @@
-import numpy as np
+import os
+
+import pandas as pd
 
 from approximators import SHAPIQEstimator, PermutationSampling
+from experiment import run_top_order_experiment
 from games import LookUpGame
-from utils_experiment import get_gt_values_for_game, get_all_errors
+from utils_experiment import get_gt_values_for_game
 
 if __name__ == "__main__":
 
     # PARAMETERS -----------------------------------------------------------------------------------
-    NUMBER_OF_RUNS = 50
-    RUN_TOP_ORDER = True
+    NUMBER_OF_RUNS = 3
+    RUN_TOP_ORDER = False
     ORDER = 4
 
     # CONSTANTS ------------------------------------------------------------------------------------
     MAX_BUDGET: int = 2 ** 14  # max computation budget
-    BUDGET_STEPS = np.arange(0, 1.05, 0.05)  # step size of computation budgets
 
     PAIRING = True
     STRATIFICATION = False
@@ -24,7 +26,8 @@ if __name__ == "__main__":
     # initialize games
     game_list = []
     used_ids = set()
-    data_folder = "image_classifier"
+    data_folder = "nlp_values"
+
     for i in range(NUMBER_OF_RUNS):
         game = LookUpGame(data_folder=data_folder, n=14, set_zero=True,
                           used_ids=used_ids)
@@ -35,33 +38,46 @@ if __name__ == "__main__":
     n = game_list[0].n
     N = set(range(n))
 
+    # define folder name and save path
+    SAVE_FOLDER = os.path.join("results", '_'.join((data_folder, str(n))))
+    file_name = '_'.join((str(n), str(NUMBER_OF_RUNS), str(ORDER))) + ".json"
+    SAVE_PATH = os.path.join(SAVE_FOLDER, file_name)
+
     print("Loaded games.")
     print("Number of games: ", len(game_list))
-
-    RESULTS = {}
-    print("Running top order Experiment.")
 
     # Initialize estimators ------------------------------------------------------------------------
     shapiq_estimator = SHAPIQEstimator(N=N, order=ORDER, interaction_type="SII", top_order=RUN_TOP_ORDER)
     baseline_estimator = PermutationSampling(N=N, order=ORDER, interaction_type='SII', top_order=RUN_TOP_ORDER)
     print("Initialized estimators.")
 
-    # Run experiments ------------------------------------------------------------------------------
-    gt_values = {}
-    for n, game in enumerate(game_list):
+    # Pre-compute the gt values --------------------------------------------------------------------
+    print("Precomputing gt values.")
+    all_gt_values = {}
+    for n, game in enumerate(game_list, start=1):
         gt_values = get_gt_values_for_game(game=game, shapiq=shapiq_estimator, order=ORDER)
+        all_gt_values[n] = gt_values
 
-        for budget_step in BUDGET_STEPS:
-            budget = int(budget_step * MAX_BUDGET)
+    # Run experiments ------------------------------------------------------------------------------
+    print("Starting experiments.")
+    RESULTS = run_top_order_experiment(
+        top_order=RUN_TOP_ORDER,
+        game_list=game_list,
+        shapiq_estimator=shapiq_estimator,
+        baseline_estimator=baseline_estimator,
+        all_gt_values=all_gt_values,
+        order=ORDER,
+        max_budget=MAX_BUDGET,
+        pairing=PAIRING,
+        stratification=STRATIFICATION,
+        sampling_kernel=SAMPLING_KERNEL,
+    )
 
-            # approximate with shapiq
-            shap_iq_approx = shapiq_estimator.compute_interactions_from_budget(
-                game=game.set_call, budget=budget,
-                sampling_kernel=SAMPLING_KERNEL, pairing=PAIRING, stratification=STRATIFICATION)
+    # Save results ---------------------------------------------------------------------------------
+    print("Saving results.")
+    if not os.path.exists(SAVE_FOLDER):
+        os.makedirs(SAVE_FOLDER)
 
-            # approximate with baseline
-            baseline_approx = baseline_estimator.approximate_with_budget(
-                game=game.set_call, budget=budget)
-
-            errors_shapiq = get_all_errors(shap_iq_approx, gt_values, n=n, order=ORDER)
-            errors_baseline = get_all_errors(baseline_approx, gt_values, n=n, order=ORDER)
+    results_df = pd.DataFrame(RESULTS)
+    results_df.to_json(SAVE_PATH)
+    print("Done.")

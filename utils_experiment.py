@@ -1,21 +1,25 @@
 """This file contains utility functions for the project."""
+import os
 from typing import Dict
 
 import numpy as np
+import pandas as pd
 from scipy.special import binom
 from scipy.stats import kendalltau
 
 from approximators import SHAPIQEstimator
 
 
-def get_all_errors(approx, exact, n: int, order: int):
+def get_all_errors(approx, exact, n: int, order: int, top_order: bool = False):
     """Computes all errors for the given approximation and exact values."""
     errors = {}
     if type(exact) == dict and type(approx) == dict:
         for order in exact.keys():
             errors[order] = _get_all_errors_arr(approx[order], exact[order], n, order)
     else:
-        errors = _get_all_errors_arr(approx, exact, n, order)
+        errors[order] = _get_all_errors_arr(approx, exact, n, order)
+    if not top_order:
+        errors = errors[order]
     return errors
 
 
@@ -26,6 +30,7 @@ def _get_all_errors_arr(approx: np.ndarray, exact: np.ndarray, n: int, order: in
     errors["precision_at_10"] = get_precision_at_k(approx, exact, k=10)
     errors["approximation_error_at_10"] = get_approximation_error_at_k(approx, exact, k=10)
     errors["kendals_tau"] = get_kendals_tau(approx, exact)
+    errors["order"] = order
     return errors
 
 
@@ -81,4 +86,14 @@ def get_gt_values_for_game(game, shapiq: SHAPIQEstimator, order: int) -> Dict[in
         gt_values = shapiq.compute_interactions_complete(game=game.set_call)
     return gt_values
 
+
+def save_values(save_path: str, values: list):
+    save_dir = os.path.join(*os.path.split(save_path)[0:-1])
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    df = pd.DataFrame(values)
+    if not os.path.isfile(save_path):
+        df.to_csv(save_path, header=True, index=False)
+    else:
+        df.to_csv(save_path, mode='a',  header=False, index=False)
 
