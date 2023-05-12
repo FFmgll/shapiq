@@ -56,9 +56,9 @@ if __name__ == "__main__":
             )
 
         #FSI values
-        shapley_extractor_sfi_regression = RegressionEstimator(
+        shapley_extractor_FSI_regression = RegressionEstimator(
                 N, interaction_order)
-        shapx_exact_values["FSI"] = shapley_extractor_sfi_regression.compute_exact_values(game_fun)
+        shapx_exact_values["FSI"] = shapley_extractor_FSI_regression.compute_exact_values(game_fun)
 
         #n-Shapley
         shapx_exact_values["n_shapley"] = approximators["SII"].transform_interactions_in_n_shapley(shapx_exact_values["SII"])

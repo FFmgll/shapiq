@@ -33,8 +33,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
 
     def __init__(self, player_names: set, max_order: int, min_order: int = 1,
                  interaction_type: str = "SII"):
-        assert interaction_type in ["SII", "STI", "SFI"], ValueError("interaction_type must be "
-                                                                     "one of 'SII', 'STI', 'SFI'")
+        assert interaction_type in ["SII", "STI", "FSI"], ValueError("interaction_type must be "
+                                                                     "one of 'SII', 'STI', 'FSI'")
         self.interaction_type = "SII"
 
         super().__init__(N=player_names, max_order=max_order, min_order=min_order)
@@ -60,14 +60,14 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             weight_value = np.math.factorial(self.n - t - 1)
             weight_value *= np.math.factorial(t)
             weight_value /= np.math.factorial(self.n)
-        elif self.interaction_type == "SFI":
+        elif self.interaction_type == "FSI":
             weight_value = np.math.factorial(2 * self.s - 1)
             weight_value /= np.math.factorial(self.s - 1) ** 2
             weight_value *= np.math.factorial(self.n - t - 1)
             weight_value *= np.math.factorial(t + self.s - 1)
             weight_value /= np.math.factorial(self.n + self.s - 1)
         else:
-            raise ValueError("interaction_type must be one of 'SII', 'STI', 'SFI'")
+            raise ValueError("interaction_type must be one of 'SII', 'STI', 'FSI'")
         return weight_value
 
     def _compute_interactions_complete_k(self, game, k):

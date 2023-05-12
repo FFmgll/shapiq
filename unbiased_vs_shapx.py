@@ -87,24 +87,24 @@ def compare_unbiasedksh_and_shapx(
 
     # SII
     interaction_estimator = SHAPIQEstimator(N=N, order=1, interaction_type='SII')
-    values_shapx_sfi = interaction_estimator.compute_from_samples(
+    values_shapx_FSI = interaction_estimator.compute_from_samples(
         S_list=all_subsets_to_sample, game_values=game_values,
         val_empty=empty_value, val_full=full_value)
-    values_shapx_sii = copy.deepcopy(values_shapx_sfi[1])
+    values_shapx_sii = copy.deepcopy(values_shapx_FSI[1])
 
     # STI
     interaction_estimator = SHAPIQEstimator(N=N, order=1, interaction_type='STI')
-    values_shapx_sfi = interaction_estimator.compute_from_samples(
+    values_shapx_FSI = interaction_estimator.compute_from_samples(
         S_list=all_subsets_to_sample, game_values=game_values,
         val_empty=empty_value, val_full=full_value)
-    values_shapx_sti = copy.deepcopy(values_shapx_sfi[1])
+    values_shapx_sti = copy.deepcopy(values_shapx_FSI[1])
 
-    # SFI
-    interaction_estimator = SHAPIQEstimator(N=N, order=1, interaction_type='SFI')
-    values_shapx_sfi = interaction_estimator.compute_from_samples(
+    # FSI
+    interaction_estimator = SHAPIQEstimator(N=N, order=1, interaction_type='FSI')
+    values_shapx_FSI = interaction_estimator.compute_from_samples(
         S_list=all_subsets_to_sample, game_values=game_values,
         val_empty=empty_value, val_full=full_value)
-    values_shapx_sfi = copy.deepcopy(values_shapx_sfi[1])
+    values_shapx_FSI = copy.deepcopy(values_shapx_FSI[1])
 
     values_ksh = calculate_uksh_from_samples(
         game=GameWrapper(game),
@@ -123,17 +123,17 @@ def compare_unbiasedksh_and_shapx(
 
     values_shapx_sii = [round(value, 5) for value in values_shapx_sii]
     values_shapx_sti = [round(value, 5) for value in values_shapx_sti]
-    values_shapx_sfi = [round(value, 5) for value in values_shapx_sfi]
+    values_shapx_FSI = [round(value, 5) for value in values_shapx_FSI]
     values_ksh = [round(value, 5) for value in values_ksh]
     u_ksh_covert = [round(value, 5) for value in u_ksh_covert]
 
     print(f"shapx-defined-samples (sii): {values_shapx_sii} (n: {budget})\n"
           f"shapx-defined-samples (sti): {values_shapx_sti} (n: {budget})\n"
-          f"shapx-defined-samples (sfi): {values_shapx_sfi} (n: {budget})\n"
+          f"shapx-defined-samples (FSI): {values_shapx_FSI} (n: {budget})\n"
           f"u-ksh-defined-samples: {values_ksh} (n: {budget})\n"
           f"u-ksh-sampling:        {u_ksh_covert} (n: {u_ksh_sample_size})")
 
-    return values_ksh, values_shapx_sii, values_shapx_sti, values_shapx_sfi, u_ksh_covert
+    return values_ksh, values_shapx_sii, values_shapx_sti, values_shapx_FSI, u_ksh_covert
 
 
 if __name__ == "__main__":
@@ -149,12 +149,12 @@ if __name__ == "__main__":
 
     result = compare_unbiasedksh_and_shapx(
         game=game, budget=500, pairing=False, u_ksh_sample_size=2000)
-    values_ksh, values_shapx_sii, values_shapx_sti, values_shapx_sfi, u_ksh_covert = result
+    values_ksh, values_shapx_sii, values_shapx_sti, values_shapx_FSI, u_ksh_covert = result
 
     feature_names = game.input_sentence.split(" ")
     print(feature_names)
     draw_shapley_values(
-        values_ksh, u_ksh_covert, values_shapx_sii, values_shapx_sti, values_shapx_sfi,
+        values_ksh, u_ksh_covert, values_shapx_sii, values_shapx_sti, values_shapx_FSI,
         labels=feature_names, figsize=(8, 3.5), save_name="plots/shap_comparison.pdf")
 
     print(np.sum((exact_values-values_ksh)**2))

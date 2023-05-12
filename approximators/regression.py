@@ -22,7 +22,7 @@ class RegressionEstimator(BaseShapleyInteractions):
         min_order = 1
         super().__init__(N, max_order, min_order=min_order)
         self._big_M = float(10_000_000)
-        self.interaction_type = 'SFI'
+        self.interaction_type = 'FSI'
 
     def _init_sampling_weights(self):
         weight_vector = np.zeros(shape=self.n - 1)

@@ -62,7 +62,7 @@ def save_values(save_path: str, values: list):
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     df = pd.DataFrame(values)
-    if not os.path.isfile(save_path):
+    if not os.path.iFSIle(save_path):
         df.to_csv(save_path, header=True, index=False)
     else:
         df.to_csv(save_path, mode='a',  header=False, index=False)
@@ -133,13 +133,13 @@ if __name__ == "__main__":
                                                     interaction_type="SII")
             shapley_extractor_sti = SHAPIQEstimator(N, SHAPLEY_INTERACTION_ORDER,
                                                     interaction_type="STI")
-            shapley_extractor_sfi = SHAPIQEstimator(N, SHAPLEY_INTERACTION_ORDER,
-                                                    interaction_type="SFI")
+            shapley_extractor_FSI = SHAPIQEstimator(N, SHAPLEY_INTERACTION_ORDER,
+                                                    interaction_type="FSI")
 
             approximators = {
                 "SII": shapley_extractor_sii,
                 "STI": shapley_extractor_sti,
-                "SFI": shapley_extractor_sfi
+                "FSI": shapley_extractor_FSI
             }
 
             # Baseline Estimator -------------------------------------------------------------------
@@ -147,13 +147,13 @@ if __name__ == "__main__":
                                                                     interaction_type="SII")
             shapley_extractor_sti_permutation = PermutationSampling(N, SHAPLEY_INTERACTION_ORDER,
                                                                     interaction_type="STI")
-            shapley_extractor_sfi_regression = RegressionEstimator(
+            shapley_extractor_FSI_regression = RegressionEstimator(
                 N, SHAPLEY_INTERACTION_ORDER)
 
             baselines = {
                 "SII": shapley_extractor_sii_permutation,
                 "STI": shapley_extractor_sti_permutation,
-                "SFI": shapley_extractor_sfi_regression
+                "FSI": shapley_extractor_FSI_regression
             }
 
             # Compute exact interactions -----------------------------------------------------------

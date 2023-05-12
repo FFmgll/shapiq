@@ -298,7 +298,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                     t) / np.math.factorial(self.n)
             else:
                 return 1.0 * (t == 0)
-        if self.interaction_type == "SFI":
+        if self.interaction_type == "FSI":
             if s == self.s_0:
                 return np.math.factorial(2 * s - 1) / np.math.factorial(
                     s - 1) ** 2 * np.math.factorial(

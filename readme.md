@@ -53,12 +53,12 @@ sti_scores = shapiq_sti.compute_interactions_from_budget(
 ```
 #### SHAP-IQ to approximate the Shapley Faith Index
 ```python
-shapiq_sfi = SHAPIQEstimator(
+shapiq_FSI = SHAPIQEstimator(
     N=player_set, max_order=interaction_order, min_order=interaction_order,
-    interaction_type="SFI"
+    interaction_type="FSI"
 )
 
-sfi_scores = shapiq_sfi.compute_interactions_from_budget(
+FSI_scores = shapiq_FSI.compute_interactions_from_budget(
     game=game_fun, budget=budget,
     pairing=False, sampling_kernel="ksh", sampling_only=False, stratification=False
 )

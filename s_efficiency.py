@@ -1,4 +1,4 @@
-"""This module is used to run experiments to investigate weather SFI is s-efficient."""
+"""This module is used to run experiments to investigate weather FSI is s-efficient."""
 import numpy as np
 
 from games import ParameterizedSparseLinearModel
@@ -30,14 +30,14 @@ if __name__ == "__main__":
     N = set(range(n))
 
     # Estimator ------------------------------------------------------------------------------------
-    shapley_extractor_sfi = SHAPIQEstimator(N, order=s_0, interaction_type="SFI")
+    shapley_extractor_FSI = SHAPIQEstimator(N, order=s_0, interaction_type="FSI")
     shapley_extractor_sti = SHAPIQEstimator(N, order=s_0, interaction_type="STI")
     shapley_extractor_sii = SHAPIQEstimator(N, order=s_0, interaction_type="SII")
 
     shap_iq_estimators = {
         "SII": shapley_extractor_sii,
         "STI": shapley_extractor_sti,
-        "SFI": shapley_extractor_sfi
+        "FSI": shapley_extractor_FSI
     }
 
     # Compute s-efficiency -------------------------------------------------------------------------

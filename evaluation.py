@@ -6,12 +6,12 @@ from matplotlib.ticker import FormatStrFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 
-COLORS_SHAPLEY = {'SII': '#058ED9', 'STI': '#2D3142', 'SFI': '#CC2D35'}  # online inclusive colors
+COLORS_SHAPLEY = {'SII': '#058ED9', 'STI': '#2D3142', 'FSI': '#CC2D35'}  # online inclusive colors
 COLORS = {'SHAP-IQ': '#ef27a6', 'baseline': '#7d53de'}
 BACKGROUND_COLOR = '#f8f8f8'
-MARKERS = {'SII': 'X', 'STI': 'o', 'SFI': "s"}
-LINESTYLES = {'SII': 'dashed', 'STI': 'dotted', 'SFI': "solid"}
-LABELS = {'SII': 'Shapley Interaction', 'STI': 'Shapley Taylor', 'SFI': "Faith-SHAP", 'U-KSH': "Unbiased Kernel Shap", "U-KSH-R": "Unbiased Kernel Shap (replacement)"}
+MARKERS = {'SII': 'X', 'STI': 'o', 'FSI': "s"}
+LINESTYLES = {'SII': 'dashed', 'STI': 'dotted', 'FSI': "solid"}
+LABELS = {'SII': 'Shapley Interaction', 'STI': 'Shapley Taylor', 'FSI': "Faith-SHAP", 'U-KSH': "Unbiased Kernel Shap", "U-KSH-R": "Unbiased Kernel Shap (replacement)"}
 
 STD_ALPHA = 0.10
 
@@ -151,7 +151,7 @@ def draw_approx_curve(df: pd.DataFrame, figsize: tuple = (10, 10), error_type: s
     #plt.show()
 
 
-def draw_shapley_values(uksh, uksh_rep, sii, sti, sfi, labels: list = None, figsize: tuple = (10, 10), save_name: str = None, plot_title: str = None):
+def draw_shapley_values(uksh, uksh_rep, sii, sti, FSI, labels: list = None, figsize: tuple = (10, 10), save_name: str = None, plot_title: str = None):
     x = np.arange(len(uksh))
 
     alpha = 0.3
@@ -171,7 +171,7 @@ def draw_shapley_values(uksh, uksh_rep, sii, sti, sfi, labels: list = None, figs
     axis.bar(x - width, uksh_rep, width * 0.7, label=LABELS["U-KSH-R"], fill=False, hatch='//////', edgecolor="gray")
     axis.bar(x, sii, width * 0.7, label=LABELS["SII"], color=colors["SII"], edgecolor=colors_edge["SII"])
     axis.bar(x + width, sti, width * 0.7, label=LABELS["STI"], color=colors["STI"], edgecolor=colors_edge["STI"])
-    axis.bar(x + width * 2, sfi, width * 0.7, label=LABELS["SFI"], color=colors["SFI"], edgecolor=colors_edge["SFI"])
+    axis.bar(x + width * 2, FSI, width * 0.7, label=LABELS["FSI"], color=colors["FSI"], edgecolor=colors_edge["FSI"])
 
     axis.set_xlim(0 - width * 2 - 0.2, len(x) - 1 + width * 2 + 0.2)
 
