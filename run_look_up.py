@@ -1,21 +1,33 @@
 import os
+import sys
 
+import numpy as np
 import pandas as pd
 
-from approximators import SHAPIQEstimator, PermutationSampling
+from approximators import SHAPIQEstimator, PermutationSampling, RegressionEstimator
 from experiment import run_top_order_experiment
 from games import LookUpGame
 from utils_experiment import get_gt_values_for_game
 
 if __name__ == "__main__":
 
+    run_parameters = sys.argv
+    has_no_param = not len(run_parameters) > 1
+    print("run parameters", run_parameters)
+
     # PARAMETERS -----------------------------------------------------------------------------------
-    NUMBER_OF_RUNS = 3
-    RUN_TOP_ORDER = False
-    ORDER = 4
+    data_folder = "nlp_values" if has_no_param else run_parameters[1]
+    data_n = 14 if has_no_param else int(run_parameters[2])
+    interaction_index = "SII" if has_no_param else run_parameters[3]
+    RUN_TOP_ORDER = True if has_no_param else run_parameters[4] == "True"
+    order = 2 if has_no_param else int(run_parameters[5])
+    NUMBER_OF_RUNS = 3 if has_no_param else int(run_parameters[6])
+
+    print("selected parameters:", data_folder, data_n, interaction_index, RUN_TOP_ORDER, order, NUMBER_OF_RUNS)
 
     # CONSTANTS ------------------------------------------------------------------------------------
     MAX_BUDGET: int = 2 ** 14  # max computation budget
+    BUDGET_STEPS = list(np.arange(0.05, 1.05, 0.05))  # step size of computation budgets
 
     PAIRING = True
     STRATIFICATION = False
@@ -26,11 +38,8 @@ if __name__ == "__main__":
     # initialize games
     game_list = []
     used_ids = set()
-    data_folder = "nlp_values"
-
     for i in range(NUMBER_OF_RUNS):
-        game = LookUpGame(data_folder=data_folder, n=14, set_zero=True,
-                          used_ids=used_ids)
+        game = LookUpGame(data_folder=data_folder, n=data_n, set_zero=True, used_ids=used_ids)
         game_list.append(game)
         used_ids = game.used_ids
 
@@ -39,23 +48,38 @@ if __name__ == "__main__":
     N = set(range(n))
 
     # define folder name and save path
-    SAVE_FOLDER = os.path.join("results", '_'.join((data_folder, str(n))))
-    file_name = '_'.join((str(n), str(NUMBER_OF_RUNS), str(ORDER))) + ".json"
+    SAVE_FOLDER = os.path.join("results", '_'.join((data_folder, str(n))), interaction_index)
+    file_name = '_'.join((
+        f"n-{n}", f"runs-{NUMBER_OF_RUNS}", f"s0-{order}", f"top-order-{RUN_TOP_ORDER}",
+        f"pairing-{PAIRING}", f"stratification-{STRATIFICATION}", f"weights-{SAMPLING_KERNEL}"
+    ))
+    file_name += ".json"
     SAVE_PATH = os.path.join(SAVE_FOLDER, file_name)
 
     print("Loaded games.")
     print("Number of games: ", len(game_list))
 
     # Initialize estimators ------------------------------------------------------------------------
-    shapiq_estimator = SHAPIQEstimator(N=N, order=ORDER, interaction_type="SII", top_order=RUN_TOP_ORDER)
-    baseline_estimator = PermutationSampling(N=N, order=ORDER, interaction_type='SII', top_order=RUN_TOP_ORDER)
+    # SHAP-IQ estimator for all three indices
+    shapiq_estimator = SHAPIQEstimator(
+        N=N, order=order, interaction_type=interaction_index, top_order=RUN_TOP_ORDER)
+
+    # get baseline estimator
+    if interaction_index in ['SII', 'STI']:
+        # for SII and STI we use the permutation sampling estimator
+        baseline_estimator = PermutationSampling(
+            N=N, order=order, interaction_type=interaction_index, top_order=RUN_TOP_ORDER)
+    else:
+        # for SFI we use the regression estimator
+        baseline_estimator = RegressionEstimator(
+            N=N, max_order=order)
     print("Initialized estimators.")
 
     # Pre-compute the gt values --------------------------------------------------------------------
     print("Precomputing gt values.")
     all_gt_values = {}
     for n, game in enumerate(game_list, start=1):
-        gt_values = get_gt_values_for_game(game=game, shapiq=shapiq_estimator, order=ORDER)
+        gt_values = get_gt_values_for_game(game=game, shapiq=shapiq_estimator, order=order)
         all_gt_values[n] = gt_values
 
     # Run experiments ------------------------------------------------------------------------------
@@ -66,11 +90,14 @@ if __name__ == "__main__":
         shapiq_estimator=shapiq_estimator,
         baseline_estimator=baseline_estimator,
         all_gt_values=all_gt_values,
-        order=ORDER,
+        order=order,
         max_budget=MAX_BUDGET,
         pairing=PAIRING,
         stratification=STRATIFICATION,
         sampling_kernel=SAMPLING_KERNEL,
+        budget_steps=BUDGET_STEPS,
+        save_path=SAVE_PATH,
+        save_folder=SAVE_FOLDER
     )
 
     # Save results ---------------------------------------------------------------------------------

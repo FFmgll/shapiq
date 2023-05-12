@@ -19,7 +19,10 @@ def get_all_errors(approx, exact, n: int, order: int, top_order: bool = False):
     else:
         errors[order] = _get_all_errors_arr(approx, exact, n, order)
     if not top_order:
-        errors = errors[order]
+        # get all errors of 'approximation_error' for each order, multiply them by the binom(n, order) and sum them up
+        errors_all = np.sum([errors[order]['approximation_error'] * binom(n, order) for order in errors.keys()])
+        errors_all /= _n_interactions_of_order(n, order)
+        errors[0] = {'approximation_error': errors_all}
     return errors
 
 
@@ -30,7 +33,6 @@ def _get_all_errors_arr(approx: np.ndarray, exact: np.ndarray, n: int, order: in
     errors["precision_at_10"] = get_precision_at_k(approx, exact, k=10)
     errors["approximation_error_at_10"] = get_approximation_error_at_k(approx, exact, k=10)
     errors["kendals_tau"] = get_kendals_tau(approx, exact)
-    errors["order"] = order
     return errors
 
 
@@ -97,3 +99,10 @@ def save_values(save_path: str, values: list):
     else:
         df.to_csv(save_path, mode='a',  header=False, index=False)
 
+
+def _n_interactions_of_order(n: int, order: int) -> int:
+    """Computes the number of interactions up to a given order starting from order 1."""
+    n_interactions = 0
+    for i in range(1, order + 1):
+        n_interactions += binom(n, i)
+    return int(n_interactions)
