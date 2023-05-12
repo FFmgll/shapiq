@@ -25,7 +25,7 @@ NAME="${GAMENAME}_${N_PLAYER}_${INTERACTION_INDEX}_${TOP_ORDER}_${ORDER}_${N_RUN
 PROCESS_NAME="${NAME}"
 
 # Paths
-EXPERIMENT_ROOT_DIR="/dss/dsshome1/lxc04/ra93yex2/shap_iq"
+EXPERIMENT_ROOT_DIR="/dss/dsshome1/lxc04/ra93yex2/shapiq"
 ROOT_DIR="${PWD}"
 DATA_DIR="${ROOT_DIR}/results"
 LOG_DIR="${DATA_DIR}/logs"

@@ -1,9 +1,9 @@
 import sys
 platform_os = sys.platform
 if platform_os == "linux" or platform_os == "linux2":
-    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shap_iq')
-    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shap_iq/games')
-    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shap_iq/approximators')
+    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shapiq')
+    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shapiq/games')
+    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shapiq/approximators')
 
 import os
 import time
