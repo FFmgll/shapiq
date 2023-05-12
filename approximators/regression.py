@@ -28,7 +28,7 @@ class RegressionEstimator(BaseShapleyInteractions):
         weight_vector = np.zeros(shape=self.n - 1)
         for subset_size in range(1, self.n):
             weight_vector[subset_size - 1] = (self.n - 1) / (subset_size * (self.n - subset_size))
-        sampling_weight = (np.asarray([0] + [*weight_vector] + [0])) / sum(weight_vector)
+        sampling_weight = (np.asarray([0] + [*weight_vector] + [0]))/ sum(weight_vector)
         return sampling_weight
 
     @staticmethod
@@ -162,10 +162,15 @@ class RegressionEstimator(BaseShapleyInteractions):
         kernel_weights = {}
 
         sampling_weight = self._init_sampling_weights()
+        #scale sampling weights to kernel_weights
+        kernel_size_weights = np.zeros(self.n+1)
+        for i in range(1,self.n):
+            kernel_size_weights[i] = sampling_weight[i] /binom(self.n,i)
+
         for T in powerset(self.N,1,self.n-1):
             S_list.append(set(T))
             game_values.append(game_fun(T))
-            kernel_weights[T] = sampling_weight[len(T)]
+            kernel_weights[T] = kernel_size_weights[len(T)]
 
         empty_value = game_fun({})
         full_value = game_fun(self.N)
