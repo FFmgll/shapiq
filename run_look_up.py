@@ -5,6 +5,7 @@ if platform_os == "linux" or platform_os == "linux2":
     sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shapiq/games')
     sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shapiq/approximators')
 
+import random
 import os
 import time
 
@@ -128,6 +129,9 @@ if __name__ == "__main__":
 
     if singleton_run:
         for i in range(NUMBER_OF_RUNS):
+            seconds_sleep = random.randint(1, 7)
+            print(f"Sleeping for {seconds_sleep} seconds.")
+            time.sleep(seconds_sleep)
             NUMBER_OF_RUNS = 1
             run_experiment()
     else:
