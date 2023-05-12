@@ -1,5 +1,12 @@
-import os
 import sys
+platform_os = sys.platform
+if platform_os == "linux" or platform_os == "linux2":
+    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shap_iq')
+    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shap_iq/games')
+    sys.path.insert(0, '/dss/dsshome1/lxc04/ra93yex2/shap_iq/approximators')
+
+import os
+import time
 
 import numpy as np
 import pandas as pd
@@ -9,21 +16,8 @@ from experiment import run_top_order_experiment
 from games import LookUpGame
 from utils_experiment import get_gt_values_for_game
 
-if __name__ == "__main__":
 
-    run_parameters = sys.argv
-    has_no_param = not len(run_parameters) > 1
-    print("run parameters", run_parameters)
-
-    # PARAMETERS -----------------------------------------------------------------------------------
-    data_folder = "nlp_values" if has_no_param else run_parameters[1]
-    data_n = 14 if has_no_param else int(run_parameters[2])
-    interaction_index = "SII" if has_no_param else run_parameters[3]
-    RUN_TOP_ORDER = True if has_no_param else run_parameters[4] == "True"
-    order = 2 if has_no_param else int(run_parameters[5])
-    NUMBER_OF_RUNS = 3 if has_no_param else int(run_parameters[6])
-
-    print("selected parameters:", data_folder, data_n, interaction_index, RUN_TOP_ORDER, order, NUMBER_OF_RUNS)
+def run_experiment():
 
     # CONSTANTS ------------------------------------------------------------------------------------
     MAX_BUDGET: int = 2 ** 14  # max computation budget
@@ -53,6 +47,8 @@ if __name__ == "__main__":
         f"n-{n}", f"runs-{NUMBER_OF_RUNS}", f"s0-{order}", f"top-order-{RUN_TOP_ORDER}",
         f"pairing-{PAIRING}", f"stratification-{STRATIFICATION}", f"weights-{SAMPLING_KERNEL}"
     ))
+    if singleton_run:
+        file_name += f"_{time.time()}"
     file_name += ".json"
     SAVE_PATH = os.path.join(SAVE_FOLDER, file_name)
 
@@ -108,3 +104,31 @@ if __name__ == "__main__":
     results_df = pd.DataFrame(RESULTS)
     results_df.to_json(SAVE_PATH)
     print("Done.")
+
+
+if __name__ == "__main__":
+
+    run_parameters = sys.argv
+    has_no_param = not len(run_parameters) > 1
+    print("run parameters", run_parameters)
+
+    # PARAMETERS -----------------------------------------------------------------------------------
+    data_folder = "nlp_values" if has_no_param else run_parameters[1]
+    data_n = 14 if has_no_param else int(run_parameters[2])
+    interaction_index = "SII" if has_no_param else run_parameters[3]
+    RUN_TOP_ORDER = True if has_no_param else run_parameters[4] == "True"
+    order = 2 if has_no_param else int(run_parameters[5])
+    NUMBER_OF_RUNS = 1 if has_no_param else int(run_parameters[6])
+    try:
+        singleton_run = bool(run_parameters[7])
+    except IndexError:
+        singleton_run = False
+
+    print("selected parameters:", data_folder, data_n, interaction_index, RUN_TOP_ORDER, order, NUMBER_OF_RUNS)
+
+    if singleton_run:
+        for i in range(NUMBER_OF_RUNS):
+            NUMBER_OF_RUNS = 1
+            run_experiment()
+    else:
+        run_experiment()
