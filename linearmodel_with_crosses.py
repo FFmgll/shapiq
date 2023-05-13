@@ -11,10 +11,12 @@ from approximators.regression import RegressionEstimator
 if __name__ == "__main__":
 
     # setup the game function (here we use a
-    game_list= [LinearModelWithCrosses(n=3,variant="STI_example",c=1),
-                LinearModelWithCrosses(n=4,variant="STI_example",c=1),
-                LinearModelWithCrosses(n=5,variant="FSI_n_shapley_m2"),
-                LinearModelWithCrosses(n=5,variant="FSI_n_shapley_m3")]
+    game_list= [LinearModelWithCrosses(n=3,order=2,variant="STI_example",c=0),
+                LinearModelWithCrosses(n=3,order=2,variant="STI_example",c=1),
+                LinearModelWithCrosses(n=7,order=3,variant="STI_example",c=1),
+                LinearModelWithCrosses(n=7,order=2,variant="STI_example",c=1,l=3)]
+                #LinearModelWithCrosses(n=4,variant="FSI_n_shapley_m2"),
+                #LinearModelWithCrosses(n=4,variant="FSI_n_shapley_m3")]
 
     for game in game_list:
 
@@ -23,7 +25,7 @@ if __name__ == "__main__":
         n = game.n
         N = set(range(n))
 
-        interaction_order = 2
+        interaction_order = game.order
 
         # SHAP-IQ to approximate the Shapley Interaction Index
         shapley_extractor_sii = SHAPIQEstimator(
@@ -46,11 +48,11 @@ if __name__ == "__main__":
             "STI": shapley_extractor_sti,
         }
 
-        print("Starting exact computations")
+        #print("Starting exact computations")
         shapx_exact_values = {}
 
         for interaction_type, approximator in approximators.items():
-            print("Exact values are calculated via brute force.")
+            #print("Exact values are calculated via brute force.")
             shapx_exact_values[interaction_type] = copy.deepcopy(
                 approximator.compute_interactions_complete(game_fun)
             )
@@ -63,6 +65,15 @@ if __name__ == "__main__":
         #n-Shapley
         shapx_exact_values["n_shapley"] = approximators["SII"].transform_interactions_in_n_shapley(shapx_exact_values["SII"])
 
+
+        print("---------------")
+        print(game.n, " features: ", game.variant)
         for vals in shapx_exact_values:
-            print(game.n," features: ",game.variant, vals)
-            print(shapx_exact_values[vals])
+            print("computed by: ",vals)
+            results = {}
+            for key in shapx_exact_values[vals]:
+                results[key] = np.unique(
+                    np.round(shapx_exact_values[vals][key][np.nonzero(shapx_exact_values[vals][key])], 6))
+            print(results)
+
+#    print(shapx_exact_values[vals])

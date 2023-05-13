@@ -410,8 +410,13 @@ class LinearModelWithCrosses:
     Players: the input features (zero or one)
     Output: regression score -Inf, Inf
     """
-    def __init__(self, n,variant="STI_example",c=None):
+    def __init__(self, n,order,variant="STI_example",c=None,l=None):
         self.n = n
+        self.order = order
+        if l==None:
+            self.l = n
+        else:
+            self.l = l
         if c==None:
             self.c = random.random()
         else:
@@ -420,7 +425,9 @@ class LinearModelWithCrosses:
         self.variant = variant
     def call(self, x):
         if self.variant=="STI_example":
-            return np.sum(x) + self.c*np.prod(x)
+            return np.sum(x) + self.c*np.prod(x[:self.l+1])
+        if self.variant=="STI_example_fix4":
+            return np.sum(x) + self.c*x[0]*x[1]*x[2]*x[3]*x[4]
         if self.variant=="FSI_n_shapley_m2":
             return np.sum(x) + x[0]*x[1] + x[0]*x[2]
         if self.variant=="FSI_n_shapley_m3":
@@ -441,17 +448,26 @@ class MarginalUtility:
     Output: regression score -Inf, Inf
     """
 
-    def __init__(self,n,p):
+    def __init__(self,n,p,example):
         self.n = n
         self.game_name = "diminishing_marginal_utility"
         self.p = p
+        self.example=example
 
     def call(self, x):
         num_players = np.sum(x)
-        if num_players <= 1:
-            return 0
-        else:
-            return num_players - self.p*binom(num_players,2)
+        if self.example == 1:
+            if num_players <= 1:
+                return 0
+            else:
+                return num_players - self.p*binom(num_players,2)
+        if self.example == 2:
+            if num_players == 0:
+                return 0
+            if num_players == 1:
+                return 3
+            if num_players > 1:
+                return 3*num_players-(num_players-2*np.log(num_players+1))
 
     def set_call(self, S):
         x = np.zeros(self.n)
