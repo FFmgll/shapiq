@@ -55,7 +55,7 @@ echo "#SBATCH --cpus-per-task=1" >> "$FILE"
 echo "module load slurm_setup" >> "$FILE"
 echo "module load python" >> "$FILE"
 echo "source ${EXPERIMENT_ROOT_DIR}/venv/bin/activate" >> "$FILE"
-echo "python ${ROOT_DIR}/run_look_up.py ${PARAMETERS}" >> "$FILE"
+echo "python ${ROOT_DIR}/run_soum.py ${PARAMETERS}" >> "$FILE"
 echo "deactivate" >> "$FILE"
 
 # Run SLURM jobs
