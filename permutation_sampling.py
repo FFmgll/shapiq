@@ -4,14 +4,14 @@ import copy
 from approximators.shapiq import SHAPIQEstimator
 
 if __name__=="__main__":
-    game = LinearModelWithCrosses(n=5, variant="STI_example",c=1)
+    game = LinearModelWithCrosses(n=5,order=3,variant="STI_example",c=1)
     game_name = game.game_name
     game_fun = game.set_call
     n = game.n
     N = set(range(n))
 
     budget = 5000
-    interaction_order = 3
+    interaction_order = game.order
 
     shapley_extractor_sii_permutation = PermutationSampling(N, interaction_order,
                         interaction_type="SII", top_order=False)
@@ -50,11 +50,11 @@ if __name__=="__main__":
             "STI": shapley_extractor_sti,
         }
 
-        print("Starting exact computations")
+        #print("Starting exact computations")
         shapx_exact_values = {}
 
         for interaction_type, approximator in approximators.items():
-            print("Exact values are calculated via brute force.")
+            #print("Exact values are calculated via brute force.")
             shapx_exact_values[interaction_type] = copy.deepcopy(
                 approximator.compute_interactions_complete(game_fun)
             )

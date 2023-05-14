@@ -31,7 +31,7 @@ class PermutationSampling(BaseShapleyInteractions):
             lower_order_cost = 0
             if self.s_0 > 1:
                 for s in range(self.min_order,self.s_0):
-                    lower_order_cost += 2**s*binom(self.n,s)
+                    lower_order_cost += binom(self.n,s)
                 results = self._compute_lower_order_sti(game, results)
                 budget -= lower_order_cost
         else:
@@ -141,11 +141,14 @@ class PermutationSampling(BaseShapleyInteractions):
         return results, counts
 
     def _compute_lower_order_sti(self, game, results):
+        game_evals = {}
+        for S in powerset(self.N,max_size=self.s_0-1):
+            game_evals[tuple(S)] = game(S)
         for S in powerset(self.N,min_size=self.min_order,max_size=self.s_0-1):
             s = len(S)
             for L in powerset(S):
                 l = len(L)
-                results[s][S] += game(L) * (-1) ** (s - l)
+                results[s][S] += game_evals[L]* (-1) ** (s - l)
         return results
 
     def _estimate_from_permutation_sii(self, game, pi, results, counts, s, interaction={}):
