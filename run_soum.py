@@ -119,10 +119,10 @@ if __name__ == "__main__":
     interaction_index = "FSI" if has_no_param else run_parameters[1]
     order = 2 if has_no_param else int(run_parameters[2])
     NUMBER_OF_RUNS = 1 if has_no_param else int(run_parameters[3])
-    singleton_run = False if has_no_param else bool(run_parameters[4])
+    RUN_TOP_ORDER = True if has_no_param else bool(run_parameters[4])
+    singleton_run = False if has_no_param else bool(run_parameters[5])
 
     MAX_BUDGET = 2**14
-    RUN_TOP_ORDER = True
     data_folder = "SOUM"
 
     soum_params = {
