@@ -73,19 +73,27 @@ def run_top_order_experiment(
 
             # compute mean, std, and var
             mean_shapiq = dict(errors_shapiq_df.mean())
+            median_shapiq = dict(errors_shapiq_df.median())
+            q_1_shapiq = dict(errors_shapiq_df.quantile(0.25))
+            q_3_shapiq = dict(errors_shapiq_df.quantile(0.75))
             std_shapiq = dict(errors_shapiq_df.std())
             var_shapiq = dict(errors_shapiq_df.var())
 
             mean_baseline = dict(errors_baseline_df.mean())
+            median_baseline = dict(errors_baseline_df.median())
+            q_1_baseline = dict(errors_baseline_df.quantile(0.25))
+            q_3_baseline = dict(errors_baseline_df.quantile(0.75))
             std_baseline = dict(errors_baseline_df.std())
             var_baseline = dict(errors_baseline_df.var())
 
             # append to results
             dict_to_append_shapiq = {
-                'budget': budget, 'mean': mean_shapiq, 'std': std_shapiq, 'var': var_shapiq
+                'budget': budget, 'mean': mean_shapiq, 'std': std_shapiq, 'var': var_shapiq,
+                'median': median_shapiq, 'q_1': q_1_shapiq, 'q_3': q_3_shapiq
             }
             dict_to_append_baseline = {
-                'budget': budget, 'mean': mean_baseline, 'std': std_baseline, 'var': var_baseline
+                'budget': budget, 'mean': mean_baseline, 'std': std_baseline, 'var': var_baseline,
+                'median': median_baseline, 'q_1': q_1_baseline, 'q_3': q_3_baseline
             }
             try:
                 RESULTS['shapiq'][order_].append(dict_to_append_shapiq)

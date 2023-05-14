@@ -83,7 +83,7 @@ def get_kendals_tau(approx: np.ndarray, exact: np.ndarray) -> float:
 def get_gt_values_for_game(game, shapiq: SHAPIQEstimator, order: int) -> Dict[int, np.ndarray]:
     """Computes the ground truth values for a given game and order."""
     try:
-        gt_values = game.exact_values(gamma_matrix=shapiq.weights, min_order=order, max_order=order)
+        gt_values = game.exact_values(gamma_matrix=shapiq.weights[order], min_order=order, max_order=order)
     except AttributeError:
         gt_values = shapiq.compute_interactions_complete(game=game.set_call)
     return gt_values

@@ -14,14 +14,15 @@ import pandas as pd
 
 from approximators import SHAPIQEstimator, PermutationSampling, RegressionEstimator
 from experiment import run_top_order_experiment
-from games import LookUpGame, ParameterizedSparseLinearModel
+from games import ParameterizedSparseLinearModel
 from utils_experiment import get_gt_values_for_game
 
 import warnings
 warnings.filterwarnings("ignore")
 
 
-def run_experiment(max_budget: int):
+
+def run_soum_experiment(max_budget: int, soum_params: dict):
 
     # CONSTANTS ------------------------------------------------------------------------------------
     MAX_BUDGET = max_budget
@@ -35,11 +36,9 @@ def run_experiment(max_budget: int):
 
     # initialize games
     game_list = []
-    used_ids = set()
     for i in range(NUMBER_OF_RUNS):
-        game = LookUpGame(data_folder=data_folder, n=data_n, set_zero=True, used_ids=used_ids)
+        game = ParameterizedSparseLinearModel(**soum_params)
         game_list.append(game)
-        used_ids = game.used_ids
 
     # get number of players
     n = game_list[0].n
@@ -117,23 +116,23 @@ if __name__ == "__main__":
     has_no_param = not len(run_parameters) > 1
     print("run parameters", run_parameters)
 
-    # PARAMETERS -----------------------------------------------------------------------------------
-    data_folder = "image_classifier" if has_no_param else run_parameters[1]
-    data_n = 14 if has_no_param else int(run_parameters[2])
-    interaction_index = "STI" if has_no_param else run_parameters[3]
-    RUN_TOP_ORDER = False if has_no_param else run_parameters[4] == "True"
-    order = 4 if has_no_param else int(run_parameters[5])
-    NUMBER_OF_RUNS = 1 if has_no_param else int(run_parameters[6])
-    try:
-        singleton_run = bool(run_parameters[7])
-    except IndexError:
-        singleton_run = False
-    try:
-        MAX_BUDGET = int(run_parameters[8])
-    except IndexError:
-        MAX_BUDGET = 2**data_n
+    interaction_index = "FSI" if has_no_param else run_parameters[1]
+    order = 2 if has_no_param else int(run_parameters[2])
+    NUMBER_OF_RUNS = 1 if has_no_param else int(run_parameters[3])
+    singleton_run = False if has_no_param else bool(run_parameters[4])
 
-    print("selected parameters:", data_folder, data_n, interaction_index, RUN_TOP_ORDER, order, NUMBER_OF_RUNS, singleton_run, MAX_BUDGET)
+    MAX_BUDGET = 2**14
+    RUN_TOP_ORDER = True
+    data_folder = "SOUM"
+
+    soum_params = {
+        "n": 30,
+        "weighting_scheme": "uniform",
+        "n_interactions": 50,
+        "max_interaction_size": 30,
+        "min_interaction_size": 1,
+        "n_non_important_features": 0
+    }
 
     if singleton_run:
         for i in range(NUMBER_OF_RUNS):
@@ -141,6 +140,6 @@ if __name__ == "__main__":
             print(f"Sleeping for {seconds_sleep} seconds.")
             time.sleep(seconds_sleep)
             NUMBER_OF_RUNS = 1
-            run_experiment(max_budget=MAX_BUDGET)
+            run_soum_experiment(max_budget=MAX_BUDGET, soum_params=soum_params)
     else:
-        run_experiment(max_budget=MAX_BUDGET)
+        run_soum_experiment(max_budget=MAX_BUDGET, soum_params=soum_params)
