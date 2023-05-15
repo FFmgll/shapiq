@@ -396,7 +396,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
 
     def transform_interactions_in_n_shapley(self, interaction_values: Dict[int, np.ndarray] = None,
                                             n: int = None,
-                                            reduce_one_dimension: bool = False):
+                                            reduce_one_dimension: bool = False, std_threshold=True):
         """Computes the n-Shapley values from the interaction values
 
         Args:
@@ -429,7 +429,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             result[len(S)][tuple(S)] = S_effect
         if not reduce_one_dimension:
             return result
-        return self._convert_n_shapley_values_to_one_dimension(result, n=n)
+        return self._convert_n_shapley_values_to_one_dimension(result, n=n, std_threshold=std_threshold)
 
     def _convert_n_shapley_values_to_one_dimension(self, n_shapley_values, n: int = None, std_threshold=True):
         """Converts the n-Shapley values to one dimension"""
