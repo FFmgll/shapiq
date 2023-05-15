@@ -431,19 +431,32 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             return result
         return self._convert_n_shapley_values_to_one_dimension(result, n=n)
 
-    def _convert_n_shapley_values_to_one_dimension(self, n_shapley_values, n: int = None):
+    def _convert_n_shapley_values_to_one_dimension(self, n_shapley_values, n: int = None, std_threshold=True):
         """Converts the n-Shapley values to one dimension"""
         if n is None:
             n = max(n_shapley_values.keys())
         result_pos = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
         result_neg = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
+
+        result_std = {order: {player: [] for player in range(self.n)} for order in range(1, n + 1)}
         for S in powerset(self.N, min_size=1, max_size=n):
             n_shap_value = n_shapley_values[len(S)][tuple(S)]
         #for S, n_shap_value in n_shapley_values.items():
             for player in S:
-                if n_shap_value > 0:
+                result_std[len(S)][player].append(n_shap_value / len(S))
+
+        for order in range(1,n+1):
+            for player in range(self.n):
+                result_std[order][player] = np.std(result_std[order][player])
+
+
+        for S in powerset(self.N, min_size=1, max_size=n):
+            n_shap_value = n_shapley_values[len(S)][tuple(S)]
+        #for S, n_shap_value in n_shapley_values.items():
+            for player in S:
+                if n_shap_value > 0 and (not std_threshold or n_shap_value>result_std[len(S)][player]):
                     result_pos[len(S)][player] += n_shap_value / len(S)
-                if n_shap_value < 0:
+                if n_shap_value < 0 and (not std_threshold or n_shap_value<-result_std[len(S)][player]):
                     result_neg[len(S)][player] += n_shap_value / len(S)
         return result_pos, result_neg
 
