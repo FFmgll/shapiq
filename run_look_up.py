@@ -27,7 +27,7 @@ def run_experiment(max_budget: int):
     MAX_BUDGET = max_budget
     BUDGET_STEPS = list(np.arange(0.05, 1.05, 0.05))  # step size of computation budgets
 
-    PAIRING = True
+    PAIRING = False
     STRATIFICATION = False
     SAMPLING_KERNEL = "ksh"
 

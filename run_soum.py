@@ -21,14 +21,13 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-
 def run_soum_experiment(max_budget: int, soum_params: dict):
 
     # CONSTANTS ------------------------------------------------------------------------------------
     MAX_BUDGET = max_budget
     BUDGET_STEPS = list(np.arange(0.05, 1.05, 0.05))  # step size of computation budgets
 
-    PAIRING = True
+    PAIRING = False
     STRATIFICATION = False
     SAMPLING_KERNEL = "ksh"
 

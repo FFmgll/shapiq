@@ -35,6 +35,7 @@ def _convert_into_single(folder_name, run_folder_name):
                 approx_errors = []
                 for df in dfs:
                     approx_errors.append(df[col][index][budget_index]['mean'])
+
                 approx_errors_df = pd.DataFrame(approx_errors)
                 mean = dict(approx_errors_df.mean())
                 median = dict(approx_errors_df.median())
@@ -67,9 +68,9 @@ def _convert_into_single(folder_name, run_folder_name):
 
 if __name__ == "__main__":
 
-    interaction_indexes = ['SII']
-    datasets_names = ["image_classifier_test"]
-    runs = ["4_allOrder"] # ["3_allOrder", "4_allOrder", "3_topOrder", "4_topOrder"]
+    interaction_indexes = ['SII', 'FSI', 'STI']
+    datasets_names = ["image_classifier"]
+    runs = ["1_topOrder", "2_topOrder", "3_topOrder", "4_topOrder", "2_allOrder", "3_allOrder", "4_allOrder"]
 
     # combinaiton of all three
     for dataset_name in datasets_names:
@@ -83,6 +84,8 @@ if __name__ == "__main__":
                     _convert_into_single(folder_name, run_folder_name)
                 except FileNotFoundError:
                     pass
+                except IndexError:
+                    print(dataset_name, interaction_index, run)
 
 
 

@@ -5,6 +5,7 @@ import typing
 import numpy as np
 from scipy.special import binom, bernoulli
 from typing import Dict
+from tqdm import tqdm
 
 from .base import BaseShapleyInteractions, powerset, determine_complete_subsets
 
@@ -94,7 +95,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return copy.deepcopy(result_complete)
 
     def compute_interactions_from_budget(self, game, budget, pairing=False, sampling_kernel="ksh",
-                                         sampling_only=False, stratification=False):
+                                         sampling_only=False, stratification=False, show_pbar=False):
         """Estimates the Shapley interactions given a game and budget for all top-order interactions
 
         Parameters
@@ -107,6 +108,10 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         stratification: if True, then stratification is used for estimation
 
         """
+        start_budget = budget
+        if show_pbar:
+            pbar = tqdm(total=start_budget)
+
         q, p = self._init_sampling_weights(sampling_kernel)
         result_complete = self.init_results()
 
@@ -121,13 +126,14 @@ class SHAPIQEstimator(BaseShapleyInteractions):
 
             for k in complete_subsets:
                 # compute all deterministic subset sizes
-                result_complete = self.update_results(result_complete,
-                                                      self._compute_interactions_complete_k(game,
-                                                                                            k))
+                result_complete = self.update_results(
+                    result_complete, self._compute_interactions_complete_k(game, k))
+            if show_pbar:
+                pbar.update(start_budget - budget)
 
             # Adjust budget, if pairwise sampling is used
             if pairing:
-                budget = 2 * int(budget / 2)
+                budget = int(budget / 2)
             else:
                 budget = budget
 
@@ -165,6 +171,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                                                            result_sample_s2[k],
                                                            n_samples[k],
                                                            result_sample_update)
+                        if show_pbar:
+                            pbar.update(1)
                         if pairing:
                             T_c = self.N - T
                             k_c = len(T_c)
@@ -173,10 +181,13 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                                 k] = self.update_mean_variance(
                                 result_sample_mean[k], result_sample_s2[k], n_samples[k],
                                 result_sample_update)
+                            if show_pbar:
+                                pbar.update(1)
                         if n_samples[k] > 1:
                             self.result_sample_variance[k] = self.scale_results(result_sample_s2[k],
                                                                                 1 / (n_samples[
                                                                                          k] - 1))
+
 
                     for k in incomplete_subsets:
                         result_complete = self.update_results(result_complete,
@@ -191,6 +202,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                     result_sample_mean = self.init_results()
                     result_sample_s2 = self.init_results()
                     for k in subset_sizes_samples:
+                        if show_pbar:
+                            pbar.update(2) if pairing else pbar.update(1)
                         T = set(np.random.choice(self.n, k, replace=False))
                         result_sample_update = self._evaluate_subset(game, T, r[k])
                         result_sample_mean, result_sample_s2, n_samples = self.update_mean_variance(
