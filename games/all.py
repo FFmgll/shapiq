@@ -92,7 +92,7 @@ class NLPGame:
     Output: in range -1 to 1 the sentiment of the subset.
     """
 
-    def __init__(self, input_text: str, label_key: str = 'label'):
+    def __init__(self, input_text: str, label_key: str = 'label', set_zero: bool = True):
         self.classifier = pipeline(model="lvwerra/distilbert-imdb", task="sentiment-analysis")
         self.tokenizer = self.classifier.tokenizer
         self.tokenized_input = np.asarray(self.tokenizer(input_text)['input_ids'][1:-1])
@@ -101,6 +101,9 @@ class NLPGame:
         self._label_key = label_key
         self.game_name = "language_model"
         self.original_output = self.call(self.input_sentence)
+        self.empty_value = 0
+        if set_zero:
+            self.empty_value = self.set_call(set())
 
     def call(self, x):
         outputs = self.classifier(x)
@@ -120,7 +123,7 @@ class NLPGame:
     def set_call(self, S):
         token_subset = self.tokenized_input[list(S)]
         x_text = self.tokenizer.decode(token_subset)
-        return self.call(x_text)[0]
+        return self.call(x_text)[0] - self.empty_value
 
 
 class NLPLookupGame:
@@ -140,11 +143,11 @@ class NLPLookupGame:
             sentence_id = random.choice(files)
             sentence_id = int(sentence_id.split(".")[0])
         self.used_ids.add(str(sentence_id) + ".csv")
-        data_path = os.path.join("data", "nlp_values", str(n), str(sentence_id) + ".csv")
+        data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "nlp_values", str(n), str(sentence_id) + ".csv")
         self.df = pd.read_csv(data_path)
         self.game_name = "language_model"
         self.n = n
-        whole_data = pd.read_csv(os.path.join("data", "simplified_imdb.csv"))
+        whole_data = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "simplified_imdb.csv"))
         self.input_sentence = str(whole_data[whole_data["id"] == sentence_id]["text"].values[0])
 
         self.storage = {}

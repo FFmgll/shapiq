@@ -95,7 +95,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
         return copy.deepcopy(result_complete)
 
     def compute_interactions_from_budget(self, game, budget, pairing=False, sampling_kernel="ksh",
-                                         sampling_only=False, stratification=False, show_pbar=False):
+                                         sampling_only=False, stratification=False, show_pbar=False, only_expicit=False):
         """Estimates the Shapley interactions given a game and budget for all top-order interactions
 
         Parameters
@@ -109,6 +109,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
 
         """
         start_budget = budget
+        pbar = None
         if show_pbar:
             pbar = tqdm(total=start_budget)
 
@@ -127,9 +128,7 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             for k in complete_subsets:
                 # compute all deterministic subset sizes
                 result_complete = self.update_results(
-                    result_complete, self._compute_interactions_complete_k(game, k))
-            if show_pbar:
-                pbar.update(start_budget - budget)
+                    result_complete, self._compute_interactions_complete_k(game, k, pbar=pbar))
 
             # Adjust budget, if pairwise sampling is used
             if pairing:
@@ -137,6 +136,8 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             else:
                 budget = budget
 
+            if only_expicit:
+                incomplete_subsets = []
             # Sample the remaining budget and update the approximations
             if len(incomplete_subsets) > 0:
                 subset_weight_vector = np.zeros(self.n + 1)
@@ -320,11 +321,13 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             else:
                 raise ValueError("Lower order interactions are not supported.")
 
-    def _compute_interactions_complete_k(self, game, k):
+    def _compute_interactions_complete_k(self, game, k, pbar=None):
         """ Computes the SI values for all interactions over all subsets of size k for a given game """
         results = self.init_results()
         for T in powerset(self.N, k, k):
             game_eval = game(T)
+            if pbar is not None:
+                pbar.update(1)
             t = len(T)
             interaction_subset_iterator = powerset(self.N, self.min_order, self.s_0)
             for S in interaction_subset_iterator:
@@ -437,27 +440,36 @@ class SHAPIQEstimator(BaseShapleyInteractions):
             n = max(n_shapley_values.keys())
         result_pos = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
         result_neg = {order: {player: 0. for player in range(self.n)} for order in range(1, n + 1)}
-
+        result_values = {order: {player: [] for player in range(self.n)} for order in range(1, n + 1)}
+        result_pos_counts = {order: {player: 0 for player in range(self.n)} for order in range(1, n + 1)}
+        result_neg_counts = {order: {player: 0 for player in range(self.n)} for order in range(1, n + 1)}
         result_std = {order: {player: [] for player in range(self.n)} for order in range(1, n + 1)}
         for S in powerset(self.N, min_size=1, max_size=n):
             n_shap_value = n_shapley_values[len(S)][tuple(S)]
-        #for S, n_shap_value in n_shapley_values.items():
             for player in S:
-                result_std[len(S)][player].append(n_shap_value / len(S))
-
-        for order in range(1,n+1):
+                result_std[len(S)][player].append(n_shap_value)
+                result_values[len(S)][player].append(n_shap_value)
+        for order in range(1, n+1):
             for player in range(self.n):
                 result_std[order][player] = np.std(result_std[order][player])
 
-
         for S in powerset(self.N, min_size=1, max_size=n):
             n_shap_value = n_shapley_values[len(S)][tuple(S)]
-        #for S, n_shap_value in n_shapley_values.items():
             for player in S:
-                if n_shap_value > 0 and (not std_threshold or n_shap_value>result_std[len(S)][player]):
+                if n_shap_value > 0:# and (not std_threshold or n_shap_value > 2 * result_std[len(S)][player]):
                     result_pos[len(S)][player] += n_shap_value / len(S)
-                if n_shap_value < 0 and (not std_threshold or n_shap_value<-result_std[len(S)][player]):
+                    result_pos_counts[len(S)][player] += 1
+                if n_shap_value < 0:# and (not std_threshold or n_shap_value < 2 * -result_std[len(S)][player]):
                     result_neg[len(S)][player] += n_shap_value / len(S)
+                    result_neg_counts[len(S)][player] += 1
+        for order in range(1, n+1):
+            for player in range(self.n):
+                if result_pos_counts[order][player] > 0:
+                    pass
+                    #result_pos[order][player] = result_pos[order][player] / result_pos_counts[order][player]
+                if result_neg_counts[order][player] > 0:
+                    pass
+                    #result_neg[order][player] = result_neg[order][player] / result_neg_counts[order][player]
         return result_pos, result_neg
 
     @staticmethod
