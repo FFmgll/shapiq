@@ -32,39 +32,36 @@ interaction_order = 2
 ```python
 
 shapiq_sii = SHAPIQEstimator(
-    N=player_set, max_order=interaction_order, min_order=interaction_order,
-    interaction_type="SII"
+    interaction_type="SII", N=player_set, order=interaction_order,  top_order=True
 )
 
 sii_scores = shapiq_sii.compute_interactions_from_budget(
     game=game_fun, budget=budget,
-    pairing=False, sampling_kernel="ksh", only_sampling=False, stratification=False
+    pairing=False, sampling_kernel="ksh", only_sampling=False, only_expicit=False, stratification=False
 )
 ```
 #### SHAP-IQ to approximate the Shapley Taylor Index
 
 ```python
 shapiq_sti = SHAPIQEstimator(
-    N=player_set, max_order=interaction_order, min_order=interaction_order,
-    interaction_type="STI"
+    interaction_type="STI", N=player_set, order=interaction_order,  top_order=True
 )
 
 sti_scores = shapiq_sti.compute_interactions_from_budget(
     game=game_fun, budget=budget,
-    pairing=False, sampling_kernel="ksh", only_sampling=False, stratification=False
+    pairing=False, sampling_kernel="ksh", only_sampling=False, only_expicit=False, stratification=False
 ) 
 ```
 #### SHAP-IQ to approximate the Shapley Faith Index
 
 ```python
 shapiq_FSI = SHAPIQEstimator(
-    N=player_set, max_order=interaction_order, min_order=interaction_order,
-    interaction_type="FSI"
+    interaction_type="FSI", N=player_set, order=interaction_order,  top_order=True
 )
 
 FSI_scores = shapiq_FSI.compute_interactions_from_budget(
     game=game_fun, budget=budget,
-    pairing=False, sampling_kernel="ksh", only_sampling=False, stratification=False
+    pairing=False, sampling_kernel="ksh", only_sampling=False, only_expicit=False, stratification=False
 )
 ```
 
@@ -73,13 +70,25 @@ FSI_scores = shapiq_FSI.compute_interactions_from_budget(
 To run and validate the same experiments as in the paper we refer to `run_experiment.py`, `run_experiment_sln.py`, and `unbiased_vs_shapx.py`.
 
 #### Sum of unanimity models (SOUM)
-To run the experiemtns on the synthetic model functions (synthetic game functions) we refer to `run_experiment_sln.py`. 
+To run the experiemtns on the synthetic model functions (synthetic game functions) we refer to `experiment_run_soum.py`. 
 There you can specify the complexity of the model functions.
 
 #### Language Model (LM)
-To run the experiments conducted on the language model we refer to `run_experiment_sln.py`.
+To run the experiments conducted on the language model we refer to `experiment_run_look_up.py`.
 We compute interaction indices for a sentiment analysis model. 
 The underlying language model is a finetuned `DistilBert` version: [dhlee347/distilbert-imdb](https://huggingface.co/dhlee347/distilbert-imdb)
+For more information on the movie reviews and value function we refer to `precompute_lm.py`.
 
-#### SHAP-IQ =  UnbiasedKernelSHAP:
-To validate the experiment, that `UnbiasedKernelSHAP` and `SHAP-IQ` indeed are the same method, we refer to `unbiased_vs_shapx.py`.
+#### Image Classification Model (ICM)
+To run the experiments conducted on the image classification model we refer to `experiment_run_look_up.py`.
+The underlying image classifier is a ResNet trained on ImageNet as provided by `torchvision.models.resnet18`.
+For more information on the superpixels and value function we refer to `precompute_icm.py`.
+
+#### SHAP-IQ = UnbiasedKernelSHAP:
+To validate the experiment, that `UnbiasedKernelSHAP` and `SHAP-IQ` indeed are the same method, we refer to `test_unbiased_vs_shapiq.py`.
+
+#### n-SII efficiency throught sampling:
+To validate the claim that SHAP-IQ preserves the efficiency of n-SII throughout the sampling process, we refer to `test_n_sii_efficiency.py`.
+
+#### FSI is not s-efficient:
+To validate the claim that FSI is not s-efficient, we refer to `test_s_efficiency.py`.
