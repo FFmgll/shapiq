@@ -595,21 +595,3 @@ class SHAPIQEstimator(BaseShapleyInteractions):
                 if n_shap_value < 0:
                     result_neg[len(S)][player] += n_shap_value / len(S)
         return result_pos, result_neg
-
-    @staticmethod
-    def _compute_bernoulli_numbers(n: int) -> np.ndarray:
-        """ Computes the Bernoulli numbers up to order n and returns a list of length n+1
-
-        Args:
-            n (int): The order of the Bernoulli numbers
-
-        Returns:
-            np.ndarray: The Bernoulli numbers up to order n
-        """
-        bernoulli_numbers = np.zeros(n + 1)
-        bernoulli_numbers[0] = 1
-        for k in range(1, n):
-            bernoulli_number = -1 / (k + 1) * np.sum(
-                [binom(k + 1, j) * bernoulli_numbers[j] for j in range(k)])
-            bernoulli_numbers[k] = bernoulli_number
-        return bernoulli_numbers
