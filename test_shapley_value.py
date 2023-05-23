@@ -4,8 +4,8 @@ import numpy as np
 
 from approximators.exact_sv import ExhaustiveSearch
 from approximators.regression import RegressionEstimator
-from approximators.shapiq import SHAPIQEstimator, SHAPIQEstimator
-from games import NLPLookupGame, ParameterizedSparseLinearModel
+from approximators.shapiq import SHAPIQEstimator
+from games import ParameterizedSparseLinearModel
 from pprint import pprint
 
 
@@ -14,7 +14,8 @@ if __name__ == "__main__":
     budget = 2**14
     interaction_order = 1
 
-    game = ParameterizedSparseLinearModel(n=14, n_interactions=50, min_interaction_size=1, max_interaction_size=14, weighting_scheme="uniform")
+    game = ParameterizedSparseLinearModel(n=14, n_interactions=50, min_interaction_size=1,
+                                          max_interaction_size=14, weighting_scheme="uniform")
     n = game.n
     game_fun = game.set_call
     N = set(range(0, n))

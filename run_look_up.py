@@ -14,7 +14,7 @@ import pandas as pd
 
 from approximators import SHAPIQEstimator, PermutationSampling, RegressionEstimator
 from experiment import run_top_order_experiment
-from games import LookUpGame, ParameterizedSparseLinearModel
+from games import LookUpGame
 from utils_experiment import get_gt_values_for_game
 
 import warnings
@@ -120,14 +120,14 @@ if __name__ == "__main__":
     # PARAMETERS -----------------------------------------------------------------------------------
     data_folder = "image_classifier" if has_no_param else run_parameters[1]
     data_n = 14 if has_no_param else int(run_parameters[2])
-    interaction_index = "STI" if has_no_param else run_parameters[3]
+    interaction_index = "SII" if has_no_param else run_parameters[3]
     RUN_TOP_ORDER = False if has_no_param else run_parameters[4] == "True"
-    order = 4 if has_no_param else int(run_parameters[5])
-    NUMBER_OF_RUNS = 1 if has_no_param else int(run_parameters[6])
+    order = 3 if has_no_param else int(run_parameters[5])
+    NUMBER_OF_RUNS = 10 if has_no_param else int(run_parameters[6])
     try:
         singleton_run = bool(run_parameters[7])
     except IndexError:
-        singleton_run = False
+        singleton_run = True
     try:
         MAX_BUDGET = int(run_parameters[8])
     except IndexError:

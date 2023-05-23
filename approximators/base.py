@@ -18,6 +18,11 @@ class BaseShapleyInteractions:
             self.weights[s] = np.zeros((self.n + 1, s + 1))
 
     def init_results(self):
+        """Initialize the results dictionary with zero arrays.
+
+        Returns:
+            Dict[np.ndarray]: Dictionary with zero arrays for each interaction order.
+        """
         results = {}
         for k in range(self.min_order, self.s_0 + 1):
             results[k] = np.zeros(np.repeat(self.n, k))
@@ -25,6 +30,7 @@ class BaseShapleyInteractions:
 
     @staticmethod
     def update_results(current, update):
+        """Update the current results with the new update."""
         rslt = {}
         for l in current:
             rslt[l] = current[l] + update[l]
@@ -32,24 +38,37 @@ class BaseShapleyInteractions:
 
     @staticmethod
     def update_mean_variance(current_mean, current_s2, n_samples, update):
-        rslt = {}
+        """Update the mean and variance of the current results with the new update."""
         for l in current_s2:
             n_samples += 1
             delta = update[l] - current_mean[l]
             current_mean[l] += delta / n_samples
             delta2 = update[l] - current_mean[l]
             current_s2[l] += delta*delta2
-        return current_mean,current_s2,n_samples
+        return current_mean, current_s2, n_samples
 
     @staticmethod
     def scale_results(current, factor):
+        """Scale the current results with the given factor."""
         rslt = {}
         for l in current:
             rslt[l] = current[l] * factor
         return rslt
 
     @staticmethod
-    def _smooth_with_epsilon(interaction_results: typing.Union[dict, np.ndarray], eps=0.00001) -> typing.Union[dict, np.ndarray]:
+    def _smooth_with_epsilon(
+            interaction_results: typing.Union[dict, np.ndarray],
+            eps=0.00001
+    ) -> typing.Union[dict, np.ndarray]:
+        """Smooth the interaction results with a small epsilon to avoid numerical issues.
+
+        Args:
+            interaction_results (Union[dict, np.ndarray]): Interaction results.
+            eps (float, optional): Small epsilon. Defaults to 0.00001.
+
+        Returns:
+            Union[dict, np.ndarray]: Smoothed interaction results.
+        """
         if not isinstance(interaction_results, dict):
             interaction_results[np.abs(interaction_results) < eps] = 0
             return copy.deepcopy(interaction_results)
@@ -61,6 +80,16 @@ class BaseShapleyInteractions:
 
 
 def powerset(iterable, min_size=-1, max_size=None):
+    """Return a powerset of the iterable with optional size limits.
+
+    Args:
+        iterable (iterable): Iterable.
+        min_size (int, optional): Minimum size of the subsets. Defaults to -1.
+        max_size (int, optional): Maximum size of the subsets. Defaults to None.
+
+    Returns:
+        iterable: Powerset of the iterable.
+    """
     if max_size is None and min_size > -1:
         max_size = min_size
     s = list(iterable)
@@ -73,9 +102,21 @@ def powerset(iterable, min_size=-1, max_size=None):
 
 
 def determine_complete_subsets(s, n, budget, q):
+    """Given a computational budget, determines the complete subsets that can be computed explicitly
+    and the corresponding incomplete subsets that need to be estimated via sampling.
+
+    Args:
+        s (int): interaction order.
+        n (int): number of features/players.
+        budget (int): total allowed budget for the computation.
+        q (np.ndarray): weight vector.
+
+    Returns:
+        list, list, int: complete subsets, incomplete subsets, remaining budget.
+
+    """
     complete_subsets = []
     paired_subsets, unpaired_subset = get_paired_subsets(s, n)
-
     incomplete_subsets = list(range(s, n - s + 1))
     weight_vector = copy.copy(q)
     sum_weight_vector = np.sum(weight_vector)
@@ -105,6 +146,16 @@ def determine_complete_subsets(s, n, budget, q):
 
 
 def get_paired_subsets(s, n):
+    """Given an interaction order and the number of features/players, determines the paired subsets
+
+    Args:
+        s (int): interaction order.
+        n (int): number of features/players.
+
+    Returns:
+        list, Union[int, None]: paired subsets, unpaired subset. If there is no unpaired subset,
+            None is returned.
+    """
     subset_sizes = list(range(s, n - s + 1))
     n_paired_subsets = int(len(subset_sizes) / 2)
     paired_subsets = [(subset_sizes[subset_size - 1], subset_sizes[-subset_size])

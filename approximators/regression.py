@@ -1,3 +1,4 @@
+"""This module contains the RegressionEstimator class, which is used to approximate the FSI interaction index using the weighted least square approach."""
 import copy
 import itertools
 import random

@@ -4,4 +4,4 @@ venv
 *.csv
 games/data
 plots_old
-code_for_patrick.py
+*.sh

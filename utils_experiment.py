@@ -94,7 +94,7 @@ def save_values(save_path: str, values: list):
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     df = pd.DataFrame(values)
-    if not os.path.iFSIle(save_path):
+    if not os.path.isfile(save_path):
         df.to_csv(save_path, header=True, index=False)
     else:
         df.to_csv(save_path, mode='a',  header=False, index=False)

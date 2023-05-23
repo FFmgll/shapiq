@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 COLORS = {'SHAP-IQ': '#ef27a6', "Baseline": '#7d53de'}
 LINESTYLE_DICT_INDEX = {'SII': 'solid', 'STI': 'dashed', 'FSI': 'dashdot'}
 LINESTYLE_DICT_ORDER = {0: "solid", 1: "dotted", 2: 'solid', 3: 'dashed', 4: 'dashdot'}
-ERROR_NAME_DICT = {"approximation_error": "MSE", "kendals_tau": "Kendall's $\\tau$", "precision_at_10": "Pr@10"}
+ERROR_NAME_DICT = {"approximation_error": "MSE", "kendals_tau": "Kendall's $\\tau$", "precision_at_10": "Prec@10"}
 LINE_MARKERS_DICT_ORDER = {0: "o", 1: "o", 2: "s", 3: "X", 4: "d"}
 LINE_MARKERS_DICT_INDEX = {'SII': "o", 'STI': "s", 'FSI': "X"}
 GAME_NAME_DICT = {"nlp_values_14": "LM", "image_classifier_14": "ResNet", "bike_1_12": r"$bike$", "adult_1_14": r"$adult$", "SOUM_30": "SOUM"}
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     baseline_dict_dfs = {}
     for interaction_index in interaction_indices:
 
-        file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-True_stratification-False_weights-ksh.json"
+        file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-False_stratification-False_weights-ksh.json"
         file_path = os.path.join("..", "results", game_name, interaction_index, file_name)
 
         # read json file with pandas
@@ -152,10 +152,9 @@ if __name__ == "__main__":
         game_name = GAME_NAME_DICT[game_name]
     except KeyError:
         game_name = game_name
-    title = f"{game_name} (" \
-            + fr"$s_0 = {ORDER}$" + ", " \
-            + fr"$d = {N_PLAYER}$" + ", " \
-            + fr"$g = {NUMBER_OF_RUNS}$" \
+    title = f"SII, STI, and FSI for {game_name} (" \
+            + fr"$s = {ORDER}$" + ", " \
+            + fr"$d = {N_PLAYER}$" \
             + ")"
     ax.set_title(title, fontsize="xx-large")
 

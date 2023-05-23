@@ -13,9 +13,7 @@ class PermutationSampling(BaseShapleyInteractions):
         super().__init__(N, order, min_order)
         self.interaction_type = interaction_type
 
-    def approximate_with_budget(self, game, budget, pairing: bool = False):
-        #results = np.zeros(np.repeat(self.n, self.s))
-        #counts = np.zeros(np.repeat(self.n, self.s))
+    def approximate_with_budget(self, game, budget):
         results = self.init_results()
         results_out = self.init_results()
         counts = self.init_results()

@@ -7,7 +7,6 @@ import numpy as np
 from approximators.unbiased import CovertRegression, calculate_uksh_from_samples, get_weights
 from approximators.shapiq import SHAPIQEstimator
 from games import NLPLookupGame
-from evaluation import draw_shapley_values
 
 
 class GameWrapper:
@@ -28,11 +27,11 @@ class GameWrapper:
         return result
 
     def grand(self):
-        '''Get grand coalition value.'''
+        """Get grand coalition value."""
         return self.__call__(np.ones((1, self.players), dtype=bool))[0]
 
     def null(self):
-        '''Get null coalition value.'''
+        """Get null coalition value."""
         return self.__call__(np.zeros((1, self.players), dtype=bool))[0]
 
 
@@ -137,7 +136,6 @@ def compare_unbiasedksh_and_shapx(
 
 
 if __name__ == "__main__":
-
     n = 14
     N = set(range(n))
 
@@ -153,10 +151,6 @@ if __name__ == "__main__":
 
     feature_names = game.input_sentence.split(" ")
     print(feature_names)
-    draw_shapley_values(
-        values_ksh, u_ksh_covert, values_shapx_sii, values_shapx_sti, values_shapx_FSI,
-        labels=feature_names, figsize=(8, 3.5), save_name="plots/shap_comparison.pdf")
-
-    print(np.sum((exact_values-values_ksh)**2))
-    print(np.sum((exact_values-values_shapx_sii)**2))
-    assert values_ksh==values_shapx_sii
+    print(np.sum((exact_values - values_ksh) ** 2))
+    print(np.sum((exact_values - values_shapx_sii) ** 2))
+    assert values_ksh == values_shapx_sii

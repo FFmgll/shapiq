@@ -33,12 +33,12 @@ if __name__ == "__main__":
     plot_mean = True
     plot_iqr = False
     plot_std = True
-    y_manual = 0.14  # 5 10
+    y_manual = 0.16 # 0.16  # 5 10
     x_min_to_plot = 0
     x_max = None
 
     # get the data to plot -------------------------------------------------------------------------
-    file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-True_stratification-False_weights-ksh.json"
+    file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-False_stratification-False_weights-ksh.json"
     file_path = os.path.join("..", "results", game_name, interaction_index, file_name)
 
     # read json file with pandas
@@ -116,15 +116,13 @@ if __name__ == "__main__":
             ax.plot([], [], color="none", label=" ")
     ax.plot([], [], label="$\\bf{Order}$", color="none")
     for order in orders_to_plot:
-        if order > 0:
-            order_title += f"{order}, " if order < max(orders_to_plot) else f"{order}"
-        label_text = r"$s_0$" + f" = {order}" if order > 0 else r"all to $s_0$" + f" = {max(orders_to_plot)}"
+        label_text = r"$s$" + f" = {order}" if order > 0 else r"all to $s_0$" + f" = {max(orders_to_plot)}"
         ax.plot([], [], color="black", linestyle=LINESTYLE_DICT_ORDER[order], label=label_text, marker=LINE_MARKERS_DICT_ORDER[order], mec="white")
     order_title += "}"
     ax.legend(ncols=n_col_legend)
 
-    if len(orders_to_plot) == 1:
-        order_title = r"$s_0 =$" + f"{max(orders_to_plot)}"
+
+    order_title = r"$s_0 =$" + f"{max(orders_to_plot)}"
 
     # set y axis limits
     ax.set_ylim((0, y_max_value * 1.1))
@@ -157,10 +155,10 @@ if __name__ == "__main__":
         game_name = GAME_NAME_DICT[game_name]
     except KeyError:
         game_name = game_name
-    title = f"{interaction_index}, {game_name} (" \
-            + order_title + ", "\
-            + fr"$d = {N_PLAYER}$" + ", " \
-            + fr"$g = {NUMBER_OF_RUNS}$" \
+    if interaction_index == "SII" and not TOP_ORDER:
+        interaction_index = "n-SII"
+    title = f"{interaction_index} for the {game_name} (" \
+            + order_title \
             + ")"
     ax.set_title(title, fontsize="xx-large")
 
@@ -169,6 +167,6 @@ if __name__ == "__main__":
     # save figure as pdf
     if SAVE_FIG:
         save_name = f"{interaction_index}_{game_name}_top-order-{TOP_ORDER}-{max(orders_to_plot)}_{error_to_plot_id}" + ".pdf"
-        plt.savefig(save_name)
+        plt.savefig(os.path.join("appendix_plots", save_name))
 
     plt.show()

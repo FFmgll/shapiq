@@ -56,7 +56,7 @@ if __name__ == "__main__":
         'xtick.labelsize': 'x-large', 'ytick.labelsize': 'x-large'
     }
 
-    fig, axis = plt.subplots(figsize=(6, 4.35))
+    fig, axis = plt.subplots(figsize=(6, 4.15))
 
     x = np.arange(n)
     x_pos_dict = {'GT': x - 0.3, 'shapiq': x - 0.1, 'shapiq_explicit': x + 0.1, 'permutation': x + 0.3}
@@ -66,7 +66,9 @@ if __name__ == "__main__":
     #width = 0.25
 
     min_max_values = [0, 0]
-    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22"]
+
+    # a color list that works for color blind people
+    colors = ["#D81B60", "#FFB000", "#1E88E5", "#FE6100", "#FFB000"]
     for i, estimator_id in enumerate(estimates.keys()):
 
         # get estimates
@@ -107,7 +109,7 @@ if __name__ == "__main__":
         legend_elements.append(Patch(facecolor=colors[order], edgecolor='black', label=f"Order {order + 1}"))
     axis.legend(handles=legend_elements, loc='upper center', ncol=interaction_order)
 
-    axis.set_title(r"n-Shapley values for a sentence provided to the LM")
+    axis.set_title(r"n-SII values for a sentence provided to the LM")
 
     x_ticks_labels = [word for word in input_words]
     axis.set_xticks(x)
@@ -116,12 +118,12 @@ if __name__ == "__main__":
     axis.set_xlim(-0.5, n - 0.5)
     axis.set_ylim(min_max_values[0] * 1.05, min_max_values[1] * 1.3)
 
-    axis.set_ylabel("n-Shapley value")
+    axis.set_ylabel("n-SII values")
 
     plt.tight_layout()
 
     # save plot ------------------------------------------------------------------------------------
-    save_path = os.path.join("plots", "n_shap.pdf")
+    save_path = os.path.join("plots", "n_SII_sampling.pdf")
     fig.savefig(save_path)
 
     plt.show()

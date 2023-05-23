@@ -3,8 +3,8 @@ import copy
 import numpy as np
 
 from approximators.regression import RegressionEstimator
-from approximators.shapiq import SHAPIQEstimator, SHAPIQEstimator
-from games import NLPLookupGame, ParameterizedSparseLinearModel
+from approximators.shapiq import SHAPIQEstimator
+from games import ParameterizedSparseLinearModel
 from pprint import pprint
 
 
@@ -13,8 +13,11 @@ if __name__ == "__main__":
     budget = 10_000
     interaction_order = 2
 
-    game = ParameterizedSparseLinearModel(n=30, n_interactions=75, min_interaction_size=1, max_interaction_size=30, weighting_scheme="uniform")
-    #game = NLPLookupGame(n=14, sentence_id=588)
+    game = ParameterizedSparseLinearModel(
+        n=30, n_interactions=75, min_interaction_size=1, max_interaction_size=30,
+        weighting_scheme="uniform"
+    )
+
     n = game.n
     game_fun = game.set_call
     N = set(range(0, n))
@@ -22,7 +25,9 @@ if __name__ == "__main__":
     # get exact values
     exact_estimator = SHAPIQEstimator(N, interaction_order, "FSI")
     try:
-        exact_values = game.exact_values(gamma_matrix=exact_estimator.weights, max_order=interaction_order, min_order=interaction_order)[interaction_order]
+        exact_values = game.exact_values(
+            gamma_matrix=exact_estimator.weights, max_order=interaction_order,
+            min_order=interaction_order)[interaction_order]
     except AttributeError:
         exact_values = copy.deepcopy(exact_estimator.compute_interactions_complete(game_fun))[interaction_order]
     pprint(exact_values)

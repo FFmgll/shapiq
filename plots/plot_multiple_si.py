@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 
 COLORS = {'SHAP-IQ': '#ef27a6', "Baseline": '#7d53de'}
 LINESTYLE_DICT_INDEX = {'SII': 'solid', 'STI': 'dashed', 'FSI': 'dashdot'}
@@ -10,7 +11,7 @@ LINESTYLE_DICT_ORDER = {0: "solid", 1: "dotted", 2: 'solid', 3: 'dashed', 4: 'da
 ERROR_NAME_DICT = {"approximation_error": "MSE", "kendals_tau": "Kendall's $\\tau$", "precision_at_10": "Pr@10"}
 LINE_MARKERS_DICT_ORDER = {0: "o", 1: "o", 2: "s", 3: "X", 4: "d"}
 LINE_MARKERS_DICT_INDEX = {'SII': "o", 'STI': "s", 'FSI': "X"}
-GAME_NAME_DICT = {"nlp_values_14": "LM", "image_classifier_14": "ResNet", "bike_1_12": r"$bike$", "adult_1_14": r"$adult$", "SOUM_30": "SOUM"}
+GAME_NAME_DICT = {"nlp_values_14": "LM", "image_classifier_14": "ICM", "bike_1_12": r"$bike$", "adult_1_14": r"$adult$", "SOUM_30": "SOUM"}
 
 
 if __name__ == "__main__":
@@ -26,12 +27,13 @@ if __name__ == "__main__":
     NUMBER_OF_RUNS = 50
 
     # plot parameters ------------------------------------------------------------------------------
-    error_to_plot_id = "approximation_error"  # "approximation_error" #'precision_at_10' #'precision_at_10' # 'approximation_error' # or 'kendals_tau'
+    error_to_plot_id = "precision_at_10"  # "approximation_error" #'precision_at_10' #'precision_at_10' # 'approximation_error' # or 'kendals_tau'
+    detail = False
     x_data = None
     plot_mean = True
     plot_iqr = False
     plot_std = True
-    y_manual = 0.8 # 0.1  # 1 0.5
+    y_manual = None # .02 # # None  #0.3 # 0.1 # 0.15 # 0.02 #0.003 # 0.1  # 1 0.5 None
     x_min_to_plot = 1000
     x_max = None
 
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     baseline_dict_dfs = {}
     for interaction_index in interaction_indices:
 
-        file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-True_stratification-False_weights-ksh.json"
+        file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-False_stratification-False_weights-ksh.json"
         file_path = os.path.join("..", "results", game_name, interaction_index, file_name)
 
         # read json file with pandas
@@ -152,18 +154,24 @@ if __name__ == "__main__":
         game_name = GAME_NAME_DICT[game_name]
     except KeyError:
         game_name = game_name
-    title = f"{game_name} (" \
+    title = f"SII, STI, and FSI for {game_name} (" \
             + fr"$s_0 = {ORDER}$" + ", " \
-            + fr"$d = {N_PLAYER}$" + ", " \
-            + fr"$g = {NUMBER_OF_RUNS}$" \
+            + fr"$d = {N_PLAYER}$" \
             + ")"
     ax.set_title(title, fontsize="xx-large")
+
+    if error_to_plot_id == "approximation_error":
+        plt.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    else:
+        ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
     plt.tight_layout()
 
     # save figure as pdf
     if SAVE_FIG:
-        save_name = f"n-index-{len(interaction_indices)}_{game_name}_top-order-{TOP_ORDER}_{error_to_plot_id}" + ".pdf"
-        plt.savefig(save_name)
+        save_name = f"n-index-{len(interaction_indices)}_{game_name}_top-order-{TOP_ORDER}-{ORDER}_{error_to_plot_id}" + ".pdf"
+        if detail:
+            save_name = f"detail_{save_name}"
+        plt.savefig(os.path.join("appendix_plots", save_name))
 
     plt.show()

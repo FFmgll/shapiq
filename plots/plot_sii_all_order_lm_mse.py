@@ -7,10 +7,10 @@ from matplotlib import pyplot as plt
 COLORS = {'SHAP-IQ': '#ef27a6', "Baseline": '#7d53de'}
 LINESTYLE_DICT_INDEX = {'SII': 'solid', 'STI': 'dashed', 'FSI': 'dashdot'}
 LINESTYLE_DICT_ORDER = {0: "solid", 1: "dotted", 2: 'solid', 3: 'dashed', 4: 'dashdot'}
-ERROR_NAME_DICT = {"approximation_error": "MSE", "kendals_tau": "Kendall's $\\tau$", "precision_at_10": "Pr@10", "approximation_error_at_10": "MSE@10"}
+ERROR_NAME_DICT = {"approximation_error": "MSE", "kendals_tau": "Kendall's $\\tau$", "precision_at_10": "Prec@10", "approximation_error_at_10": "MSE@10"}
 LINE_MARKERS_DICT_ORDER = {0: "o", 1: "o", 2: "s", 3: "X", 4: "d"}
 LINE_MARKERS_DICT_INDEX = {'SII': "o", 'STI': "s", 'FSI': "X"}
-GAME_NAME_DICT = {"nlp_values_14": "LM", "image_classifier_14": "ResNet", "bike_1_12": r"$bike$", "adult_1_14": r"$adult$", "SOUM_70": r"SOUM"}
+GAME_NAME_DICT = {"nlp_values_14": "LM", "image_classifier_14": "ICM", "bike_1_12": r"$bike$", "adult_1_14": r"$adult$", "SOUM_70": r"SOUM"}
 
 
 if __name__ == "__main__":
@@ -33,12 +33,12 @@ if __name__ == "__main__":
     plot_mean = True
     plot_iqr = False
     plot_std = True
-    y_manual = 0.14  # 5 10
-    x_min_to_plot = 0
+    y_manual = 0.16  # 5 10
+    x_min_to_plot = 1000
     x_max = None
 
     # get the data to plot -------------------------------------------------------------------------
-    file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-True_stratification-False_weights-ksh.json"
+    file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-False_stratification-False_weights-ksh.json"
     file_path = os.path.join("..", "results", game_name, interaction_index, file_name)
 
     # read json file with pandas
@@ -110,21 +110,18 @@ if __name__ == "__main__":
     ax.plot([], [], color=COLORS["Baseline"], linestyle="solid", label="Baseline")
 
     n_col_legend = 2
-    order_title = r"$s_0$={"
+
     if len(orders_to_plot) > 2:
         for _ in range(len(orders_to_plot) - 2):
             ax.plot([], [], color="none", label=" ")
     ax.plot([], [], label="$\\bf{Order}$", color="none")
     for order in orders_to_plot:
-        if order > 0:
-            order_title += f"{order}, " if order < max(orders_to_plot) else f"{order}"
-        label_text = r"$s_0$" + f" = {order}" if order > 0 else r"all to $s_0$" + f" = {max(orders_to_plot)}"
+        label_text = r"$s$" + f" = {order}" if order > 0 else r"all to $s_0$" + f" = {max(orders_to_plot)}"
         ax.plot([], [], color="black", linestyle=LINESTYLE_DICT_ORDER[order], label=label_text, marker=LINE_MARKERS_DICT_ORDER[order], mec="white")
-    order_title += "}"
     ax.legend(ncols=n_col_legend)
 
-    if len(orders_to_plot) == 1:
-        order_title = r"$s_0 =$" + f"{max(orders_to_plot)}"
+
+    order_title = r"$s_0 =$" + f"{max(orders_to_plot)}"
 
     # set y axis limits
     ax.set_ylim((0, y_max_value * 1.1))
@@ -157,10 +154,10 @@ if __name__ == "__main__":
         game_name = GAME_NAME_DICT[game_name]
     except KeyError:
         game_name = game_name
-    title = f"{interaction_index}, {game_name} (" \
-            + order_title + ", "\
-            + fr"$d = {N_PLAYER}$" + ", " \
-            + fr"$g = {NUMBER_OF_RUNS}$" \
+    #if interaction_index == "SII" and not TOP_ORDER:
+    #    interaction_index = "n-SII"
+    title = f"{interaction_index} for the {game_name} (" \
+            + fr"$d = {N_PLAYER}$" \
             + ")"
     ax.set_title(title, fontsize="xx-large")
 

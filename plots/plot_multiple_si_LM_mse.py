@@ -31,7 +31,7 @@ if __name__ == "__main__":
     plot_mean = True
     plot_iqr = False
     plot_std = True
-    y_manual = 0.12 # 0.1  # 1 0.5
+    y_manual = 0.16 # 0.1  # 1 0.5
     x_min_to_plot = 1000
     x_max = None
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     baseline_dict_dfs = {}
     for interaction_index in interaction_indices:
 
-        file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-True_stratification-False_weights-ksh.json"
+        file_name = f"n-{N_PLAYER}_runs-{NUMBER_OF_RUNS}_s0-{ORDER}_top-order-{TOP_ORDER}_pairing-False_stratification-False_weights-ksh.json"
         file_path = os.path.join("..", "results", game_name, interaction_index, file_name)
 
         # read json file with pandas
@@ -152,10 +152,9 @@ if __name__ == "__main__":
         game_name = GAME_NAME_DICT[game_name]
     except KeyError:
         game_name = game_name
-    title = f"{game_name} (" \
-            + fr"$s_0 = {ORDER}$" + ", " \
-            + fr"$d = {N_PLAYER}$" + ", " \
-            + fr"$g = {NUMBER_OF_RUNS}$" \
+    title = f"SII, STI, and FSI for {game_name} (" \
+            + fr"$s = {ORDER}$" + ", " \
+            + fr"$d = {N_PLAYER}$" \
             + ")"
     ax.set_title(title, fontsize="xx-large")
 
