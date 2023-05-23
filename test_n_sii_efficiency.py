@@ -16,7 +16,7 @@ if __name__ == "__main__":
     game_list = []
     game = LookUpGame(data_folder=data_set_name, n=data_n, data_id=data_id, set_zero=True)
 
-    # get information about the input senctence and the model --------------------------------------
+    # get information about the input sentence and the model --------------------------------------
     input_sentence = NLPLookupGame(n=data_n, sentence_id=data_id, set_zero=True).input_sentence
     nlp_model_game = NLPGame(input_text=input_sentence)
     original_ouput = nlp_model_game.original_output

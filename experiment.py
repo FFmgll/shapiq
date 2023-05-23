@@ -1,3 +1,4 @@
+"""This module contains the experiment function for the top order experiment."""
 import copy
 import os
 from typing import Union
@@ -7,7 +8,7 @@ import pandas as pd
 import tqdm
 
 from approximators import SHAPIQEstimator, PermutationSampling, RegressionEstimator
-from utils_experiment import get_gt_values_for_game, get_all_errors
+from utils_experiment import get_all_errors
 
 
 def run_top_order_experiment(

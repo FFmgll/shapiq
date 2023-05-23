@@ -32,7 +32,8 @@ class Adult:
         assert version in [1, 2], "OpenML census dataset version must be '1' or '2'."
         dataset, class_label = get_open_ml_dataset("adult", version=version)
         self.num_feature_names = ['age', 'capital-gain', 'capital-loss', 'hours-per-week', 'fnlwgt']
-        self.cat_feature_names = ['workclass', 'education', 'marital-status', 'occupation', 'relationship', 'race', 'sex', 'native-country', 'education-num']
+        self.cat_feature_names = ['workclass', 'education', 'marital-status', 'occupation',
+                                  'relationship', 'race', 'sex', 'native-country', 'education-num']
         dataset[self.num_feature_names] = dataset[self.num_feature_names].apply(pd.to_numeric)
         num_pipeline = Pipeline([
             ('imputer', SimpleImputer(strategy='median')),
@@ -70,7 +71,8 @@ class BikeSharing:
     ):
         dataset, class_label = get_open_ml_dataset(42713, version=1)
         self.num_feature_names = ['hour', 'temp', 'feel_temp', 'humidity', 'windspeed']
-        self.cat_feature_names = ['season', 'year', 'month', 'holiday', 'weekday', 'workingday', 'weather']
+        self.cat_feature_names = ['season', 'year', 'month', 'holiday', 'weekday', 'workingday',
+                                  'weather']
         dataset[self.num_feature_names] = dataset[self.num_feature_names].apply(pd.to_numeric)
         num_pipeline = Pipeline([
             ('scaler', RobustScaler())

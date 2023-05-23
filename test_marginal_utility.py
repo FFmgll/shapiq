@@ -1,7 +1,6 @@
 import copy
 
 import numpy as np
-from scipy.special import binom
 
 from games.all import MarginalUtility
 from approximators import SHAPIQEstimator
