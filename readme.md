@@ -3,6 +3,7 @@ This repository holds the supplement material for the contribution _SHAP-IQ: Uni
 
 ### 🚀 Quickstart
 For a quick introduction, we refer to the `main.ipynb` notebook:
+Install the dependencies via `pip install -r requirements.txt` and run the notebook.
 
 #### Setup
 ```python
