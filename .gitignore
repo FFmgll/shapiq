@@ -5,3 +5,4 @@ venv
 games/data
 plots_old
 *.sh
+__pycache__
