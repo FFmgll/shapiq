@@ -67,7 +67,8 @@ FSI_scores = shapiq_FSI.compute_interactions_from_budget(
 
 ### ✅ Validate Experiments
 
-To run and validate the same experiments as in the paper we refer to `run_experiment.py`, `run_experiment_sln.py`, and `unbiased_vs_shapx.py`.
+To run and validate the same experiments as in the paper the lookup data needs to be first pre-computed.
+For this we refer to `precompute_lm.py` and `precompute_icm.py`. We provide some example images and sentences in the `games/data` folder.
 
 #### Sum of unanimity models (SOUM)
 To run the experiemtns on the synthetic model functions (synthetic game functions) we refer to `experiment_run_soum.py`. 
