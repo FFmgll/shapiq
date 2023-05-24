@@ -153,7 +153,7 @@ if __name__ == "__main__":
     except KeyError:
         game_name = game_name
     title = f"SII, STI, and FSI for {game_name} (" \
-            + fr"$s = {ORDER}$" + ", " \
+            + fr"$s_0 = {ORDER}$" + ", " \
             + fr"$d = {N_PLAYER}$" \
             + ")"
     ax.set_title(title, fontsize="xx-large")

@@ -36,8 +36,8 @@ if __name__ == "__main__":
     interaction_order = 4
     budget = 10_000
 
-    #og = "I have never forgot this movie. All these years and it has remained in my life."
-    #sentence = "i have never forgot this movie all these years and it has remained in my life"
+    og = "I have never forgot this movie. All these years and it has remained in my life."
+    sentence = "i have never forgot this movie all these years and it has remained in my life"
 
     #og = "Absolutely nothing is redeeming about this total piece of trash."
     #sentence = "absolutely nothing is redeeming about this total piece of trash"
@@ -54,8 +54,8 @@ if __name__ == "__main__":
     #og = "My first thought after this movies conclusion was this. Not good, but not bad, for early-to-mid eighties."
     #sentence = "my first thought after this movies conclusion was this not good but not bad for early to mid eighties"
 
-    og = "It is a gruesome cannibal movie. But it's not bad. If you like Hannibal, you'll love this."
-    sentence = "it is a gruesome cannibal movie but it is not bad if you like hannibal you will love this"
+    #og = "It is a gruesome cannibal movie. But it's not bad. If you like Hannibal, you'll love this."
+    #sentence = "it is a gruesome cannibal movie but it is not bad if you like hannibal you will love this"
 
     #og = "Not bad for a Mixed tag match, it had entertaining antics, and passed the time well."
     #sentence = "not bad for a mixed tag match it had entertaining antics and passed the time well"
@@ -131,10 +131,10 @@ if __name__ == "__main__":
 
         # add legend
         legend_elements = []
-        for order in range(interaction_order):
+        for order in range(n_sii_order):
             legend_elements.append(
                 Patch(facecolor=colors[order], edgecolor='black', label=f"Order {order + 1}"))
-        axis.legend(handles=legend_elements, loc='upper center', ncol=interaction_order)
+        axis.legend(handles=legend_elements, loc='upper center', ncol=n_sii_order)
 
         axis.set_title(r"n-SII values for a sentence provided to the LM")
 
