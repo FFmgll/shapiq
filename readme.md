@@ -1,3 +1,6 @@
+## Disclaimer: Please use other Implementation in Practice!
+If you plan on using SHAP-IQ or other interaction algorithms for your own purposes, please have a look at our publicly available [python package shapiq](https://github.com/mmschlk/shapiq
+)!
 ## 📄 SHAP-IQ: Unified Approximation of any-order Shapley Interactions
 This repository holds the supplement material for the contribution _SHAP-IQ: Unified Approximation of any-order Shapley Interactions_.
 
