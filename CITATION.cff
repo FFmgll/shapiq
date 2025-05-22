@@ -1,0 +1,36 @@
+cff-version: 1.0.0
+message: "To cite the SHAP-IQ approximator use the following citation:"
+authors:
+  - family-names: Fumagalli
+    given-names: Fabian
+  - family-names: Muschalik
+    given-names: Maximilian
+  - family-names: Kolpaczki
+    given-names: Patrick
+  - family-names: H\"ullermeier
+    given-names: Eyke
+  - family-names: Hammer
+    given-names: Barbara
+title: 'SHAP-IQ: Unified Approximation of any-order Shapley Interactions'
+version: 1.2.0
+url: https://openreview.net/forum?id=IEMLNF4gK4
+date-released: '2023-12-30'
+preferred-citation:
+  authors:
+  - family-names: Fumagalli
+    given-names: Fabian
+  - family-names: Muschalik
+    given-names: Maximilian
+  - family-names: Kolpaczki
+    given-names: Patrick
+  - family-names: H\"ullermeier
+    given-names: Eyke
+  - family-names: Hammer
+    given-names: Barbara
+  title: 'SHAP-IQ: Unified Approximation of any-order Shapley Interactions'
+  url: https://openreview.net/forum?id=IEMLNF4gK4
+  type: conference-paper
+  year: '2023'
+  collection-title: The Thirty-seventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track
+  conference: {}
+  publisher: {}
