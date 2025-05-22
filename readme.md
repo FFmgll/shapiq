@@ -1,10 +1,12 @@
-## Disclaimer: Please use other Implementation in Practice!
-If you plan on using SHAP-IQ or other interaction algorithms for your own purposes, please have a look at our publicly available [python package shapiq](https://github.com/mmschlk/shapiq
-)!
+# ❗Disclaimer: Please use the official Implementation of ``shapiq``.
+
+If you plan on using SHAP-IQ or other interaction algorithms for your own purposes, please have a look at the **official implementation** in [``shapiq`` python package](https://github.com/mmschlk/shapiq
+)! This repository **only** contains the **research code** for this [NeurIPS'23 paper](https://openreview.net/forum?id=IEMLNF4gK4&noteId=pL6cYtCk7N) titled "SHAP-IQ: Unified Approximation of any-order Shapley Interactions".
+
 ## 📄 SHAP-IQ: Unified Approximation of any-order Shapley Interactions
 This repository holds the supplement material for the contribution _SHAP-IQ: Unified Approximation of any-order Shapley Interactions_.
 
-### 🚀 Quickstart
+### Quickstart
 For a quick introduction, we refer to the `main.ipynb` notebook:
 Install the dependencies via `pip install -r requirements.txt` and run the notebook.
 
